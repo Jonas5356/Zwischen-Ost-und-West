@@ -38,3 +38,17 @@ export const SPD_WAHLKAMPF = [
     ergebnis: s => (s.f.vereinigt ? 'Ein Wahlkampf für die Neutralität. Die Union warnt vor Abhängigkeit von Moskau, die Westmächte hören genau hin.' : 'Ein Wahlkampf gegen die Blockbildung. Die Union warnt vor Neutralismus, die Westmächte hören genau hin.'),
     w: s => ({ ansehen: Math.round(s.w.einheit / 10) + 1, usa: -2 }) },
 ];
+
+// Wer regiert in Washington und Moskau? (Die Regierungen sind öffentlich, ihre Ziele nicht.)
+import { REGIERUNGEN as USA } from '../usa.js';
+import { REGIERUNGEN as SU, aussenminister } from '../su.js';
+export const usaRegime = s => s.welt.laender.usa?.regime;
+export const suRegime = s => s.welt.laender.su?.regime;
+/** „Eisenhower“, „Kennedy“ … */
+export const praesident = s => USA[usaRegime(s)]?.kurz || 'der Präsident';
+export const praesidentVoll = s => USA[usaRegime(s)]?.name || 'der Präsident';
+/** Amerikanischer Außenminister, falls bekannt (Acheson, Dulles, Rusk) */
+export const usaAussen = s => USA[usaRegime(s)]?.aussen || null;
+/** „Stalin“, „Chruschtschow“ … */
+export const suChef = s => SU[suRegime(s)]?.kurz || 'Moskau';
+export const suAussen = s => aussenminister(s.zeit, suRegime(s));

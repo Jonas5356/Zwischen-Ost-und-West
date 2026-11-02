@@ -46,7 +46,8 @@ test('Nach der Einheit kommt die Teilung in keinem Text mehr vor', () => {
       E.waehle(W, welt, o.index);
     }
     if (welt.ende && s.f.vereinigt) {
-      const t = E.txt(sz.enden[s.ende.id].text, s).replace(ERLAUBT, '');
+      // Der Rückblick auf die Absichten Washingtons und Moskaus darf von der Teilung sprechen
+      const t = E.txt(sz.enden[s.ende.id].text, s).split('\n\n').filter(x => !x.startsWith('Was Washington und Moskau wirklich wollten')).join('\n\n').replace(ERLAUBT, '');
       const m = t.match(VERBOTEN); if (m) fehler.add(`Ende ${s.ende.id}: „${m[0]}“`);
     }
   }

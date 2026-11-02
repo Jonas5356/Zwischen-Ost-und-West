@@ -1,6 +1,6 @@
 // Der alternative Strang: ein neutrales, wiedervereinigtes Deutschland.
 // Er öffnet sich über die Stalin-Note 1952 oder die Berliner Konferenz 1954.
-import { vereinigt, Land, land, hauptstadt, spdRegiert } from './hilfen.js';
+import { vereinigt, Land, land, hauptstadt, spdRegiert, suChef, suAussen, praesident } from './hilfen.js';
 import { zeitPlus, zeitIndex, jahrVon, zeitText } from '../../../engine.js';
 
 const folgeEreignisse = [
@@ -41,27 +41,27 @@ export default [
     nurGeplant: true, ordnung: 8,
     absender: 'Beobachterdelegation in Wien',
     ascii: 'note',
-    text: s => `Auf deinen Druck hin haben sich die Außenminister der vier Mächte in Wien versammelt. ${s.f.stalin_angenommen ? 'Da Bonn die Neutralität bereits akzeptiert hat, verhandelt Molotow ungewohnt konziliant.' : 'Die Westmächte sind nur widerwillig gekommen.'}
+    text: s => `Auf deinen Druck hin haben sich die Außenminister der vier Mächte in Wien versammelt. ${s.f.stalin_angenommen ? `Da Bonn die Neutralität bereits akzeptiert hat, verhandelt ${suAussen(s)} ungewohnt konziliant.` : 'Die Westmächte sind nur widerwillig gekommen.'}
 
 Der Kern des Streits ist die Reihenfolge. Der Westen verlangt zuerst freie, international überwachte Wahlen in ganz Deutschland. Moskau will zuerst einen „Gesamtdeutschen Rat“, in dem Bundesrepublik und DDR gleich viele Vertreter stellen und der die Wahlen vorbereitet – mit der SED als gleichberechtigter Partnerin.`,
     optionen: [
       { text: 'Freie Wahlen unter internationaler Aufsicht zur Bedingung machen.',
-        zufall: [
-          { p: s => 0.2 + (s.f.stalin_angenommen ? 0.15 : 0) + (s.w.einheit - 30) / 200 + (s.w.moskau - 50) / 200,
-            ergebnis: 'Nach wochenlangem Ringen gibt Molotow nach: Eine Viermächtekommission soll die Wahlen überwachen. Ein Vertrag über die Einheit wird ausgehandelt.',
+        rueckfrage: { land: 'su', id: 'su_viermaechte_wahlen' },
+        antworten: {
+          ja: { ergebnis: s => `Nach wochenlangem Ringen gibt ${suAussen(s)} nach: Eine Viermächtekommission soll die Wahlen überwachen. Ein Vertrag über die Einheit wird ausgehandelt.`,
             w: { einheit: 15, usa: 3, moskau: 5 }, setze: ['neutral'], plane: [{ id: 'n_abkommen', in: 1 }] },
-          { ergebnis: 'Molotow bleibt hart, die Konferenz scheitert. Die Westmächte drängen Bonn, die Westverträge nun doch zu unterzeichnen.',
+          nein: { ergebnis: s => `${suAussen(s)} bleibt hart, die Konferenz scheitert. Die Westmächte drängen Bonn, die Westverträge nun doch zu unterzeichnen.`,
             w: { einheit: -8, moskau: -3 }, aktion: s => scheitern(s) },
-        ] },
+        } },
       { text: 'Den sowjetischen Weg akzeptieren: einen paritätischen Gesamtdeutschen Rat.', richtung: 'ost',
         w: { usa: -10, koalition: -14, ansehen: -3 },
-        zufall: [
-          { p: 0.65,
-            ergebnis: 'Der Gesamtdeutsche Rat tritt zusammen. Ost-CDU, LDPD und SED sitzen neben Union, SPD und FDP. Ein Vertrag über die Einheit wird ausgehandelt.',
+        rueckfrage: { land: 'su', id: 'su_viermaechte_rat' },
+        antworten: {
+          ja: { ergebnis: 'Der Gesamtdeutsche Rat tritt zusammen. Ost-CDU, LDPD und SED sitzen neben Union, SPD und FDP. Ein Vertrag über die Einheit wird ausgehandelt.',
             w: { einheit: 18, moskau: 10 }, setze: ['neutral', 'paritaet'], plane: [{ id: 'n_abkommen', in: 1 }] },
-          { ergebnis: 'Trotz des Bonner Entgegenkommens zieht Moskau die Verhandlungen in die Länge. Der Westen verliert die Geduld; die Konferenz zerfällt.',
+          nein: { ergebnis: 'Trotz des Bonner Entgegenkommens zieht Moskau die Verhandlungen in die Länge. Der Westen verliert die Geduld; die Konferenz zerfällt.',
             w: { einheit: -5 }, aktion: s => scheitern(s) },
-        ] },
+        } },
       { text: 'Die Konferenz für gescheitert erklären und zu den Westverträgen zurückkehren.', richtung: 'west',
         ergebnis: 'Washington atmet auf. Die Verträge können unterzeichnet werden.',
         w: { usa: 5, einheit: -6 }, aktion: s => scheitern(s) },
@@ -80,21 +80,21 @@ Offen ist ein Punkt, der alles entscheidet: die Grenze im Osten. Moskau verlangt
     optionen: [
       { text: 'Die Oder-Neiße-Grenze anerkennen. Die Einheit hat ihren Preis.',
         w: { ansehen: -8, koalition: -15, einheit: 15 },
-        zufall: [
-          { p: s => 0.8 - Math.max(0, 50 - s.w.moskau) / 100,
-            ergebnis: 'Der Vertrag wird unterzeichnet. In Vertriebenenversammlungen werden Bilder des Kanzlers verbrannt. Aber Deutschland wird eins sein.',
+        rueckfrage: { land: 'su', id: 'su_abkommen', daten: { grenze: true } },
+        antworten: {
+          ja: { ergebnis: 'Der Vertrag wird unterzeichnet. In Vertriebenenversammlungen werden Bilder des Kanzlers verbrannt. Aber Deutschland wird eins sein.',
             setze: ['grenze_anerkannt'], plane: [{ id: 'n_wahlkampf', in: 1 }] },
-          { ergebnis: 'Selbst dieses Zugeständnis reicht nicht. Im Kreml hat sich die Linie geändert, die DDR soll bleiben. Die Verhandlungen brechen ab.',
+          nein: { ergebnis: 'Selbst dieses Zugeständnis reicht nicht. Im Kreml soll die DDR bleiben. Die Verhandlungen brechen ab.',
             w: { einheit: -20 }, aktion: s => scheitern(s) },
-        ] },
+        } },
       { text: 'Die Grenzfrage einem späteren Friedensvertrag vorbehalten.',
-        zufall: [
-          { p: s => 0.3 + (s.w.einheit - 40) / 200 - Math.max(0, 50 - s.w.moskau) / 150,
-            ergebnis: 'Molotow willigt nach langem Zögern ein: Die Grenze bleibt bis zum Friedensvertrag offen. Ein diplomatisches Meisterstück.',
+        rueckfrage: { land: 'su', id: 'su_abkommen', daten: { grenze: false } },
+        antworten: {
+          ja: { ergebnis: s => `${suAussen(s)} willigt nach langem Zögern ein: Die Grenze bleibt bis zum Friedensvertrag offen. Ein diplomatisches Meisterstück.`,
             w: { ansehen: 4, einheit: 15 }, plane: [{ id: 'n_wahlkampf', in: 1 }] },
-          { ergebnis: 'Moskau lässt die Verhandlungen platzen. Die Chance ist vertan.',
+          nein: { ergebnis: 'Moskau lässt die Verhandlungen platzen. Die Chance ist vertan.',
             w: { einheit: -15, moskau: -4 }, aktion: s => scheitern(s) },
-        ] },
+        } },
       { text: 'Abbrechen. Der Preis ist zu hoch.', richtung: 'west',
         ergebnis: 'Die Westmächte sind erleichtert. Die Teilung bleibt.',
         w: { usa: 6, einheit: -15, ansehen: 1 }, aktion: s => scheitern(s) },
@@ -288,7 +288,7 @@ Umstritten ist die Formulierung der Neutralität. Moskau will ein Verbot jeder �
     titel: 'Ungarn – und das neutrale Deutschland',
     datum: 'November 1956',
     ab: 1956.2, ordnung: 10,
-    wenn: vereinigt,
+    wenn: s => vereinigt(s) && !!s.weltflags.ungarn_einmarsch,
     absender: 'Gesandtschaft in Wien',
     ascii: 'aufstand',
     text: s => `In Budapest hat Imre Nagy den Austritt aus dem Warschauer Pakt und die Neutralität Ungarns erklärt – nach dem Vorbild Österreichs und Deutschlands. Sowjetische Panzer walzen den Aufstand nieder. Zehntausende fliehen.
@@ -299,7 +299,7 @@ Für viele Ungarn war das neutrale Deutschland ein Versprechen. Nun richten sich
         ergebnis: 'Deutschland nimmt Zehntausende auf. Moskau warnt vor „Einmischung“.',
         w: { ansehen: 3, moskau: -5, haushalt: -1 } },
       { text: 'Als Neutraler eine Vermittlung anbieten.',
-        ergebnis: 'Chruschtschow lehnt ab. Aber man hat bemerkt, dass Deutschland eine eigene Rolle sucht.',
+        ergebnis: s => `${suChef(s)} lehnt ab. Aber man hat bemerkt, dass Deutschland eine eigene Rolle sucht.`,
         w: { moskau: 2, usa: -2, ansehen: -1 } },
       { text: 'Den Grenzschutz an der tschechoslowakischen Grenze verstärken.',
         ergebnis: 'Ein Signal, das in Moskau als Provokation verstanden wird.',
@@ -348,7 +348,7 @@ Für viele Ungarn war das neutrale Deutschland ein Versprechen. Nun richten sich
   },
   {
     id: 'n_chruschtschow',
-    titel: 'Chruschtschow am Rhein',
+    titel: s => `${suChef(s)} am Rhein`,
     datum: 'Herbst 1959',
     ab: 1959.2, ordnung: 8,
     wenn: vereinigt,
@@ -363,7 +363,7 @@ Für viele Ungarn war das neutrale Deutschland ein Versprechen. Nun richten sich
         ergebnis: 'Ein Rapallo der fünfziger Jahre, schreiben die westlichen Zeitungen.',
         w: { moskau: 15, usa: -12, frankreich: -6, grossbritannien: -6 } },
       { text: 'Höflich bleiben und nichts unterschreiben.',
-        ergebnis: 'Chruschtschow reist verstimmt ab.',
+        ergebnis: s => `${suChef(s)} reist verstimmt ab.`,
         w: { moskau: -4 } },
     ],
   },
@@ -392,7 +392,7 @@ Für viele Ungarn war das neutrale Deutschland ein Versprechen. Nun richten sich
     ab: 1961.2, ordnung: 9,
     wenn: vereinigt,
     absender: 'Persönlicher Gesandter des Präsidenten',
-    text: `Ein Vertrauter Kennedys überbringt ein vertrauliches Angebot: Die USA würden Deutschland im Falle eines sowjetischen Angriffs beistehen, wenn deutsche und amerikanische Generalstäbe ihre Planungen heimlich abstimmen. Ein offener Verstoß gegen die Neutralität wäre es nicht – solange niemand davon erfährt.`,
+    text: s => `Ein Vertrauter von Präsident ${praesident(s)} überbringt ein vertrauliches Angebot: Die USA würden Deutschland im Falle eines sowjetischen Angriffs beistehen, wenn deutsche und amerikanische Generalstäbe ihre Planungen heimlich abstimmen. Ein offener Verstoß gegen die Neutralität wäre es nicht – solange niemand davon erfährt.`,
     optionen: [
       { text: 'Zustimmen.',
         zufall: [

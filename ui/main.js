@@ -62,9 +62,107 @@ async function zeigeTitel() {
   $('k-neu').focus();
 }
 
+// ---------------------------------------------------------------- Neues Spiel
+
+const TREUE = [
+  [95, 'historisch', 'Die Regierungen kommen wie in der Geschichte, und ihre Ziele entsprechen dem, was die Forschung über sie weiß. Ihre Absichten sind trotzdem verborgen: Ob die Stalin-Note ernst gemeint war, entscheidet der Zufall – so wie es die Forschung offen lässt.'],
+  [70, 'weitgehend historisch', 'Meist kommt es wie in der Geschichte, aber nicht immer: Eisenhower kann die Wahl verlieren, Berija den Machtkampf gewinnen. Die Ziele der Regierungen streuen etwas.'],
+  [35, 'offen', 'Andere Regierungen sind fast so wahrscheinlich wie die historischen, ihre Absichten sind kaum vorhersehbar.'],
+  [0, 'frei', 'Alle plausiblen Regierungen sind gleich wahrscheinlich; welche Ziele sie verfolgen, ist weitgehend offen.'],
+];
+function treueText() {
+  const v = Number($('n-treue').value);
+  const [, name, text] = TREUE.find(([ab]) => v >= ab);
+  $('n-treue-wert').textContent = `${v} % – ${name}`;
+  $('n-treue-text').textContent = text;
+}
 function starteNeu() {
-  uebernehme(E.neueWelt(W, { spieler: [W.spielbar[0]] }));
+  $('n-treue').value = Math.round(100 * (einst.geschichtstreue ?? 0.75));
+  treueText();
+  $('d-neu').showModal();
+}
+function beginneSpiel() {
+  einst.geschichtstreue = Number($('n-treue').value) / 100;
+  Sp.speichereEinstellungen(einst);
+  $('d-neu').close();
+  uebernehme(E.neueWelt(W, { spieler: [W.spielbar[0]], geschichtstreue: einst.geschichtstreue }));
   zeigeSpiel();
+}
+
+// ---------------------------------------------------------------- Washington und Moskau
+
+const MAECHTE = [['usa', 'Washington'], ['su', 'Moskau']];
+
+/** Verbale Einschätzung einer Wahrscheinlichkeit */
+const sicherheit = p => (p >= 0.85 ? 'sehr wahrscheinlich' : p >= 0.65 ? 'vermutlich' : 'eher');
+
+/** Einschätzung des Spielers über ein gesteuertes Land: { R, typen: [[id, p, T]], beste } */
+function einschaetzung(land) {
+  const L = welt.laender[land];
+  const R = W.laender[land].regierungen?.[L?.regime];
+  const E = s.einschaetzung?.[land];
+  if (!R) return null;
+  const typen = Object.entries(E?.p || {}).map(([id, p]) => [id, p, R.typen[id]]).sort((a, b) => b[1] - a[1]);
+  return { L, R, E, typen, beste: typen[0] };
+}
+
+function weltKarte() {
+  let html = '<section class="karte welt"><h3>Die Welt</h3>';
+  for (const [land, ort] of MAECHTE) {
+    const e = einschaetzung(land);
+    if (!e) continue;
+    const [, p, T] = e.beste || [];
+    const antwort = !T ? '' : p < 0.55 ? 'unklar' : `${sicherheit(p)}: ${T.kurz}`;
+    html += `<div class="macht"><div class="macht-kopf"><b>${esc(ort)}</b><span>${esc(e.R.titel)}</span></div>
+      ${T ? `<div class="macht-frage">${esc(e.R.frage)}</div><div class="macht-antwort${p < 0.55 ? ' unklar' : ''}">${esc(antwort)}</div>` : ''}</div>`;
+  }
+  const v = (E.beziehung(welt, 'usa', 'su') + E.beziehung(welt, 'su', 'usa')) / 2;
+  const n = Math.max(0, Math.min(10, Math.round(v / 10)));
+  html += `<div class="zeile" title="Verhältnis zwischen Washington und Moskau (hoch heißt Entspannung)"><span>USA – UdSSR</span><span class="balken" aria-hidden="true">${'█'.repeat(n)}${'░'.repeat(10 - n)}</span><span class="wert">${Math.round(v)}</span><span></span></div>`;
+  html += '<button class="knopf klein dossier-knopf" id="k-dossier-lage">Dossier öffnen</button></section>';
+  return html;
+}
+
+function zeigeDossier() {
+  let html = '<p class="hinweis">Das Auswärtige Amt rechnet nach Bayes: Jede Entscheidung, die eine Regierung trifft, und jeder Bericht verschiebt die Wahrscheinlichkeiten – je nachdem, wie gut sie zu jeder möglichen Absicht passen. Berichte können irren; die Treffsicherheit der Quelle steht dabei.</p>';
+  for (const [land, ort] of MAECHTE) {
+    const e = einschaetzung(land);
+    if (!e) continue;
+    const seit = e.L.regierungen?.[e.L.regierungen.length - 1]?.ab;
+    html += `<section class="dossier-land"><h3>${esc(ort)}: ${esc(e.R.titel)}${seit ? ` <small>seit ${esc(E.zeitText(seit))}</small>` : ''}</h3>`;
+    if (e.typen.length) {
+      html += `<p class="dossier-frage">${esc(e.R.frage)}</p><ul class="dossier-typen">`;
+      for (const [, p, T] of e.typen) {
+        html += `<li><div class="dt-kopf"><b>${esc(T.name)}</b><span>${Math.round(100 * p)} %</span></div>
+          <div class="dt-balken"><span style="width:${(100 * p).toFixed(1)}%"></span></div><p>${esc(T.beschreibung)}</p></li>`;
+      }
+      html += '</ul>';
+      const verlauf = [...(e.E?.verlauf || [])].reverse();
+      if (verlauf.length) {
+        const erste = e.typen.map(x => x[0]).sort()[0];
+        html += '<h4>Erkenntnisse</h4><ol class="dossier-verlauf">';
+        for (const v of verlauf) {
+          const top = Object.entries(v.p).sort((a, b) => b[1] - a[1])[0];
+          html += `<li><span class="z">${esc(E.zeitText(v.zeit))}</span><span class="q">${v.art === 'bericht' ? `${esc(v.quelle)} (Treffsicherheit ${Math.round(100 * v.q)} %)` : 'Handlung'}</span>
+            <span class="t">${esc(v.text)}</span><span class="p">danach: ${esc(e.R.typen[top[0]].name)} ${Math.round(100 * top[1])} %</span></li>`;
+        }
+        html += '</ol>';
+      } else html += '<p class="hinweis">Noch keine Erkenntnisse über diese Regierung – die Einschätzung beruht allein auf dem, was über sie bekannt ist.</p>';
+    } else html += '<p class="hinweis">Über die Absichten dieser Regierung gibt es keine offenen Fragen.</p>';
+    const frueher = (e.E?.frueher || []).filter(f => Object.keys(f.p || {}).length);
+    if (frueher.length) {
+      html += '<h4>Frühere Regierungen</h4><ul class="dossier-frueher">';
+      for (const f of frueher) {
+        const R = W.laender[land].regierungen[f.regime];
+        const top = Object.entries(f.p).sort((a, b) => b[1] - a[1])[0];
+        html += `<li><b>${esc(R.titel)}</b>: zuletzt eingeschätzt als „${esc(R.typen[top[0]].name)}“ (${Math.round(100 * top[1])} %). Was sie wirklich wollte, zeigt der Abschlussbericht.</li>`;
+      }
+      html += '</ul>';
+    }
+    html += '</section>';
+  }
+  $('dossier').innerHTML = html;
+  if (!$('d-dossier').open) { $('d-dossier').showModal(); Ton.blatt(); }
 }
 
 function zeigeSpiel() {
@@ -148,6 +246,7 @@ function zeichneLage() {
     }
     html += '</section>';
   }
+  html += weltKarte();
   // Bundestag
   const gesamt = Object.values(s.sitze).reduce((a, b) => a + b, 0);
   const reihenfolge = ['KPD', 'SPD', 'FDP', 'Union', 'Kleine', 'Sonstige'];
@@ -158,6 +257,7 @@ function zeichneLage() {
     <div class="legende">${legende}</div>
     <div class="legende">${naechste ? `Nächste Wahl: ${E.zeitText(naechste)}` : 'Bis 1964 keine Wahl mehr'}</div></section>`;
   $('lage').innerHTML = html;
+  $('k-dossier-lage')?.addEventListener('click', zeigeDossier);
 }
 
 function briefkopf(art, absender) {
@@ -226,8 +326,12 @@ let zeitungZeit = null;
 function ausgabe(zeit) {
   const vor = E.zeitPlus(zeit, -1);
   const gleich = (a, b) => E.zeitIndex(a) === E.zeitIndex(b);
-  const meldungen = (s.ausgaben || []).find(a => gleich(a.zeit, zeit))?.meldungen
-    ?? (gleich(zeit, s.zeit) ? s.lage?.meldungen : null) ?? [];
+  // Was Washington und Moskau im letzten Halbjahr öffentlich getan haben, dazu Regierungswechsel
+  const welt_ = MAECHTE.flatMap(([land]) => (welt.laender[land]?.chronik || [])
+    .filter(c => (c.art === 'wechsel' ? gleich(c.zeit, zeit) : gleich(c.zeit, vor) && c.oeffentlich) && c.ergebnis)
+    .map(c => c.ergebnis));
+  const meldungen = [...welt_, ...((s.ausgaben || []).find(a => gleich(a.zeit, zeit))?.meldungen
+    ?? (gleich(zeit, s.zeit) ? s.lage?.meldungen : null) ?? [])];
   const entscheidungen = s.chronik.filter(c => gleich(c.zeit, vor));
   const wahl = s.wahlen.find(w => gleich(w.zeit, vor));
   const wirtschaft = s.verlauf.find(v => gleich(v.zeit, vor));
@@ -599,6 +703,9 @@ document.addEventListener('DOMContentLoaded', () => {
   $('k-fortsetzen').onclick = async () => { const st = await Sp.lade('auto'); if (ladbar(st)) { uebernehme(st); zeigeSpiel(); } };
   $('k-laden').onclick = () => zeigePlaetze('laden');
   $('k-chronik').onclick = zeigeChronik;
+  $('k-dossier').onclick = zeigeDossier;
+  $('n-treue').oninput = treueText;
+  $('n-start').onclick = beginneSpiel;
   $('k-zeitung').onclick = () => zeigeZeitung();
   $('z-aelter').onclick = () => { Ton.blatt(); zeigeZeitung(E.zeitPlus(zeitungZeit, -1)); };
   $('z-neuer').onclick = () => { Ton.blatt(); zeigeZeitung(E.zeitPlus(zeitungZeit, 1)); };
@@ -628,6 +735,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (b && document.activeElement?.tagName !== 'BUTTON') { e.preventDefault(); b.click(); }
     } else if (e.key === 'c' || e.key === 'C') {
       zeigeChronik();
+    } else if (e.key === 'd' || e.key === 'D') {
+      zeigeDossier();
     } else if (e.key === 'z' || e.key === 'Z') {
       zeigeZeitung();
     } else if (e.key === 'Escape') {

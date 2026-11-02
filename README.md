@@ -18,6 +18,9 @@ Selbst bauen: `build_windows.bat` doppelklicken (braucht Rust und Node.js, das S
 - **Vorlagen:** In jedem Halbjahr landen die historischen Ereignisse als Entscheidungsvorlagen auf dem Schreibtisch, dazu Briefe von Ministern, Verbänden und Zeitgenossen (Böckler, Heuss, Heisenberg, Fritz Bauer …). Am Ende des Halbjahrs bringst du ein Regierungsvorhaben ein – Lastenausgleich, Kindergeld, Kartellgesetz, Autobahnbau.
 - **Lagebild:** Beziehungen zu Washington, Paris, London und Moskau (0–100, hoch heißt gut), Souveränität, Aussicht auf Einheit, europäische Integration, Umfragewerte der Kanzlerpartei, Ansehen des Kanzlers, Koalitionsklima, Wachstum, Arbeitslosigkeit, Haushalt, Fluchtbewegung aus der DDR.
 - **Wahlen und Regierungswechsel:** 1953, 1957 und 1961 wird gewählt. Kann die Kanzlerpartei eine Mehrheit bilden, wählst du die Koalition. Verliert sie die Mehrheit oder zerbricht die Koalition im konstruktiven Misstrauensvotum, bildet sich eine neue Regierung – etwa unter Ollenhauer oder Brandt – und du führst sie weiter, bis die Union vielleicht zurückkehrt. Vorbei ist das Spiel nur bei Staatsbankrott, einem Krieg mit Moskau oder wenn die Westmächte das Besatzungsrecht wieder in Kraft setzen. Der Abschlussbericht nennt alle Kanzler mit ihren Amtszeiten.
+- **Washington und Moskau:** Die Supermächte steuert das Spiel. Ihre Regierungen wechseln – Präsidentschaftswahlen, Stalins Tod, Machtkämpfe im Kreml – und jede verfolgt eigene Ziele. Ob Moskau die Stalin-Note schickt, Ulbricht die Mauer erlaubt oder Raketen nach Kuba bringt, ob Washington einen Wehrbeitrag verlangt oder Truppen abziehen will, entscheiden sie selbst. Auf der Viermächtekonferenz und bei den Verhandlungen über die Einheit antwortet Moskau nach seinen Absichten.
+- **Verborgene Absichten:** Was eine Regierung wirklich will (war die Stalin-Note ernst gemeint? geht Chruschtschow in Berlin aufs Ganze?), siehst du nicht. Das Auswärtige Amt schätzt es nach Bayes aus ihrem Handeln und aus Berichten von Botschaften und Diensten, die sich irren können. Die Einschätzung steht im Lagebild, mit Wahrscheinlichkeiten im Dossier; der Abschlussbericht verrät die Wahrheit.
+- **Geschichtstreue:** Beim neuen Spiel stellst du ein, wie nah sich die Welt an die Geschichte hält – von „historisch“ (die historischen Regierungen mit ihren überlieferten Zielen) bis „frei“ (Stevenson, Nixon, Berija oder Molotow können an die Macht kommen, die Ziele streuen).
 - **Zeitung:** Zu jedem Halbjahr erscheint eine Ausgabe der „Depesche“ mit den Entscheidungen des letzten Halbjahrs, Wahlergebnissen, Wirtschaftsdaten und Meldungen aus aller Welt. Sie ist freiwillige Lektüre; ältere Ausgaben lassen sich nachblättern.
 - **Geräusche:** Schreibmaschine beim Erscheinen der Texte, Stempel bei Entscheidungen, Papier beim Umblättern, Fernschreiber am Wahlabend. Alles wird im Programm erzeugt, Lautstärke und Abschalten im Menü.
 - **Randvermerke:** Nach jeder Entscheidung steht in violetter Schrift, was tatsächlich geschah. Am Ende zeigt der Abschlussbericht, wie oft du wie die historische Regierung entschieden hast.
@@ -40,13 +43,15 @@ Tauri-2-Programm: die Oberfläche ist HTML/JavaScript ohne Build-Schritt (`ui/`)
 - `ui/engine.js` – Spielablauf, unabhängig von den Ländern: Weltzustand mit mehreren Ländern, gerichtete Beziehungen (0–100, hoch = gut), Postfach für Nachrichten zwischen Ländern, Weltereignisse, gemeinsame Vorgangsliste aller Länder nach Monat, Zufall, Speicherbarkeit
 - `ui/szenarien/kalter_krieg/` – die Welt 1949–1964: `index.js` (Länder, Startbeziehungen), `weltereignisse.js`, je ein Modul pro Land
 - `ui/szenarien/kalter_krieg/brd/` – die Bundesrepublik: `modell.js` (Wirtschafts-, Umfrage- und Wahlmodell, Koalitionsbildung, Krisen), Ereignisse nach Zeitabschnitten, `einheit.js` (alternativer Strang), `akten.js`, `vorhaben.js`, `enden.js`, `zeitgeschehen.js`
-- `usa.js`, `su.js`, `frankreich.js`, `grossbritannien.js` – vorerst Hüllen, die in den nächsten Ausbaustufen Regierungen und Ziele bekommen
+- `usa.js`, `su.js` – die Supermächte: Regierungen mit Zielen und verborgenen Typen, Regierungswechsel, eigene Entscheidungen
+- `frankreich.js`, `grossbritannien.js` – vorerst Hüllen, die in den nächsten Ausbaustufen Regierungen und Ziele bekommen
+- `ui/ki.js` – Entscheidungslogik der gesteuerten Länder (Nutzen aus Werten und Zielen, Wahl per Logit) und die Einschätzung ihrer Absichten nach Bayes
 - `ui/main.js`, `ui/style.css`, `ui/ascii.js` – Oberfläche und ASCII-Szenen
 - `ui/ton.js` – Geräusche, synthetisch mit Web Audio (keine Tondateien)
 
 Wie es weitergeht (mehrere Länder, Regierungen mit Zielen, vom Spiel gesteuerte Länder), steht in [`docs/PLAN.md`](docs/PLAN.md).
 
-Tests: `npm test` (spielt mehrere hundert Partien mit verschiedenen Strategien durch und prüft u. a., dass ein Durchlauf mit den historischen Entscheidungen ungefähr die historischen Wahlergebnisse ergibt). `npm run sim` zeigt eine Auswertung nach Strategien.
+Tests: `npm test` (spielt mehrere hundert Partien mit verschiedenen Strategien durch und prüft u. a., dass ein Durchlauf mit den historischen Entscheidungen ungefähr die historischen Wahlergebnisse ergibt). `npm run sim` zeigt eine Auswertung nach Strategien, `npm run welt -- 300 1` (Partien, Geschichtstreue) was die Supermächte tun und wie gut Bonn ihre Absichten erkennt.
 
 Im Browser ausprobieren: im Ordner `ui` einen Webserver starten (`python -m http.server`) und `http://localhost:8000` öffnen.
 

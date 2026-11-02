@@ -16,10 +16,10 @@ export default {
   spielbar: ['brd'],
   // Wie Land A Land B sieht (0 = feindlich, 100 = engste Partnerschaft); fehlende Paare: 50
   startBeziehungen: {
-    usa: { brd: 55 },
+    usa: { brd: 55, su: 25 },
     frankreich: { brd: 30 },
     grossbritannien: { brd: 40 },
-    su: { brd: 50 },
+    su: { brd: 50, usa: 25 },
   },
   weltereignisse,
 };

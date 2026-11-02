@@ -33,7 +33,6 @@ export default [
   { zeit: 1962.1, text: 'Das Fernsehen strahlt den Krimi-Mehrteiler „Das Halstuch“ aus; die Straßen sind leer.' },
   { zeit: 1962.2, text: 'Im Hamburger Star-Club spielt eine Band aus Liverpool: die Beatles.' },
   { zeit: 1963.1, text: 'Das Zweite Deutsche Fernsehen nimmt in Mainz den Sendebetrieb auf.' },
-  { zeit: 1963.2, text: 'Am 22. November ist John F. Kennedy in Dallas ermordet worden.' },
   { zeit: 1963.2, text: 'Die Bundesliga hat ihre erste Saison begonnen.' },
   { zeit: 1964.1, text: s => `${Land(s)} zählt rund 900.000 ausländische Arbeitnehmer.`, wenn: s => !!s.f.gastarbeiter },
   { zeit: 1955.1, text: 'In Wien wird die Republik Österreich wieder frei; der Staatsvertrag ist unterzeichnet.', wenn: vereinigt },

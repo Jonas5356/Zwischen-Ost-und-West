@@ -1,6 +1,27 @@
 // Enden des Spiels und der Abschlussbericht
 import { jahrVon, zeitText } from '../../../engine.js';
 import { vollerName } from './modell.js';
+import { REGIERUNGEN as USA } from '../usa.js';
+import { REGIERUNGEN as SU } from '../su.js';
+
+/** Was Washington und Moskau wirklich wollten – und was Bonn zuletzt vermutet hat */
+function aufloesung(s) {
+  const teile = [];
+  for (const [land, R, ort] of [['usa', USA, 'Washington'], ['su', SU, 'Moskau']]) {
+    const L = s.welt.laender[land];
+    const E = s.einschaetzung?.[land];
+    if (!L?.regierungen) continue;
+    const schaetzungen = [...(E?.frueher || []), ...(E ? [{ regime: E.regime, p: E.p }] : [])];
+    L.regierungen.forEach((r, i) => {
+      if (!r.typ) return;
+      const T = R[r.regime].typen[r.typ];
+      const p = schaetzungen[i]?.regime === r.regime ? schaetzungen[i].p?.[r.typ] : undefined;
+      const geschaetzt = p === undefined ? '' : ` Bonn hielt das zuletzt für ${p >= 0.85 ? 'sehr wahrscheinlich' : p >= 0.65 ? 'wahrscheinlich' : p >= 0.35 ? 'möglich' : 'unwahrscheinlich'} (${Math.round(100 * p)} %).`;
+      teile.push(`${ort}, ${R[r.regime].titel.replace(/ \(Fiktion\)/, '')}: ${T.name}. ${T.beschreibung}${geschaetzt}`);
+    });
+  }
+  return teile.length ? 'Was Washington und Moskau wirklich wollten:\n' + teile.join('\n') : '';
+}
 
 const pct = x => `${x.toFixed(1).replace('.', ',')}\u00a0%`;
 
@@ -8,7 +29,7 @@ export const ENDEN = {
   krieg: {
     titel: 'Der Krieg',
     ascii: 'pilz',
-    text: s => `${s.f.vereinigt ? 'Es beginnt mit einem Zwischenfall an der Oder, einem Missverständnis, einem Befehl, der zu spät widerrufen wird. Binnen Stunden stoßen sowjetische Panzer auf Berlin vor; das neutrale Deutschland hat ihnen wenig entgegenzusetzen. Am dritten Tag greifen die Amerikaner ein – mit taktischen Atomwaffen, auf deutschem Boden.' : 'Es beginnt mit einem Zwischenfall an der Zonengrenze, einem Missverständnis, einem Befehl, der zu spät widerrufen wird. Binnen Stunden rollen Panzer durch die Fulda-Lücke. Am zweiten Tag setzt die NATO taktische Atomwaffen ein, um den Vormarsch aufzuhalten – auf deutschem Boden.'}
+    text: s => `${s.weltflags.atomkrieg ? 'Es beginnt mit Kuba: Amerikanische Bomber greifen die sowjetischen Raketenstellungen an, Moskau antwortet in Berlin. Ein Panzerkommandant am Checkpoint Charlie schießt, ein Befehl wird zu spät widerrufen. Binnen Stunden fliegen die ersten Atomwaffen – auf Kuba, auf Berlin, auf das Ruhrgebiet.' : s.f.vereinigt ? 'Es beginnt mit einem Zwischenfall an der Oder, einem Missverständnis, einem Befehl, der zu spät widerrufen wird. Binnen Stunden stoßen sowjetische Panzer auf Berlin vor; das neutrale Deutschland hat ihnen wenig entgegenzusetzen. Am dritten Tag greifen die Amerikaner ein – mit taktischen Atomwaffen, auf deutschem Boden.' : 'Es beginnt mit einem Zwischenfall an der Zonengrenze, einem Missverständnis, einem Befehl, der zu spät widerrufen wird. Binnen Stunden rollen Panzer durch die Fulda-Lücke. Am zweiten Tag setzt die NATO taktische Atomwaffen ein, um den Vormarsch aufzuhalten – auf deutschem Boden.'}
 
 Was die Göttinger Achtzehn vorhergesagt haben, tritt ein. Zwischen Elbe und Rhein bleibt wenig, was man noch verteidigen könnte.
 
@@ -79,6 +100,8 @@ export function bericht(s) {
     absaetze.push('Wahlergebnisse: ' + s.wahlen.map(e => `${jahrVon(e.zeit)}: Union ${pct(e.stimmen.Union)}, SPD ${pct(e.stimmen.SPD)}`).join(' · ') + ' (historisch 1953: 45,2 % und 28,8 %, 1957: 50,2 % und 31,8 %, 1961: 45,3 % und 36,2 %).');
   }
   absaetze.push(`Bundeskanzler: ${kanzlerText(s)}${f.praesident_adenauer ? '. Konrad Adenauer ist Bundespräsident' : ''}. Regierungsparteien zuletzt: ${s.regierung.map(p => ({ Union: 'CDU/CSU', SPD: 'SPD', FDP: 'FDP', Kleine: 'DP/BHE' }[p] || p)).join(', ')}.`);
+  const a = aufloesung(s);
+  if (a) absaetze.push(a);
   // Geschichtsnähe
   const mitHist = s.chronik.filter(c => c.hist !== null);
   const gleich = mitHist.filter(c => c.hist).length;

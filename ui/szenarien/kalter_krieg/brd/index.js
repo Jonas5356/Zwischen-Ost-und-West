@@ -39,6 +39,7 @@ export default {
     aktenProRunde: modell.aktenProRunde,
     lagebericht,
     kleineName: modell.kleineName,
+    aufklaerung: modell.aufklaerung,
     nachEntscheidung: s => { modell.notiereKanzler(s); s.w.zustimmung = modell.berechneUmfrage(s); },
   },
   dynamisch: modell.dynamisch,

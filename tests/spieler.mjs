@@ -7,8 +7,8 @@ export const W = E.bereiteVor(W0);
 export const sz = W.laender.brd;
 
 /** strategie: 'zufall' | 'historisch' | 'ost' | 'west' */
-export function spiele(seed, strategie = 'zufall', log = null) {
-  const welt = E.neueWelt(W, { spieler: ['brd'], seed });
+export function spiele(seed, strategie = 'zufall', log = null, { geschichtstreue = 1 } = {}) {
+  const welt = E.neueWelt(W, { spieler: ['brd'], seed, geschichtstreue });
   const s = E.sicht(W, welt, 'brd');
   let schritte = 0;
   const gesehen = [];

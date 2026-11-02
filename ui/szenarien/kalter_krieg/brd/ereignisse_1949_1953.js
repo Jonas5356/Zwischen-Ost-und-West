@@ -1,5 +1,5 @@
 // Hauptereignisse Herbst 1949 bis Ende 1953
-import { west, geteilt, adenauer, regiertMit, wahlIn, unionRegiert, spdRegiert, SPD_WAHLKAMPF } from './hilfen.js';
+import { west, geteilt, adenauer, regiertMit, wahlIn, unionRegiert, spdRegiert, SPD_WAHLKAMPF, praesident, usaAussen } from './hilfen.js';
 
 export default [
   // ------------------------------------------------------------------ 1949/II
@@ -109,18 +109,18 @@ Für die deutsche Schwerindustrie heißt das Abgabe von Souveränität – aber 
     ascii: 'korea',
     text: s => `Am 25. Juni haben nordkoreanische Truppen die Grenze zum Süden überschritten. In der Bundesrepublik geht die Angst um: Was in Korea geschieht, könnte morgen an der Elbe geschehen. Die kasernierte Volkspolizei der DDR umfasst bereits rund 50.000 Mann, die Bundesrepublik hat keine eigenen Streitkräfte.
 
-Die Amerikaner fragen inzwischen offen nach einem deutschen Verteidigungsbeitrag. Du könntest ihn in einem Memorandum an die Hohen Kommissare anbieten – gegen mehr Gleichberechtigung. Das Kabinett weiß noch nichts davon. ${unionRegiert(s) ? 'Innenminister Heinemann und große Teile der evangelischen Kirche lehnen' : 'Die eigene Partei und große Teile der evangelischen Kirche lehnen'} jede Wiederbewaffnung ab; unter jungen Leuten macht das Wort „Ohne mich“ die Runde.`,
+${s.weltflags.usa_will_wehrbeitrag ? `${usaAussen(s) ? 'Außenminister ' + usaAussen(s) : 'Washington'} verlangt auf der Außenministerkonferenz in New York offen einen deutschen Verteidigungsbeitrag.` : 'In Washington zögert man noch, deutsche Soldaten zu verlangen – aus Rücksicht auf Paris.'} Du könntest ihn in einem Memorandum an die Hohen Kommissare anbieten – gegen mehr Gleichberechtigung. Das Kabinett weiß noch nichts davon. ${unionRegiert(s) ? 'Innenminister Heinemann und große Teile der evangelischen Kirche lehnen' : 'Die eigene Partei und große Teile der evangelischen Kirche lehnen'} jede Wiederbewaffnung ab; unter jungen Leuten macht das Wort „Ohne mich“ die Runde.`,
     optionen: [
       { text: 'Einen deutschen Wehrbeitrag anbieten, ohne das Kabinett zu fragen.', hist: true, richtung: 'west',
         ergebnis: 'Das Memorandum des Kanzlers vom 29. August liegt in Washington auf dem Tisch. Die Westmächte beginnen, über deutsche Soldaten zu reden – und über das Ende des Besatzungsstatuts.',
-        w: { usa: 10, grossbritannien: 3, frankreich: -4, souveraenitaet: 4, moskau: -6, einheit: -5, ansehen: -2, koalition: -3 },
+        w: s => ({ usa: s.weltflags.usa_will_wehrbeitrag ? 10 : 6, grossbritannien: 3, frankreich: -4, souveraenitaet: 4, moskau: -6, einheit: -5, ansehen: -2, koalition: -3 }),
         setze: ['wehrbeitrag'] },
       { text: 'Nur eine Bundespolizei zum Schutz der Grenzen fordern.',
         ergebnis: 'Die Hohen Kommissare reagieren zurückhaltend. Eine Polizei ist besser als nichts, eine Armee ist sie nicht.',
         w: { usa: 3, moskau: -2, ansehen: 1 }, setze: ['bundespolizei'] },
       { text: 'Keine deutsche Beteiligung – die Sicherheit ist Sache der Besatzungsmächte.', richtung: 'ost',
         ergebnis: s => `${spdRegiert(s) ? 'Die eigene Partei' : 'Die SPD'} und die Kirchen loben die Zurückhaltung des Kanzlers. In Washington wird man ungeduldig.`,
-        w: { usa: -8, einheit: 3, moskau: 3, ansehen: 2 } },
+        w: s => ({ usa: s.weltflags.usa_will_wehrbeitrag ? -8 : -4, einheit: 3, moskau: 3, ansehen: 2 }) },
     ],
     historisch: 'Adenauer übergab am 29. August 1950 zwei Memoranden an die Hohen Kommissare, in denen er einen Wehrbeitrag anbot und eine Revision des Besatzungsstatuts forderte. Das Kabinett war nicht eingeweiht. Der Korea-Krieg löste zugleich den „Korea-Boom“ der deutschen Exportwirtschaft aus.',
   },
@@ -283,6 +283,7 @@ In der eigenen Fraktion gibt es Widerstand. Viele meinen, die Bundesrepublik hab
     datum: '10. März 1952',
     ab: 1952.1, ordnung: 3,
     wenn: west,
+    ausloeser: 'stalin_note', ausloeserVon: 'su',
     absender: 'Note der Sowjetregierung an die Westmächte',
     ascii: 'note',
     text: s => `Moskau hat den drei Westmächten den Entwurf eines Friedensvertrages mit Deutschland übermittelt. Der Inhalt ist sensationell: Ein wiedervereinigtes Deutschland, alle Besatzungstruppen raus binnen eines Jahres, eigene nationale Streitkräfte, freie Betätigung demokratischer Parteien. Bedingungen: Deutschland darf keinem Bündnis beitreten, das sich gegen einen der Siegerstaaten richtet, und die Grenzen von Potsdam – die Oder-Neiße-Linie – werden anerkannt.
@@ -295,9 +296,14 @@ Ist es ein ernstes Angebot oder ein Störmanöver gegen die Westintegration? ${s
         ergebnis: 'Die Westmächte antworten mit der Forderung nach freien Wahlen unter UN-Aufsicht. Ein Notenwechsel folgt, ohne Annäherung. Die Westverträge können unterzeichnet werden.',
         w: { usa: 8, frankreich: 3, grossbritannien: 4, einheit: -8, moskau: -4, ansehen: -1 }, setze: ['stalin_abgelehnt'] },
       { text: 'Ernsthaft prüfen: von den Westmächten eine Viermächtekonferenz über freie Wahlen verlangen.', richtung: 'ost',
-        ergebnis: 'Die Westverträge werden vorerst nicht unterzeichnet. Washington ist irritiert, London vorsichtig interessiert. Auf Bonner Druck hin wird eine Viermächtekonferenz vorbereitet.',
-        w: { usa: -7, grossbritannien: -2, frankreich: -2, einheit: 12, moskau: 8, ansehen: 3 },
-        setze: ['stalin_geprueft'], plane: [{ id: 'n_viermaechte', in: 1 }] },
+        ergebnis: 'Bonn verlangt eine Viermächtekonferenz über freie Wahlen; die Westverträge werden vorerst nicht unterzeichnet. Washington ist irritiert, London vorsichtig interessiert.',
+        w: { usa: -7, grossbritannien: -2, frankreich: -2, einheit: 6, moskau: 8, ansehen: 3 },
+        setze: ['stalin_geprueft'],
+        rueckfrage: { land: 'usa', id: 'usa_konferenz' },
+        antworten: {
+          ja: { ergebnis: 'Die Westmächte stimmen zu. Eine Viermächtekonferenz wird vorbereitet.', w: { einheit: 6 }, plane: [{ id: 'n_viermaechte', in: 1 }] },
+          nein: { ergebnis: 'Die Westmächte lehnen eine Konferenz ohne vorherige Zusage freier Wahlen ab. Der Notenwechsel verläuft im Sande.', w: { einheit: -4, usa: 2 }, setze: ['chance_vertan'] },
+        } },
       { text: 'Auf das Angebot eingehen: Neutralität für die Einheit.', richtung: 'ost',
         ergebnis: s => `Ein Beben in der westlichen Welt. In Washington spricht man vom „Verrat von Bonn“, ${spdRegiert(s) ? 'die Union spricht von einem zweiten Rapallo' : 'die CSU droht mit dem Bruch'}. Doch die Viermächtekonferenz kommt.`,
         w: { usa: -18, grossbritannien: -10, frankreich: -6, einheit: 20, moskau: 14, koalition: -12, ansehen: 2 },
@@ -310,7 +316,8 @@ Ist es ein ernstes Angebot oder ein Störmanöver gegen die Westintegration? ${s
     titel: 'Deutschlandvertrag und EVG-Vertrag',
     datum: s => (s.zeit < 1952.2 ? '26./27. Mai 1952' : 'Frühjahr 1953'),
     ab: 1952.1, bis: 1953.2, ordnung: 5,
-    wenn: s => west(s) && (s.f.stalin_abgelehnt || s.f.chance_vertan),
+    // Nach der Stalin-Note nur, wenn Bonn sie nicht ernsthaft verfolgt oder die Chance vertan ist
+    wenn: s => west(s) && (!(s.f.stalin_geprueft || s.f.stalin_angenommen) || s.f.chance_vertan),
     absender: 'Walter Hallstein, Staatssekretär des Auswärtigen Amtes',
     text: s => `Die Verträge sind unterschriftsreif. Der Deutschlandvertrag soll das Besatzungsstatut ablösen und der Bundesrepublik weitgehend die Souveränität zurückgeben; die Alliierten behalten Rechte für Berlin und Deutschland als Ganzes. Der Vertrag über die Europäische Verteidigungsgemeinschaft sieht deutsche Kontingente in einer europäischen Armee vor.
 
@@ -322,7 +329,7 @@ Umstritten ist die „Bindungsklausel“: Ein wiedervereinigtes Deutschland wär
         setze: ['westvertraege'] },
       { text: 'Die Bindungsklausel streichen lassen, dann unterzeichnen.',
         zufall: [
-          { p: s => 0.4 + (s.w.usa - 50) / 200, ergebnis: 'Acheson und Eden lenken ein: Die Klausel wird abgeschwächt. Ein Erfolg, der in der Fraktion viel Ruhe bringt.',
+          { p: s => 0.4 + (s.w.usa - 50) / 200, ergebnis: s => `${usaAussen(s) || 'Washington'} und Eden lenken ein: Die Klausel wird abgeschwächt. Ein Erfolg, der in der Fraktion viel Ruhe bringt.`,
             w: { souveraenitaet: 8, usa: 4, frankreich: 1, moskau: -6, einheit: -2, europa: 4, koalition: 4 }, setze: ['westvertraege'] },
           { ergebnis: 'Die Westmächte bleiben hart. Nach wochenlanger Verzögerung unterschreibt Bonn doch, mit Ansehensverlust.',
             w: { souveraenitaet: 6, usa: 2, moskau: -7, einheit: -5, europa: 4, ansehen: -2 }, setze: ['westvertraege'] },
@@ -394,10 +401,10 @@ Die Bundesrepublik würde damit wieder kreditwürdig. Einzelne Gläubiger, vor a
 Der britische Premierminister Winston Churchill schlägt im Unterhaus eine Gipfelkonferenz der Großmächte vor, ohne feste Tagesordnung. Für dich ist das eine Gefahr: Die Großmächte könnten sich über Deutschland verständigen, bevor die Westverträge in Kraft sind – im schlimmsten Fall auf eine Neutralisierung.`,
     optionen: [
       { text: 'In London und Washington gegen Churchills Vorstoß intervenieren.', hist: true, richtung: 'west',
-        ergebnis: 'Eisenhower und Dulles teilen die Bonner Bedenken. Churchill ist verärgert, der Gipfel kommt nicht zustande.',
+        ergebnis: s => `${praesident(s)}${usaAussen(s) ? ' und ' + usaAussen(s) : ''} teilen die Bonner Bedenken. Churchill ist verärgert, der Gipfel kommt nicht zustande.`,
         w: { usa: 4, grossbritannien: -5, einheit: -3, moskau: -2 } },
       { text: 'Churchill unterstützen: Ein Gespräch der Großmächte kann nur nützen.', richtung: 'ost',
-        ergebnis: 'Churchill ist entzückt, Dulles besorgt. Die Westverträge geraten in Frankreich weiter ins Stocken.',
+        ergebnis: s => `Churchill ist entzückt, ${usaAussen(s) || 'Washington'} besorgt. Die Westverträge geraten in Frankreich weiter ins Stocken.`,
         w: { grossbritannien: 6, usa: -5, frankreich: -1, einheit: 5, moskau: 5 } },
       { text: 'Abwarten und schweigen.',
         ergebnis: 'Die Initiative verläuft im Sande. Niemand hat die Haltung Bonns bemerkt.',
@@ -413,7 +420,7 @@ Der britische Premierminister Winston Churchill schlägt im Unterhaus eine Gipfe
     wenn: west,
     absender: 'Protokoll des Auswärtigen Amtes',
     ascii: 'schiff',
-    text: `Präsident Eisenhower hat dich nach Washington eingeladen – der erste offizielle Besuch eines deutschen Regierungschefs in den Vereinigten Staaten. Die Reise wird Wochenschau und Zeitungen über Wochen beschäftigen.
+    text: s => `Präsident ${praesident(s)} hat dich nach Washington eingeladen – der erste offizielle Besuch eines deutschen Regierungschefs in den Vereinigten Staaten. Die Reise wird Wochenschau und Zeitungen über Wochen beschäftigen.
 
 Was soll im Mittelpunkt stehen? Das Protokoll schlägt eine Kranzniederlegung auf dem Nationalfriedhof Arlington vor. Die Vertriebenenverbände und Teile der Koalition drängen dich, auch die Freilassung deutscher Kriegsverurteilter aus alliierten Gefängnissen anzusprechen.`,
     optionen: [
@@ -432,12 +439,23 @@ Was soll im Mittelpunkt stehen? Das Protokoll schlägt eine Kranzniederlegung au
     datum: '17. Juni 1953',
     ab: 1953.1, ordnung: 6,
     wenn: west,
+    ausloeser: 'juni17', ausloeserVon: 'su',
     absender: 'Bundesministerium für gesamtdeutsche Fragen',
     ascii: 'aufstand',
-    text: `In Ost-Berlin haben Bauarbeiter der Stalinallee gegen erhöhte Arbeitsnormen die Arbeit niedergelegt. Binnen eines Tages hat sich der Streik zu einem Aufstand in über 500 Orten der DDR ausgeweitet. Die Menschen fordern freie Wahlen und den Rücktritt der Regierung. Am Nachmittag rollen sowjetische Panzer, es gibt Tote.
+    text: s => `In Ost-Berlin haben Bauarbeiter der Stalinallee gegen erhöhte Arbeitsnormen die Arbeit niedergelegt. Binnen eines Tages hat sich der Streik zu einem Aufstand in über 500 Orten der DDR ausgeweitet. Die Menschen fordern freie Wahlen und den Rücktritt der Regierung. ${s.weltflags.juni17_zugestaendnisse ? 'Doch die Panzer bleiben in den Kasernen: Moskau lässt die Normerhöhungen zurücknehmen und Ulbricht fallen. In Ost-Berlin spricht man von einem „Neuen Kurs“.' : 'Am Nachmittag rollen sowjetische Panzer, es gibt Tote.'}
 
-Die Westmächte machen klar, dass sie nicht eingreifen werden. Der RIAS sendet Berichte in die DDR. Was sagt Bonn?`,
-    optionen: [
+${s.weltflags.juni17_zugestaendnisse ? 'Ist das ein Tauwetter oder nur eine Atempause?' : 'Die Westmächte machen klar, dass sie nicht eingreifen werden. Der RIAS sendet Berichte in die DDR.'} Was sagt Bonn?`,
+    optionen: s => s.weltflags.juni17_zugestaendnisse ? [
+      { text: 'Moskau beim Wort nehmen: Gespräche über freie Wahlen in ganz Deutschland anbieten.', richtung: 'ost',
+        ergebnis: 'In Moskau wird das Angebot aufmerksam registriert. Washington mahnt zur Vorsicht.',
+        w: { moskau: 8, einheit: 6, usa: -4, ansehen: 2 } },
+      { text: 'Die Freiheitsbewegung in der DDR öffentlich ermutigen.', richtung: 'west',
+        ergebnis: 'Der RIAS sendet die Bonner Erklärung in Dauerschleife. Ost-Berlin spricht von Einmischung.',
+        w: { moskau: -6, usa: 2, ansehen: 3, flucht: 6 } },
+      { text: 'Abwarten, ob der „Neue Kurs“ Bestand hat.',
+        ergebnis: 'Bonn hält sich zurück. Die Lage in der DDR beruhigt sich.',
+        w: { ansehen: -1 } },
+    ] : [
       { text: 'Solidarität bekunden, zur Besonnenheit mahnen, den 17. Juni zum Gedenktag machen.', hist: true,
         ergebnis: 'Der Kanzler spricht auf der Trauerfeier in West-Berlin. Der 17. Juni wird „Tag der deutschen Einheit“. Die Fluchtbewegung schwillt an.',
         w: { ansehen: 3, moskau: -3, einheit: -2, flucht: 10 }, setze: ['tag_der_einheit'] },

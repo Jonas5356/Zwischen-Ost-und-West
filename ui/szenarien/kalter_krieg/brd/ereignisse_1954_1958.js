@@ -1,5 +1,5 @@
 // Hauptereignisse 1954 bis 1958
-import { west, geteilt, vereinigt, imBuendnis, adenauer, regiertMit, land, Land, wahlIn, hauptstadt, unionRegiert, spdRegiert, SPD_WAHLKAMPF } from './hilfen.js';
+import { west, geteilt, vereinigt, imBuendnis, adenauer, regiertMit, land, Land, wahlIn, hauptstadt, unionRegiert, spdRegiert, SPD_WAHLKAMPF, praesident, usaAussen, suChef, suRegime } from './hilfen.js';
 import { hatMehrheit } from './modell.js';
 
 export default [
@@ -19,15 +19,15 @@ Die Delegationen sind festgefahren. Ein Signal aus Bonn könnte die Gewichte ver
         ergebnis: 'Die Konferenz endet nach vier Wochen ohne Ergebnis. Die Teilung wirkt endgültiger als zuvor.',
         w: { usa: 3, grossbritannien: 3, einheit: -3, moskau: -2 } },
       { text: 'Einen Kompromiss signalisieren: Neutralität eines vereinten Deutschlands, wenn freie Wahlen garantiert sind.', richtung: 'ost',
-        ergebnis: 'Dulles ist außer sich, Bidault kühl, Eden nachdenklich. Molotow lässt eine Pause einlegen.',
+        ergebnis: s => `${usaAussen(s) || 'Washington'} ist außer sich, Bidault kühl, Eden nachdenklich. Molotow lässt eine Pause einlegen.`,
         w: { usa: -12, frankreich: -3, grossbritannien: -4, einheit: 8, koalition: -6 },
-        zufall: [
-          { p: s => 0.12 + (s.w.einheit - 15) / 150 + (s.w.moskau - 45) / 200 + (s.f.stalin_geprueft || s.f.stalin_angenommen ? 0.1 : 0),
-            ergebnis: 'Molotow nimmt das Signal auf: Moskau sei bereit, über ein Wahlgesetz zu sprechen. Die Westverträge liegen auf Eis.',
+        rueckfrage: { land: 'su', id: 'su_berliner_konferenz' },
+        antworten: {
+          ja: { ergebnis: 'Die Westverträge liegen auf Eis; ein Vertrag über die Einheit wird ausgehandelt.',
             w: { moskau: 10, einheit: 10 }, setze: ['neutral', 'berlin_durchbruch'], plane: [{ id: 'n_abkommen', in: 1 }] },
-          { ergebnis: 'Molotow beharrt auf einer paritätischen Regierung ohne freie Wahlen. Die Konferenz scheitert, und Bonn steht im Westen mit beschädigtem Ruf da.',
+          nein: { ergebnis: 'Die Konferenz scheitert, und Bonn steht im Westen mit beschädigtem Ruf da.',
             w: { moskau: -2 }, setze: ['chance_vertan'] },
-        ] },
+        } },
       { text: 'Schweigen – die Großmächte sollen sich festfahren.',
         ergebnis: 'Die Konferenz scheitert ohne Bonner Zutun.',
         w: { einheit: -2 } },
@@ -49,7 +49,7 @@ Auf der Konferenz in Brüssel liegt es an dir, ob du ihm entgegenkommst.`,
     optionen: [
       { text: 'Hart bleiben – keine weiteren Diskriminierungen.', hist: true,
         zufall: [
-          { p: s => 0.08 + Math.max(0, s.w.frankreich - 55) / 200,
+          { p: s => 0.08 + Math.max(0, s.w.frankreich - 55) / 200 + (s.weltflags.evg_druck ? 0.04 : 0),
             ergebnis: 'Überraschend stimmt die Nationalversammlung zu. Die Europäische Verteidigungsgemeinschaft kann entstehen.',
             w: { europa: 12, frankreich: 4, souveraenitaet: 10, usa: 6, moskau: -8 }, setze: ['evg'] },
           { ergebnis: 'Die Nationalversammlung lehnt mit einem Verfahrensantrag ab, ohne Aussprache. Die Abgeordneten singen die Marseillaise. Das Herzstück der Bonner Politik liegt in Trümmern.',
@@ -58,7 +58,7 @@ Auf der Konferenz in Brüssel liegt es an dir, ob du ihm entgegenkommst.`,
       { text: 'Mendès France entgegenkommen: Zusatzprotokolle und Bewegung in der Saarfrage.', richtung: 'west',
         w: { ansehen: -2, koalition: -4 },
         zufall: [
-          { p: s => 0.25 + Math.max(0, s.w.frankreich - 45) / 150,
+          { p: s => 0.25 + Math.max(0, s.w.frankreich - 45) / 150 + (s.weltflags.evg_druck ? 0.04 : 0),
             ergebnis: 'Mit knapper Mehrheit ratifiziert Paris die EVG. Europa hat eine gemeinsame Armee.',
             w: { europa: 14, frankreich: 8, souveraenitaet: 8, usa: 6, moskau: -8 }, setze: ['evg', 'saar_zugestaendnis'] },
           { ergebnis: 'Die Zugeständnisse reichen nicht. Die Nationalversammlung lehnt die EVG ab.',
@@ -79,7 +79,7 @@ Auf der Konferenz in Brüssel liegt es an dir, ob du ihm entgegenkommst.`,
 Frankreichs Preis: Die Bundesrepublik soll freiwillig auf die Herstellung atomarer, biologischer und chemischer Waffen verzichten.`,
     optionen: [
       { text: 'Den ABC-Waffen-Verzicht erklären und dem Paket zustimmen.', hist: true, richtung: 'west',
-        ergebnis: 'Dulles steht auf und sagt, er gehe davon aus, dass dieser Verzicht – wie alle völkerrechtlichen Erklärungen – nur „rebus sic stantibus“ gelte. Der Kanzler antwortet: „Genau so haben Sie mich verstanden.“ Die Pariser Verträge werden im Oktober unterzeichnet.',
+        ergebnis: s => `${usaAussen(s) || 'Der amerikanische Außenminister'} steht auf und sagt, er gehe davon aus, dass dieser Verzicht – wie alle völkerrechtlichen Erklärungen – nur „rebus sic stantibus“ gelte. Der Kanzler antwortet: „Genau so haben Sie mich verstanden.“ Die Pariser Verträge werden im Oktober unterzeichnet.`,
         w: { usa: 8, grossbritannien: 8, frankreich: 4, souveraenitaet: 6, moskau: -6, einheit: -6, europa: 2 },
         setze: ['pariser_vertraege', 'abc_verzicht'] },
       { text: 'Beitreten, aber keinen einseitigen Verzicht erklären.',
@@ -223,7 +223,7 @@ In der Bundesrepublik fragen sich viele: Warum nicht auch für uns? ${spdRegiert
     ab: 1955.2, ordnung: 7,
     wenn: geteilt,
     absender: 'Beobachterdelegation in Genf',
-    text: `Eisenhower, Eden, Faure und Bulganin mit Chruschtschow treffen sich in Genf – der erste Gipfel der Großmächte seit Potsdam. Die Stimmung ist freundlich, man spricht vom „Geist von Genf“. Über Deutschland gibt es keine Einigung: Moskau spricht jetzt von „zwei deutschen Staaten“.
+    text: s => `${praesident(s)}, Eden, Faure und ${suRegime(s) === 'chruschtschow' ? 'Bulganin mit Chruschtschow' : suChef(s)} treffen sich in Genf – der erste Gipfel der Großmächte seit Potsdam. Die Stimmung ist freundlich, man spricht vom „Geist von Genf“. Über Deutschland gibt es keine Einigung: Moskau spricht jetzt von „zwei deutschen Staaten“.
 
 Bonn ist nur Beobachter. Was soll die Delegation den westlichen Regierungschefs mit auf den Weg geben?`,
     optionen: [
@@ -242,18 +242,29 @@ Bonn ist nur Beobachter. Was soll die Delegation den westlichen Regierungschefs 
     datum: 'September 1955',
     ab: 1955.2, ordnung: 9,
     wenn: geteilt,
+    ausloeser: 'einladung_moskau', ausloeserVon: 'su',
     absender: 'Einladung der Sowjetregierung',
     ascii: 'kreml',
-    text: `Ministerpräsident Bulganin lädt dich nach Moskau ein, um über die Aufnahme diplomatischer Beziehungen zu sprechen. Noch immer sind rund 10.000 deutsche Kriegsgefangene und Zivilinternierte in sowjetischen Lagern, verurteilt als „Kriegsverbrecher“. Ihre Familien warten seit zehn Jahren.
+    text: s => `${suRegime(s) === 'chruschtschow' ? 'Ministerpräsident Bulganin' : suChef(s)} lädt dich nach Moskau ein, um über die Aufnahme diplomatischer Beziehungen zu sprechen. Noch immer sind rund 10.000 deutsche Kriegsgefangene und Zivilinternierte in sowjetischen Lagern, verurteilt als „Kriegsverbrecher“. Ihre Familien warten seit zehn Jahren.
 
-Moskau will Beziehungen, ohne über die Gefangenen zu reden. Diplomatische Beziehungen würden bedeuten, dass in Moskau zwei deutsche Botschafter sitzen – einer aus Bonn, einer aus Ost-Berlin.`,
+Moskau will Beziehungen, ohne über die Gefangenen zu reden. Diplomatische Beziehungen würden bedeuten, dass in Moskau zwei deutsche Botschafter sitzen – einer aus Bonn, einer aus Ost-Berlin. Eine Botschaft in Moskau würde aber auch zeigen, was dort wirklich gedacht wird.`,
     optionen: [
       { text: 'Reisen und hart verhandeln: Beziehungen nur gegen die Freilassung der Gefangenen.', hist: true,
-        ergebnis: 'Nach zermürbenden Tagen – mit Wodka, Wutausbrüchen und einem demonstrativ bestellten Flugzeug für die Abreise – gibt Bulganin beim Abschiedsempfang sein Wort. Als die ersten Heimkehrer im Lager Friedland ankommen, wird der Name des Kanzlers zur Legende.',
-        w: { ansehen: 6, moskau: 6, usa: -2, einheit: 1 }, setze: ['moskau_beziehungen', 'heimkehrer'] },
+        rueckfrage: { land: 'su', id: 'su_gefangene' },
+        antworten: {
+          ja: { ergebnis: s => `Nach zermürbenden Tagen – mit Wodka, Wutausbrüchen und einem demonstrativ bestellten Flugzeug für die Abreise – gibt ${suRegime(s) === 'chruschtschow' ? 'Bulganin' : suChef(s)} beim Abschiedsempfang sein Wort. Als die ersten Heimkehrer im Lager Friedland ankommen, wird der Name des Kanzlers zur Legende.`,
+            w: { ansehen: 6, moskau: 6, usa: -2, einheit: 1 }, setze: ['moskau_beziehungen', 'heimkehrer'] },
+          nein: { ergebnis: 'Moskau verweigert jede Zusage für die Gefangenen. Der Kanzler reist ohne Ergebnis ab; Beziehungen gibt es nicht.',
+            w: { ansehen: -3, moskau: -3, usa: 1 } },
+        } },
       { text: 'Beziehungen nur, wenn Moskau über die Einheit verhandelt.',
-        ergebnis: 'Die Sowjets lehnen jede Verknüpfung ab. Der Kanzler reist mit leeren Händen zurück, die Gefangenen bleiben in den Lagern.',
-        w: { ansehen: -4, moskau: -3, usa: 2 } },
+        rueckfrage: { land: 'su', id: 'su_einheit_verhandeln' },
+        antworten: {
+          ja: { ergebnis: 'Zur allgemeinen Überraschung sagt Moskau Gespräche über die Einheit zu. Diplomatische Beziehungen werden aufgenommen; Washington ist alarmiert.',
+            w: { ansehen: 4, moskau: 8, usa: -6, einheit: 8 }, setze: ['moskau_beziehungen'] },
+          nein: { ergebnis: 'Die Sowjets lehnen jede Verknüpfung ab. Der Kanzler reist mit leeren Händen zurück, die Gefangenen bleiben in den Lagern.',
+            w: { ansehen: -4, moskau: -3, usa: 2 } },
+        } },
       { text: 'Die Einladung ablehnen.', richtung: 'west',
         ergebnis: 'Washington ist erleichtert. In tausenden Familien wächst die Bitterkeit.',
         w: { ansehen: -5, usa: 2, moskau: -4 } },
@@ -394,20 +405,44 @@ Mit Moskau bestehen inzwischen diplomatische Beziehungen. Ein Verbot wäre ein S
     historisch: 'Das Bundesverfassungsgericht verbot die KPD am 17. August 1956. 1968 wurde die DKP als Nachfolgepartei neu gegründet.',
   },
   {
+    id: 'radford',
+    titel: 'Der Radford-Plan',
+    datum: 'Juli 1956',
+    ab: 1956.2, ordnung: 6.5,
+    wenn: imBuendnis,
+    ausloeser: 'radford', ausloeserVon: 'usa',
+    absender: 'Botschaft Washington',
+    text: s => `Die „New York Times“ berichtet, der Vorsitzende der amerikanischen Stabschefs, Admiral Radford, wolle die Truppen in Europa um bis zu 800.000 Mann verringern und die Verteidigung ganz auf Atomwaffen stützen. Washington dementiert nicht.
+
+Für ${land(s)} wäre das ein Albtraum: Ohne amerikanische Soldaten würde jede Krise sofort zur Atomfrage – auf deutschem Boden. ${s.f.wehrpflicht ? 'Die Wehrpflicht ist gerade beschlossen' : 'Die Bundeswehr steht noch am Anfang'}.`,
+    optionen: [
+      { text: 'Scharf protestieren und Washington an seine Zusagen erinnern.', hist: true,
+        ergebnis: 'Der Kanzler spricht von einem Vertrauensbruch. In Washington wird beschwichtigt; ob der Plan vom Tisch ist, bleibt offen.',
+        w: { usa: -4, ansehen: 2, souveraenitaet: 1 } },
+      { text: 'Den Aufbau der Bundeswehr beschleunigen, um die Lücke selbst zu füllen.', richtung: 'west',
+        ergebnis: 'Die Verbündeten loben die deutsche Entschlossenheit. Der Finanzminister rechnet nach.',
+        w: { usa: 4, moskau: -5, haushalt: -4, bundeswehr: 1 } },
+      { text: 'Die Lehre ziehen: mehr Ausgleich mit Moskau, weniger Abhängigkeit von Washington.', richtung: 'ost',
+        ergebnis: 'Moskau horcht auf, Washington ist verstimmt.',
+        w: { moskau: 6, usa: -6, einheit: 2 } },
+    ],
+    historisch: 'Der Bericht der „New York Times“ vom 13. Juli 1956 löste in Bonn einen Schock aus. Adenauer protestierte heftig; der Plan wurde nicht umgesetzt, die Debatte über die Abhängigkeit von den USA blieb.',
+  },
+  {
     id: 'suez',
     titel: 'Die Suezkrise',
     datum: 'November 1956',
     ab: 1956.2, ordnung: 10.5,
     absender: 'Botschaft Paris',
-    text: s => `Großbritannien und Frankreich haben zusammen mit Israel Ägypten angegriffen, um den von Nasser verstaatlichten Suezkanal zurückzugewinnen. Eisenhower ist empört und zwingt London und Paris mit finanziellem Druck zum Rückzug; Moskau droht mit Raketen. Für Paris und London ist es eine Demütigung.
+    text: s => `Großbritannien und Frankreich haben zusammen mit Israel Ägypten angegriffen, um den von Nasser verstaatlichten Suezkanal zurückzugewinnen. ${s.weltflags.suez_gewaehren ? `${praesident(s)} lässt die Verbündeten gewähren; britische und französische Truppen besetzen die Kanalzone. Moskau droht London und Paris mit Raketen.` : `${praesident(s)} ist empört und zwingt London und Paris mit finanziellem Druck zum Rückzug; Moskau droht mit Raketen. Für Paris und London ist es eine Demütigung.`}
 
-Für den 6. November ist ${s.kanzler} zu einem lange geplanten Besuch bei Ministerpräsident Guy Mollet in Paris angekündigt. Das Auswärtige Amt rät zur Absage – man dürfe sich nicht an die Seite der Verlierer stellen.`,
+Für den 6. November ist ${s.kanzler} zu einem lange geplanten Besuch bei Ministerpräsident Guy Mollet in Paris angekündigt. ${s.weltflags.suez_gewaehren ? 'Das Auswärtige Amt rät zur Absage – man dürfe nicht in den Konflikt hineingezogen werden.' : 'Das Auswärtige Amt rät zur Absage – man dürfe sich nicht an die Seite der Verlierer stellen.'}`,
     optionen: [
       { text: 'Trotzdem nach Paris fahren – gerade jetzt.', hist: true, richtung: 'west',
         ergebnis: 'Während des Besuchs akzeptiert Paris die Waffenruhe. Mollet wird die Geste nicht vergessen. „Europa wird eure Rache sein“, sagt der Kanzler ihm.',
-        w: { frankreich: 12, europa: 4, usa: -4 }, setze: ['paris_suez'] },
+        w: s => ({ frankreich: 12, europa: 4, usa: s.weltflags.suez_gewaehren ? -1 : -4, moskau: s.weltflags.suez_gewaehren ? -4 : 0 }), setze: ['paris_suez'] },
       { text: 'Die Reise absagen und sich hinter Washington stellen.',
-        ergebnis: 'Eisenhower ist zufrieden, Mollet verbittert.',
+        ergebnis: s => `${praesident(s)} ist zufrieden, Mollet verbittert.`,
         w: { usa: 5, frankreich: -7, grossbritannien: -2 } },
       { text: 'Neutral bleiben.',
         ergebnis: 'Niemand dankt es Bonn, aber niemand ist verärgert.',
@@ -421,12 +456,24 @@ Für den 6. November ist ${s.kanzler} zu einem lange geplanten Besuch bei Minist
     datum: 'Oktober/November 1956',
     ab: 1956.2, ordnung: 10,
     wenn: geteilt,
+    ausloeser: 'ungarn', ausloeserVon: 'su',
     absender: 'Gesandtschaft in Wien',
     ascii: 'aufstand',
-    text: `In Budapest hat sich das Volk gegen die kommunistische Herrschaft erhoben. Ministerpräsident Imre Nagy kündigt den Austritt aus dem Warschauer Pakt an. Am 4. November rollen sowjetische Panzer in die Stadt. Radio Free Europe hat den Aufständischen über Tage Hoffnung auf westliche Hilfe gemacht – die nicht kommt.
+    text: s => (s.weltflags.ungarn_neutral
+      ? `In Budapest hat sich das Volk gegen die kommunistische Herrschaft erhoben. Ministerpräsident Imre Nagy hat den Austritt aus dem Warschauer Pakt verkündet – und die Panzer bleiben aus. Moskau lässt Ungarn ziehen; das Land soll neutral werden wie Österreich.
 
-Zehntausende Flüchtlinge strömen nach Österreich.`,
-    optionen: [
+Ein Riss im Ostblock. In Warschau, Prag und Ost-Berlin wird jede Meldung aus Budapest verschlungen.`
+      : `In Budapest hat sich das Volk gegen die kommunistische Herrschaft erhoben. Ministerpräsident Imre Nagy kündigt den Austritt aus dem Warschauer Pakt an. Am 4. November rollen sowjetische Panzer in die Stadt. Radio Free Europe hat den Aufständischen über Tage Hoffnung auf westliche Hilfe gemacht – die nicht kommt.
+
+Zehntausende Flüchtlinge strömen nach Österreich.`),
+    optionen: s => s.weltflags.ungarn_neutral ? [
+      { text: 'Die Neutralität Ungarns begrüßen und Wirtschaftshilfe anbieten.', richtung: 'ost',
+        ergebnis: 'Budapest nimmt die Hilfe dankbar an. In Bonn fragen manche, ob das ungarische Modell auch für Deutschland taugt.',
+        w: { moskau: 4, einheit: 4, ansehen: 2, haushalt: -2, usa: -1 } },
+      { text: 'Zurückhaltung: kein Anlass, die Westbindung in Frage zu stellen.', richtung: 'west',
+        ergebnis: 'Bonn hält sich bedeckt. Washington ist zufrieden.',
+        w: { usa: 2, einheit: -1 } },
+    ] : [
       { text: 'Flüchtlinge aufnehmen, Hilfe schicken, zur Besonnenheit mahnen.', hist: true,
         ergebnis: 'Die Bundesrepublik nimmt Tausende Ungarn auf. Die Lehre aus Budapest ist bitter: Der Westen wird nicht eingreifen.',
         w: { ansehen: 2, haushalt: -1, moskau: -2, einheit: -2 } },
@@ -615,6 +662,7 @@ ${spdRegiert(s) ? 'Deine Partei und viele Kirchenleute sehen darin eine Chance, 
     datum: 'März 1958',
     ab: 1958.1, ordnung: 3,
     wenn: s => imBuendnis(s) && !s.f.atomverzicht_bundeswehr,
+    ausloeser: 'teilhabe', ausloeserVon: 'usa',
     absender: s => (unionRegiert(s) ? 'Franz Josef Strauß, Bundesminister der Verteidigung' : 'Bundesministerium der Verteidigung'),
     text: s => `Die NATO stellt ihre Strategie auf atomare Abschreckung um. ${unionRegiert(s) ? 'Verteidigungsminister Strauß will' : 'Die NATO-Planer und die Union wollen'} die Bundeswehr mit Trägersystemen ausrüsten, die atomare Sprengköpfe verschießen können – die Sprengköpfe selbst blieben unter amerikanischer Kontrolle.
 
@@ -686,9 +734,10 @@ Nun lädt er ${s.kanzler === 'Adenauer' ? 'dich' : 'den Kanzler'} in sein Landha
     datum: '27. November 1958',
     ab: 1958.2, ordnung: 11,
     wenn: geteilt,
+    ausloeser: 'berlin_ultimatum', ausloeserVon: 'su',
     absender: 'Note der Sowjetregierung',
     ascii: 'berlin',
-    text: `Nikita Chruschtschow verlangt in einer Note an die drei Westmächte, West-Berlin binnen sechs Monaten in eine „entmilitarisierte Freie Stadt“ umzuwandeln. Andernfalls werde die Sowjetunion ihre Rechte in Berlin an die DDR übertragen – die dann über die Zugangswege nach West-Berlin bestimmen würde.
+    text: s => `${suChef(s)} verlangt in einer Note an die drei Westmächte, West-Berlin binnen sechs Monaten in eine „entmilitarisierte Freie Stadt“ umzuwandeln. Andernfalls werde die Sowjetunion ihre Rechte in Berlin an die DDR übertragen – die dann über die Zugangswege nach West-Berlin bestimmen würde.
 
 Über West-Berlin verlassen jeden Monat Zehntausende die DDR. Für Moskau und Ost-Berlin ist die offene Grenze eine blutende Wunde.`,
     optionen: [

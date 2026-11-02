@@ -615,6 +615,21 @@ export function pruefeEnde(s, a) {
   pruefeKrise(s);
 }
 
+/**
+ * Berichte über gesteuerte Länder (ki.js): Treffsicherheit q (Wahrscheinlichkeit, dass ein
+ * Bericht die wahre Absicht nennt) und Quelle. Ein Nachrichtendienst und eine Botschaft in
+ * Moskau machen die Berichte über die Sowjetunion verlässlicher.
+ */
+export function aufklaerung(s, land) {
+  if (land === 'su') {
+    const q = 0.6 + (s.f.bnd ? 0.1 : s.f.bnd_eigen ? 0.06 : 0) + (s.f.moskau_beziehungen ? 0.1 : 0);
+    const quelle = s.f.moskau_beziehungen ? 'Botschaft Moskau' : s.f.bnd || s.f.bnd_eigen ? 'Bundesnachrichtendienst' : 'Organisation Gehlen';
+    return { q, quelle };
+  }
+  if (land === 'usa') return { q: 0.65 + (s.w.usa >= 65 ? 0.1 : 0), quelle: s.zeit < 1955.2 ? 'Verbindungsstelle Washington' : 'Botschaft Washington' };
+  return { q: 0.6, quelle: 'Auswärtiges Amt' };
+}
+
 export function aktenProRunde(s, nHaupt) {
   if (nHaupt >= 3) return 0;
   if (nHaupt === 2) return 1;

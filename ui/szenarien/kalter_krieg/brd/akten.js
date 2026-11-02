@@ -116,6 +116,21 @@ export default [
     ],
   }),
   akte({
+    id: 'a_bnd', titel: 'Ein Nachrichtendienst für die Bundesrepublik', ab: 1955.2, bis: 1956.1, ordnung: 4,
+    wenn: s => !s.f.vereinigt && (s.f.nato || s.f.evg),
+    absender: 'Reinhard Gehlen, Organisation Gehlen, Pullach',
+    text: 'Seit 1946 arbeitet in Pullach die „Organisation Gehlen“ im Auftrag der Amerikaner: ehemalige Offiziere der Wehrmachtsabteilung Fremde Heere Ost, darunter auch frühere SS-Leute. Mit der Souveränität soll sie als Bundesnachrichtendienst in Bonner Verantwortung übergehen. Gehlen verspricht bessere Berichte aus Moskau und Ost-Berlin; Kritiker warnen vor den alten Seilschaften.',
+    optionen: [
+      { text: 'Die Organisation Gehlen als Bundesnachrichtendienst übernehmen.', hist: true,
+        ergebnis: 'Der BND nimmt am 1. April 1956 seine Arbeit auf. Die Berichte aus dem Osten werden dichter – und manche Personalie wird später zum Skandal.',
+        w: { usa: 2, ansehen: -1 }, setze: ['bnd'] },
+      { text: 'Einen neuen Dienst ohne Gehlens Leute aufbauen.',
+        ergebnis: 'Der Neuanfang ist sauber, aber langsam. Washington ist verstimmt, die Quellen im Osten müssen erst gewonnen werden.',
+        w: { usa: -3, ansehen: 1, haushalt: -1 }, setze: ['bnd_eigen'] },
+    ],
+    historisch: 'Der Bundesnachrichtendienst ging am 1. April 1956 aus der Organisation Gehlen hervor. Reinhard Gehlen leitete ihn bis 1968. Die Durchsetzung mit ehemaligen NS-Tätern und sowjetischen Agenten wie Heinz Felfe wurde erst später bekannt.',
+  }),
+  akte({
     id: 'a_juliusturm', titel: 'Der Juliusturm', ab: 1956.1, bis: 1957.1, ordnung: 3,
     wenn: s => s.w.haushalt >= 35,
     absender: s => (unionRegiert(s) ? 'Fritz Schäffer, Bundesminister der Finanzen' : 'Bundesminister der Finanzen'),

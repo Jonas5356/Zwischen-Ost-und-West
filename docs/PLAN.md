@@ -1,6 +1,6 @@
 # Plan: Mehrere Länder mit Regierungen und Zielen
 
-Stand: November 2026. Phase 1 ist umgesetzt (Version 0.2.0). Seit 0.3.0 kann in der BRD auch die SPD regieren, ohne dass das Spiel endet – Voraussetzung dafür, dass die BRD später vom Spiel gesteuert werden kann.
+Stand: November 2026. Phase 1 ist umgesetzt (Version 0.2.0). Seit 0.3.0 kann in der BRD auch die SPD regieren, ohne dass das Spiel endet – Voraussetzung dafür, dass die BRD später vom Spiel gesteuert werden kann. Seit 0.4.0 handeln USA und Sowjetunion mit eigenen Regierungen und Zielen (erster Teil von Phase 2).
 
 ## Ziel
 
@@ -17,7 +17,9 @@ Eine gemeinsame Welt 1949–1964, später erweiterbar, mit mehreren Ländern. Je
 - **Spielstände:** Beim Umbau dürfen alte Spielstände ungültig werden.
 - **Länderreihenfolge** nach Frankreich: entscheidet Jonas später.
 - **Gespielt wird ein Staat, nicht eine Partei:** Regierungswechsel beenden das Spiel nicht; der Spieler führt die neue Regierung weiter (umgesetzt für die BRD in 0.3.0: Union oder SPD als Kanzlerpartei, Koalitionswahl nur, wenn die Kanzlerpartei regieren kann). Für die BRD-Regierungen in Phase 2 heißt das: Union- und SPD-Regierungen bekommen eigene Ziele.
-- **Offen:** Ziele der anderen Länder offen anzeigen (wie HOI4) oder nur vermutet (über Botschaftsberichte, verborgene Typen, z. B. ob die Stalin-Note ernst gemeint ist)?
+- **Ziele nur vermutet:** Die Regierungen der anderen Länder sind öffentlich, ihre Absichten nicht. Verborgene Typen (z. B. ob die Stalin-Note ernst gemeint ist) werden beim Amtsantritt ausgelost; der Spieler schätzt sie nach Bayes aus Handlungen und Berichten (Treffsicherheit abhängig von BND und Botschaft in Moskau). Im Lagebild in Worten, im Dossier mit Wahrscheinlichkeiten; der Abschlussbericht verrät die Wahrheit.
+- **Ein Regler „Geschichtstreue“** beim neuen Spiel; die Berechenbarkeit λ ist pro Regierung fest.
+- **Ereignislisten der Supermächte** (umgesetzt in 0.4.0) müssen angepasst werden, wenn weitere Länder spielbar werden.
 
 ## Aufbau
 
@@ -82,6 +84,7 @@ Startbildschirm mit Länderwahl und Reglern (Geschichtstreue, Berechenbarkeit); 
 | Phase | Inhalt | Stand |
 |---|---|---|
 | 1 | Weltzustand, BRD als Landesmodul, Postfach, Weltereignisse, gerichtete Beziehungen mit einheitlicher Skala, gemeinsame Vorgangsliste, Hüllen für USA/SU/Frankreich/Großbritannien | **erledigt (0.2.0)**: 600 Referenzpartien vor und nach dem Umbau identisch |
-| 2 | Entscheidungslogik, Regierungen, Geschichtstreue-Regler; USA und SU mit Regierungen und Zielen; Frankreich als Nebenrolle; gemeinsame Ereignisse BRD–Frankreich/Moskau zweiseitig (Schuman-Plan, EVG, Saar, Colombey, Élysée, Stalin-Note, Berlin); `dient`-Angaben an allen BRD-Optionen; Karte „Die Welt“ | offen |
+| 2a | Entscheidungslogik (`ki.js`), Regierungen mit verborgenen Typen, Einschätzung nach Bayes, Geschichtstreue-Regler; USA und SU mit Regierungen, Zielen und eigenen Entscheidungen (Stalin-Note, 17. Juni, Moskau 1955, Ungarn, Berlin-Ultimatum, Mauer, Kuba; Wehrbeitrag, Viermächtekonferenz, EVG-Druck, Radford, Suez, Teilhabe, Essentials, MLF); Rückfragen; Karte „Die Welt“ und Dossier | **erledigt (0.4.0)** |
+| 2b | Frankreich als Nebenrolle; Ereignisse BRD–Frankreich zweiseitig (Schuman-Plan, EVG, Saar, Colombey, Élysée); `dient`-Angaben an allen BRD-Optionen | offen |
 | 3 | Frankreich spielbar (Indochina, Algerien, EVG und Suez aus Pariser Sicht, Force de frappe, Mai 1958, Generalsputsch) | offen |
 | 4 ff. | weitere Länder, jeweils erst Nebenrolle, dann spielbar | offen |

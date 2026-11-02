@@ -9,7 +9,9 @@
 // verhält (s.w, s.f, s.zeit …). Werte, die eine Beziehung sind (z. B. „usa“ bei der BRD),
 // werden dabei in die Beziehungstabelle der Welt umgeleitet.
 
-export const VERSION = 2;
+import * as KI from './ki.js';
+
+export const VERSION = 3;
 
 // ---------- Zeit: Halbjahre als 1952.1 (I) und 1952.2 (II) ----------
 
@@ -61,7 +63,7 @@ export function setzeBeziehung(welt, von, zu, wert) {
 
 // ---------- Landsicht ----------
 
-const WELTFELDER = new Set(['zeit', 'runde', 'seed', 'rng', 'ende']);
+const WELTFELDER = new Set(['zeit', 'runde', 'seed', 'rng', 'ende', 'anfrage']);
 const sichten = new WeakMap();
 
 /**
@@ -97,6 +99,7 @@ export function sicht(W, welt, land = welt.spieler[0]) {
       if (k === 'land') return land;
       if (k === 'welt') return welt;
       if (k === 'weltflags') return welt.weltflags;
+      if (k === 'andere') return id => sicht(W, welt, id);
       if (WELTFELDER.has(k)) return welt[k];
       return t[k];
     },
@@ -215,7 +218,11 @@ function neuesLand(M) {
   };
 }
 
-export function neueWelt(W, { spieler, seed } = {}) {
+/**
+ * Neue Welt. `geschichtstreue` (0…1): 1 = Regierungen und ihre Ziele wie in der Geschichte,
+ * 0 = frei gelost (siehe ki.js).
+ */
+export function neueWelt(W, { spieler, seed, geschichtstreue = 1 } = {}) {
   seed ??= (Date.now() ^ (Math.random() * 1e9)) >>> 0;
   spieler ??= [W.spielbar[0]];
   const welt = {
@@ -226,6 +233,7 @@ export function neueWelt(W, { spieler, seed } = {}) {
     zeit: W.start,
     runde: 1,
     spieler: [...spieler],
+    geschichtstreue: Math.max(0, Math.min(1, geschichtstreue)),
     laender: {},
     beziehungen: {},
     postfach: [],
@@ -244,6 +252,7 @@ export function neueWelt(W, { spieler, seed } = {}) {
   for (const id of Object.keys(W.laender)) {
     W.laender[id].modell?.initialisiere?.(sicht(W, welt, id), api(W, welt, id));
   }
+  KI.initialisiere(W, welt);
   starteRunde(W, welt);
   return welt;
 }
@@ -276,7 +285,7 @@ function moeglich(W, welt, land, ev, s) {
   return !ev.wenn || ev.wenn(s);
 }
 
-const istHauptereignis = ev => ev.art !== 'akte' && !ev.nurGeplant;
+const istHauptereignis = ev => ev.art !== 'akte' && !ev.nurGeplant && !ev.nurRueckfrage;
 const istVorhaben = item => item.id === '@vorhaben';
 
 // ---------- Rundenablauf ----------
@@ -341,6 +350,7 @@ export function starteRunde(W, welt) {
   welt.pos = 0;
   welt.ergebnis = null;
   welt.modellGelaufen = false;
+  KI.rundenstart(W, welt);
   weltereignisse(W, welt);
 
   const items = [];
@@ -402,20 +412,74 @@ function vorruecken(W, welt) {
     if (!ev || (!ev.dynamisch && ev.wenn && !ev.wenn(s))) { welt.pos++; continue; }
     if (istMensch(welt, item.land)) return;
     // Land wird vom Spiel gesteuert: entscheiden und weiter
-    const index = automatischeWahl(W, welt, item.land, ev);
-    entscheide(W, welt, item.land, ev, index);
+    spielEntscheidet(W, welt, item.land, ev);
     naechsterVorgang(W, welt, false);
   }
   throw new Error('Endlosschleife im Spielablauf');
 }
 
-/** Platzhalter bis zur eigentlichen Entscheidungslogik: die historische, sonst die erste mögliche Option */
-function automatischeWahl(W, welt, land, ev) {
+/**
+ * Ein vom Spiel gesteuertes Land entscheidet. Länder mit Regierungen (`regierungen` im
+ * Landesmodul) wählen nach ihren Zielen (ki.js); andere nehmen die historische, sonst die
+ * erste mögliche Option. Gibt den Index der gewählten Option zurück.
+ */
+function spielEntscheidet(W, welt, land, ev) {
+  const M = W.laender[land];
+  const opts = optionen(W, welt, land, ev);
+  if (!opts.some(o => o.verfuegbar)) throw new Error(`Keine mögliche Option bei ${land}:${ev.id}`);
+  if (KI.istKI(M)) {
+    const { index, like } = KI.waehle(W, welt, land, ev, opts);
+    entscheide(W, welt, land, ev, index);
+    KI.beobachte(W, welt, land, ev, opts.find(o => o.index === index), like);
+    return index;
+  }
+  // Eigene Entscheidungsregel des Szenarios (z. B. in Tests), sonst die historische, sonst die erste Option
+  const index = W.ki ? W.ki(sicht(W, welt, land), ev, opts)
+    : (opts.find(x => x.verfuegbar && x.hist) || opts.find(x => x.verfuegbar)).index;
+  entscheide(W, welt, land, ev, index);
+  return index;
+}
+
+/** Zufallsausgang einer Wirkung (`zufall: [{ p, … }, { … }]`) auslosen und anwenden */
+function wendeZufall(W, welt, land, eff, texte) {
+  if (!eff.zufall) return;
   const s = sicht(W, welt, land);
-  if (W.ki) return W.ki(s, ev, optionen(W, welt, land, ev));
-  const opts = optionen(W, welt, land, ev).filter(o => o.verfuegbar);
-  if (!opts.length) throw new Error(`Keine mögliche Option bei ${land}:${ev.id}`);
-  return (opts.find(o => o.hist) || opts[0]).index;
+  const r = zufall(welt);
+  let summe = 0;
+  let treffer = null;
+  for (const z of eff.zufall) {
+    if (z.p === undefined) { treffer = z; break; }
+    summe += Math.max(0, Math.min(1, txt(z.p, s)));
+    if (r < summe) { treffer = z; break; }
+  }
+  if (treffer) {
+    wende(W, welt, land, treffer);
+    if (treffer.ergebnis) texte.push(txt(treffer.ergebnis, s));
+  }
+}
+
+/**
+ * Rückfrage: Eine Option fragt ein vom Spiel gesteuertes Land, das sofort entscheidet
+ * (`rueckfrage: { land, id, daten }`, das Ereignis dort mit `nurRueckfrage: true`). Je nach
+ * dessen Antwort (`antwort` an der gewählten Option) gilt `antworten[antwort]`.
+ */
+function rueckfrage(W, welt, land, o, texte) {
+  const s = sicht(W, welt, land);
+  const rf = txt(o.rueckfrage, s);
+  if (!rf) return;
+  if (istMensch(welt, rf.land)) throw new Error('Rückfragen an gespielte Länder sind noch nicht möglich: ' + rf.land);
+  const ev2 = findeEreignis(W, welt, rf.land, rf.id);
+  if (!ev2) throw new Error(`Unbekannte Rückfrage ${rf.land}:${rf.id}`);
+  const vorher = welt.anfrage;
+  welt.anfrage = { von: land, ...(rf.daten || {}) };
+  const index = spielEntscheidet(W, welt, rf.land, ev2);
+  welt.anfrage = vorher;
+  const antwort = txt(ev2.optionen, sicht(W, welt, rf.land))[index].antwort;
+  const eff = txt(o.antworten, s)?.[antwort];
+  if (!eff) throw new Error(`Keine Wirkung für Antwort ${antwort} (${rf.land}:${rf.id})`);
+  wende(W, welt, land, eff);
+  if (eff.ergebnis) texte.push(txt(eff.ergebnis, s));
+  wendeZufall(W, welt, land, eff, texte);
 }
 
 /** Optionen eines Ereignisses mit Verfügbarkeit */
@@ -448,21 +512,8 @@ function entscheide(W, welt, land, ev, index) {
   wende(W, welt, land, o);
   M.modell?.nachOption?.(s, o, ev, api(W, welt, land));
   if (o.ergebnis) texte.push(txt(o.ergebnis, s));
-
-  if (o.zufall) {
-    const r = zufall(welt);
-    let summe = 0;
-    let treffer = null;
-    for (const z of o.zufall) {
-      if (z.p === undefined) { treffer = z; break; }
-      summe += Math.max(0, Math.min(1, txt(z.p, s)));
-      if (r < summe) { treffer = z; break; }
-    }
-    if (treffer) {
-      wende(W, welt, land, treffer);
-      if (treffer.ergebnis) texte.push(txt(treffer.ergebnis, s));
-    }
-  }
+  if (o.rueckfrage) rueckfrage(W, welt, land, o, texte);
+  wendeZufall(W, welt, land, o, texte);
 
   // Auslösende Nachricht ist damit beantwortet
   if (ev.ausloeser) {
@@ -483,6 +534,8 @@ function entscheide(W, welt, land, ev, index) {
     wahl: txt(o.text, s),
     hist: hatHist ? !!o.hist : null,
     ergebnis: texte.join(' '),
+    // für Zeitung und Einschätzung: Entscheidungen, die niemand mitbekommt, und Rückfragen nicht
+    oeffentlich: !(o.still || ev.geheim || ev.nurRueckfrage),
   });
 
   const ergebnis = {

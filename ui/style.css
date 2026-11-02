@@ -244,6 +244,40 @@ button { font: inherit; color: inherit; }
 .diagramm { width: 100%; max-width: 640px; height: auto; margin: 10px 0 18px; }
 .diagramm text { font-family: var(--din); font-size: 12px; fill: var(--grau); }
 
+/* Die Welt (Lagebild) */
+.welt .macht { padding: 4px 0 8px; border-bottom: 1px dotted var(--linie); margin-bottom: 4px; }
+.macht-kopf { display: flex; justify-content: space-between; gap: 8px; font-size: 15px; }
+.macht-kopf span { color: var(--grau); text-align: right; }
+.macht-frage { font-size: 13.5px; color: var(--grau); line-height: 1.3; margin-top: 2px; }
+.macht-antwort { font-size: 14.5px; line-height: 1.3; color: var(--kopierstift); }
+.macht-antwort.unklar { color: var(--grau); font-style: italic; }
+.dossier-knopf { margin-top: 8px; }
+
+/* Neues Spiel */
+.neu { padding: 0 24px; }
+.neu .treue { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; font-family: var(--din); font-size: 16px; }
+.neu .treue input { flex: 1 1 200px; accent-color: var(--kopierstift); }
+.hinweis { font-size: 15px; color: var(--grau); line-height: 1.45; }
+
+/* Dossier */
+.dossier { padding: 0 24px 20px; overflow: auto; }
+.dossier-land { border-top: 1px solid var(--linie); padding-top: 12px; margin-top: 12px; }
+.dossier-land h3 { font-family: var(--din); font-size: 19px; margin: 0 0 6px; }
+.dossier-land h3 small { color: var(--grau); font-weight: 400; font-size: 14px; }
+.dossier-land h4 { font-family: var(--din); font-weight: 600; font-size: 15px; color: var(--grau); margin: 16px 0 6px; }
+.dossier-frage { font-weight: 700; margin: 4px 0 10px; }
+.dossier-typen { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+.dt-kopf { display: flex; justify-content: space-between; font-family: var(--din); font-size: 16px; }
+.dt-balken { height: 8px; background: #dedbd0; margin: 3px 0 4px; }
+.dt-balken span { display: block; height: 100%; background: var(--kopierstift); }
+.dossier-typen p { margin: 0; font-size: 14.5px; color: var(--grau); }
+.dossier-verlauf { list-style: none; padding: 0; margin: 0; }
+.dossier-verlauf li { display: grid; grid-template-columns: 4.6em 1fr; gap: 0 12px; padding: 7px 0; border-bottom: 1px dotted var(--linie); font-size: 14.5px; }
+.dossier-verlauf .z { grid-row: span 3; font-family: var(--din); color: var(--grau); }
+.dossier-verlauf .q { font-family: var(--din); font-size: 13.5px; color: var(--grau); }
+.dossier-verlauf .p { font-family: var(--din); font-size: 13.5px; color: var(--kopierstift); }
+.dossier-frueher { padding-left: 18px; font-size: 14.5px; }
+
 /* Programm und Updates */
 .programm { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 18px; padding-top: 14px; border-top: 1px dashed var(--linie); }
 .programm-version { font-family: var(--din); color: var(--grau); margin-right: auto; }

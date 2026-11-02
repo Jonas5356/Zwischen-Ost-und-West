@@ -38,15 +38,16 @@ test('Spielstand ist als JSON speicherbar und lässt sich fortsetzen', () => {
   E.weiter(W, kopie);
   E.weiter(W, welt);
   assert.deepEqual(kopie, welt);
-  assert.equal(welt.version, 2);
+  assert.equal(welt.version, E.VERSION);
 });
 
 test('Historischer Durchlauf liegt nahe an der Geschichte', () => {
   const union = { 1953: [], 1957: [], 1961: [] };
   const al = [];
+  let mauer = 0;
   for (let i = 1; i <= 100; i++) {
     const { s } = spiele(i, 'historisch');
-    assert.equal(s.f.mauer, true);
+    if (s.f.mauer) mauer++;
     for (const w of s.wahlen) union[E.jahrVon(w.zeit)].push(w.stimmen.Union);
     al.push(s.w.arbeitslosigkeit);
   }
@@ -55,6 +56,8 @@ test('Historischer Durchlauf liegt nahe an der Geschichte', () => {
   assert.ok(Math.abs(m(union[1957]) - 50.2) < 3, 'Wahl 1957: ' + m(union[1957]));
   assert.ok(Math.abs(m(union[1961]) - 45.3) < 3, 'Wahl 1961: ' + m(union[1961]));
   assert.ok(m(al) < 2, 'Arbeitslosigkeit 1964: ' + m(al));
+  // Die Mauer kommt, wenn Moskau sie erlaubt – im historischen Modus fast immer
+  assert.ok(mauer >= 80, 'Mauer in ' + mauer + ' von 100 Partien');
 });
 
 test('Jedes Ereignis kommt in irgendeinem Spiel vor', () => {

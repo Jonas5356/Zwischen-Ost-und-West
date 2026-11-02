@@ -1,11 +1,13 @@
 // Hauptereignisse 1959 bis Frühjahr 1964
-import { west, geteilt, vereinigt, imBuendnis, adenauer, land, Land, hauptstadt, wahlIn, unionRegiert, spdRegiert, SPD_WAHLKAMPF } from './hilfen.js';
+import { west, geteilt, vereinigt, imBuendnis, adenauer, land, Land, hauptstadt, wahlIn, unionRegiert, spdRegiert, SPD_WAHLKAMPF, praesident, praesidentVoll, usaAussen, usaRegime, suChef, suAussen, suRegime } from './hilfen.js';
 import { kandidat, vollerName } from './modell.js';
 
 /** Ist Brandt selbst Kanzler, spricht für Berlin der Senat */
 const brandtKanzler = s => s.kanzler === 'Brandt';
 
-const mauerKommt = s => geteilt(s) && !s.f.freistadt_vereinbart && (s.w.flucht >= 35 || s.f.berlinkrise);
+/** Die Mauer kommt, wenn Moskau sie Ulbricht erlaubt hat (su.js, su_mauer) */
+const mauerKommt = s => geteilt(s) && !s.f.freistadt_vereinbart && !!s.weltflags.mauer_genehmigt;
+const ikeUndChruschtschow = s => usaRegime(s) === 'eisenhower' && suRegime(s) === 'chruschtschow';
 
 export default [
   // ------------------------------------------------------------------ 1959/I
@@ -87,7 +89,7 @@ Im Präsidium wird ein anderer Gedanke laut: Du selbst könntest Bundespräsiden
     titel: 'Der Geist von Camp David',
     datum: 'September 1959',
     ab: 1959.2, ordnung: 9,
-    wenn: geteilt,
+    wenn: s => geteilt(s) && ikeUndChruschtschow(s),
     absender: 'Botschaft Washington',
     text: `Chruschtschow reist durch die Vereinigten Staaten und trifft Eisenhower in Camp David. Die beiden vereinbaren, die Berlinfrage ohne Fristen weiter zu verhandeln. In Bonn wächst die Sorge, dass sich die Supermächte über die Köpfe der Deutschen hinweg verständigen.`,
     optionen: [
@@ -159,6 +161,7 @@ Für die Union ist die Lage neu: Die SPD wird für bürgerliche Wähler wählbar
     titel: 'Der Gipfel, der nicht stattfand',
     datum: 'Mai 1960',
     ab: 1960.1, ordnung: 5,
+    wenn: ikeUndChruschtschow,
     absender: 'Botschaft Paris',
     text: `Zwei Wochen vor dem Gipfel in Paris haben die Sowjets ein amerikanisches U-2-Spionageflugzeug abgeschossen; der Pilot lebt. Chruschtschow verlangt von Eisenhower eine Entschuldigung. Als sie ausbleibt, lässt er den Gipfel am ersten Tag platzen.`,
     optionen: [
@@ -207,14 +210,16 @@ Für die Union ist die Lage neu: Die SPD wird für bürgerliche Wähler wählbar
   },
   {
     id: 'kennedy_wahl',
-    titel: 'Ein junger Präsident',
-    datum: 'November 1960',
-    ab: 1960.2, ordnung: 11,
+    titel: s => (usaRegime(s) === 'kennedy' ? 'Ein junger Präsident' : 'Ein neuer Präsident'),
+    datum: 'Januar 1961',
+    ab: 1961.1, ordnung: 1,
     absender: 'Botschaft Washington',
-    text: s => `John F. Kennedy hat die Präsidentschaftswahl knapp gegen Richard Nixon gewonnen. Er ist 43 Jahre alt${s.kanzler === 'Adenauer' ? ', du bist 84' : ''}. Seine Berater sprechen von „flexible response“ und neuen Initiativen gegenüber Moskau. In Bonn fragt man sich, ob die neue Regierung in Berlin so fest bleiben wird wie Eisenhower und Dulles.`,
+    text: s => (usaRegime(s) === 'kennedy'
+      ? `John F. Kennedy ist als Präsident vereidigt worden. Er ist 43 Jahre alt${s.kanzler === 'Adenauer' ? ', du bist 85' : ''}. Seine Berater sprechen von „flexible response“ und neuen Initiativen gegenüber Moskau. In Bonn fragt man sich, ob die neue Regierung in Berlin so fest bleiben wird wie ihre Vorgänger.`
+      : `Richard Nixon ist als Präsident vereidigt worden. Acht Jahre war er Eisenhowers Vizepräsident; im Wahlkampf hat er Härte gegenüber Moskau versprochen. In Bonn fragt man sich, was davon nach der Wahl übrig bleibt.`),
     optionen: [
       { text: 'Rasch nach Washington reisen und ein persönliches Verhältnis aufbauen.', hist: true, richtung: 'west',
-        ergebnis: 'Das Treffen ist höflich. Die Chemie zwischen den Generationen bleibt schwierig.',
+        ergebnis: s => (usaRegime(s) === 'kennedy' ? 'Das Treffen ist höflich. Die Chemie zwischen den Generationen bleibt schwierig.' : 'Das Treffen ist herzlich; Nixon kennt Bonn aus seiner Zeit als Vizepräsident.'),
         w: { usa: 3 } },
       { text: 'Abwartende Distanz halten und enger mit de Gaulle zusammenarbeiten.',
         ergebnis: 'Paris registriert es mit Genugtuung, Washington mit Stirnrunzeln.',
@@ -250,15 +255,19 @@ Für die Union ist die Lage neu: Die SPD wird für bürgerliche Wähler wählbar
     ab: 1961.1, ordnung: 6,
     wenn: s => geteilt(s) && !s.f.freistadt_vereinbart,
     absender: 'Botschaft Washington',
-    text: `Auf dem Gipfel in Wien hat Chruschtschow Kennedy erneut ein Ultimatum gestellt: Bis Jahresende werde er einen separaten Friedensvertrag mit der DDR schließen. Kennedy kehrt erschüttert zurück. In Washington wird an einer Rede gearbeitet, die drei unverzichtbare Punkte („Essentials“) nennen soll: die Präsenz der Westmächte in West-Berlin, den freien Zugang und die Freiheit der West-Berliner. Von Ost-Berlin ist keine Rede.
+    text: s => `Auf dem Gipfel in Wien hat ${suChef(s)} ${praesident(s)} ${s.f.berlinkrise ? 'erneut ' : ''}ein Ultimatum gestellt: Bis Jahresende werde er einen separaten Friedensvertrag mit der DDR schließen. ${{
+      westberlin: `${praesident(s)} antwortet mit drei unverzichtbaren Punkten („Essentials“): die Präsenz der Westmächte in West-Berlin, den freien Zugang und die Freiheit der West-Berliner. Von Ost-Berlin ist keine Rede.`,
+      ganz_berlin: `${praesident(s)} antwortet mit einer Garantie für ganz Berlin, auch für den Ostsektor. Moskau spricht von Kriegstreiberei.`,
+      verhandlung: `${praesident(s)} bietet Moskau Verhandlungen über einen neuen Status Berlins an – ohne Bonn vorher zu fragen.`,
+    }[s.weltflags.essentials] || `Washington hält sich bedeckt.`}
 
 Am 15. Juni hat Walter Ulbricht auf einer Pressekonferenz erklärt: „Niemand hat die Absicht, eine Mauer zu errichten.“`,
     optionen: [
-      { text: 'Kennedys Linie mittragen.', hist: true, richtung: 'west',
-        ergebnis: 'Kennedy hält seine Rede am 25. Juli. In Ost-Berlin wird sie aufmerksam gelesen.',
+      { text: 'Die Linie Washingtons mittragen.', hist: true, richtung: 'west',
+        ergebnis: 'Washington weiß die Unterstützung zu schätzen. In Ost-Berlin wird genau hingesehen.',
         w: { usa: 3, flucht: 10 } },
-      { text: 'Eine Garantie für ganz Berlin verlangen, auch für den Ostsektor.',
-        ergebnis: 'Kennedy weicht aus. Das Verhältnis kühlt ab.',
+      { text: 'Eine Garantie für ganz Berlin verlangen, auch für den Ostsektor.', nurWenn: s => s.weltflags.essentials !== 'ganz_berlin',
+        ergebnis: s => `${praesident(s)} weicht aus. Das Verhältnis kühlt ab.`,
         w: { usa: -4, moskau: -4, flucht: 10 } },
       { text: 'Moskau Gespräche über eine Konföderation anbieten.', richtung: 'ost',
         ergebnis: 'Ein Sturm der Entrüstung in Washington und in der eigenen Partei. Moskau zeigt Interesse – an der Aufwertung der DDR.',
@@ -276,7 +285,7 @@ Am 15. Juni hat Walter Ulbricht auf einer Pressekonferenz erklärt: „Niemand h
     wenn: mauerKommt,
     absender: 'Bundesministerium für gesamtdeutsche Fragen',
     ascii: 'mauer',
-    text: s => `In der Nacht haben Volkspolizei und Kampfgruppen die Sektorengrenze in Berlin abgeriegelt. Stacheldraht, aufgerissenes Pflaster, bald Betonblöcke. S-Bahn und U-Bahn halten nicht mehr an den Grenzbahnhöfen. Familien werden auseinandergerissen. Die Westmächte protestieren – aber sie greifen nicht ein. Der Zugang nach West-Berlin bleibt unangetastet.
+    text: s => `In der Nacht haben Volkspolizei und Kampfgruppen die Sektorengrenze in Berlin abgeriegelt. Stacheldraht, aufgerissenes Pflaster, bald Betonblöcke. S-Bahn und U-Bahn halten nicht mehr an den Grenzbahnhöfen. Familien werden auseinandergerissen. ${s.weltflags.essentials === 'ganz_berlin' ? 'Washington, das eine Garantie für ganz Berlin gegeben hat, protestiert scharf und versetzt seine Truppen in Alarmbereitschaft – aber es greift nicht ein.' : 'Die Westmächte protestieren – aber sie greifen nicht ein.'} Der Zugang nach West-Berlin bleibt unangetastet.
 
 ${brandtKanzler(s) ? 'Der Berliner Senat verlangt Taten.' : spdRegiert(s) ? 'Willy Brandt, Regierender Bürgermeister, verlangt Taten.' : 'Willy Brandt, Regierender Bürgermeister und Kanzlerkandidat der SPD, verlangt Taten.'}${wahlIn(s, 1961.2) ? ' In vier Wochen ist Bundestagswahl.' : ''}`,
     optionen: [
@@ -299,7 +308,7 @@ ${brandtKanzler(s) ? 'Der Berliner Senat verlangt Taten.' : spdRegiert(s) ? 'Wil
     ab: 1961.2, ordnung: 8,
     wenn: s => geteilt(s) && !mauerKommt(s),
     absender: 'Bundesnachrichtendienst',
-    text: s => `${s.f.freistadt_vereinbart ? 'Seit West-Berlin Freie Stadt ist, kontrolliert die DDR die Zugangswege. Die Flucht über Berlin ist kaum noch möglich.' : 'Die Lage in Berlin ist ruhiger, als viele befürchtet hatten. Die Fluchtzahlen sind gesunken.'} Der BND meldet, Ulbricht habe in Moskau eine vollständige Abriegelung verlangt – Chruschtschow habe abgelehnt.
+    text: s => `${s.f.freistadt_vereinbart ? 'Seit West-Berlin Freie Stadt ist, kontrolliert die DDR die Zugangswege. Die Flucht über Berlin ist kaum noch möglich.' : 'Die Lage in Berlin ist ruhiger, als viele befürchtet hatten. Die Fluchtzahlen sind gesunken.'} Der BND meldet, Ulbricht habe in Moskau eine vollständige Abriegelung verlangt – ${suChef(s)} habe abgelehnt.
 
 Ost-Berlin sucht nun wirtschaftliche Hilfe. Über die Treuhandstelle für den Interzonenhandel fragt die DDR nach Krediten.`,
     optionen: [
@@ -348,7 +357,7 @@ Womit soll die SPD in den Wahlkampf ziehen?` : `Am 17. September wird gewählt. 
         ergebnis: 'Nach 16 Stunden ziehen sich die Panzer zurück – erst die sowjetischen, dann die amerikanischen.',
         w: { usa: 3, moskau: -6, ansehen: 1 } },
       { text: 'Diskret in Washington auf Deeskalation dringen.', hist: true,
-        ergebnis: 'Kennedy und Chruschtschow verständigen sich über einen Hintergrundkanal. Die Panzer rollen zurück.',
+        ergebnis: s => `${praesident(s)} und ${suChef(s)} verständigen sich über einen Hintergrundkanal. Die Panzer rollen zurück.`,
         w: { moskau: 3 } },
     ],
     historisch: 'Die Konfrontation dauerte vom 27. bis 28. Oktober 1961 und wurde über einen geheimen Kanal zwischen Kennedy und Chruschtschow beendet.',
@@ -380,10 +389,10 @@ Womit soll die SPD in den Wahlkampf ziehen?` : `Am 17. September wird gewählt. 
     ab: 1962.1, ordnung: 4,
     wenn: s => geteilt(s) && (!!s.f.mauer || !!s.f.berlinkrise) && !s.f.freistadt_vereinbart,
     absender: 'Botschafter Wilhelm Grewe, Washington',
-    text: `Außenminister Rusk verhandelt mit Gromyko über eine internationale Zugangsbehörde für Berlin, an der auch die DDR beteiligt wäre. Die Amerikaner haben Bonn das Papier zur Stellungnahme vorgelegt – mit 48 Stunden Frist. Für dich sieht es nach einer schleichenden Anerkennung der DDR aus.`,
+    text: s => `${usaAussen(s) ? 'Außenminister ' + usaAussen(s) : 'Der amerikanische Außenminister'} verhandelt mit ${suAussen(s)} über eine internationale Zugangsbehörde für Berlin, an der auch die DDR beteiligt wäre. Die Amerikaner haben Bonn das Papier zur Stellungnahme vorgelegt – mit 48 Stunden Frist. Für dich sieht es nach einer schleichenden Anerkennung der DDR aus.`,
     optionen: [
       { text: 'Das Papier an die Presse durchsickern lassen, um es zu Fall zu bringen.', hist: true,
-        ergebnis: 'Das Projekt ist tot. Kennedy ist außer sich; Botschafter Grewe muss Washington verlassen.',
+        ergebnis: s => `Das Projekt ist tot. ${praesident(s)} ist außer sich; Botschafter Grewe muss Washington verlassen.`,
         w: { usa: -7, ansehen: 2, souveraenitaet: 1 } },
       { text: 'Vertraulich Einwände formulieren und Washington vertrauen.',
         ergebnis: 'Die Amerikaner nehmen einige Änderungen auf. Die Gespräche versanden ohnehin.',
@@ -415,22 +424,33 @@ Womit soll die SPD in den Wahlkampf ziehen?` : `Am 17. September wird gewählt. 
     titel: 'Raketen auf Kuba',
     datum: 'Oktober 1962',
     ab: 1962.2, ordnung: 10,
-    absender: 'Botschaft Washington, Sonderbeauftragter Dean Acheson',
+    // Nur wenn Moskau Raketen stationiert hat (su.js); Washington hat dann schon reagiert (usa.js)
+    wenn: s => !!s.weltflags.raketen_kuba,
+    absender: s => (usaAussen(s) === 'Rusk' ? 'Botschaft Washington, Sonderbeauftragter Dean Acheson' : 'Botschaft Washington'),
     ascii: 'rakete',
-    text: s => `Kennedy hat den ehemaligen Außenminister Acheson nach Europa geschickt, um die Verbündeten vorab zu unterrichten: Luftaufnahmen zeigen sowjetische Mittelstreckenraketen auf Kuba. Die USA werden eine Seeblockade verhängen. Niemand weiß, ob Chruschtschow mit einem Gegenzug in ${geteilt(s) ? 'Berlin' : 'Mitteleuropa'} antworten wird.`,
+    text: s => {
+      const m = s.weltflags.kuba_massnahme, berlin = s.weltflags.kuba_ausgang === 'berlin';
+      return `Luftaufnahmen zeigen sowjetische Mittelstreckenraketen auf Kuba, keine 150 Kilometer vor Florida. ${{
+        blockade: `${praesident(s)} hat eine Seeblockade verhängt und verlangt den Abzug.`,
+        angriff: `Amerikanische Bomber haben die Raketenstellungen angegriffen.`,
+        tausch: `${praesident(s)} verhandelt: Washington bietet an, seine Jupiter-Raketen aus der Türkei abzuziehen.`,
+      }[m] || ''}
+
+${berlin ? `Moskau antwortet in Europa: Sowjetische Truppen sperren die Zufahrtswege nach ${geteilt(s) ? 'West-Berlin' : 'Berlin'}. Die Welt hält den Atem an.` : `Niemand weiß, ob ${suChef(s)} mit einem Gegenzug in ${geteilt(s) ? 'Berlin' : 'Mitteleuropa'} antworten wird.`} Washington erwartet ein Wort aus ${hauptstadt(s)}.`;
+    },
     optionen: [
-      { text: 'Kennedy die uneingeschränkte Unterstützung zusichern.', hist: true, richtung: 'west',
-        zufall: [
-          { p: s => Math.max(0, (20 - s.w.moskau) / 100), ergebnis: 'Moskau antwortet mit einer Blockade der Zufahrtswege. Die Welt hält den Atem an.',
-            w: { usa: 6, moskau: -25 } },
-          { ergebnis: 'Nach dreizehn Tagen zieht Chruschtschow die Raketen ab. Kennedy wird die Treue Bonns nicht vergessen.',
-            w: { usa: 6, moskau: -4 } },
-        ] },
+      { text: s => `${praesident(s)} die uneingeschränkte Unterstützung zusichern.`, hist: true, richtung: 'west',
+        w: s => (s.weltflags.kuba_ausgang === 'berlin' ? { usa: 8, moskau: -20 } : { usa: 6, moskau: -4 }),
+        ergebnis: s => (s.weltflags.kuba_ausgang === 'berlin'
+          ? 'Bonn steht an der Seite Washingtons, während die Zufahrtswege gesperrt sind. Nach drei bangen Wochen gibt Moskau nach – gegen amerikanische Zugeständnisse in der Türkei.'
+          : s.weltflags.kuba_massnahme === 'tausch'
+            ? 'Der Handel kommt zustande, die Raketen werden abgezogen. In Bonn fragt man sich, was Washington beim nächsten Mal zur Verhandlung stellt.'
+            : `Nach dreizehn Tagen zieht ${suChef(s)} die Raketen ab. ${praesident(s)} wird die Treue Bonns nicht vergessen.`) },
       { text: 'Zur Mäßigung mahnen und auf Verhandlungen drängen.', richtung: 'ost',
-        ergebnis: 'Kennedy registriert die Zurückhaltung Bonns. Die Krise endet ohne Bonner Zutun.',
-        w: { usa: -3, moskau: 2 } },
+        w: s => (s.weltflags.kuba_ausgang === 'berlin' ? { usa: -6, moskau: 4, ansehen: -3 } : { usa: -3, moskau: 2 }),
+        ergebnis: s => `${praesident(s)} registriert die Zurückhaltung Bonns. Die Krise endet ohne Bonner Zutun.` },
     ],
-    historisch: 'Adenauer sicherte Kennedy sofort volle Unterstützung zu, anders als manche andere Verbündete. Die Krise endete am 28. Oktober mit dem Abzug der Raketen.',
+    historisch: 'Adenauer sicherte Kennedy sofort volle Unterstützung zu, anders als manche andere Verbündete. Die Krise endete am 28. Oktober mit dem Abzug der Raketen; im Gegenzug sagten die USA zu, Kuba nicht anzugreifen, und zogen insgeheim ihre Jupiter-Raketen aus der Türkei ab.',
   },
   {
     id: 'spiegel',
@@ -486,7 +506,7 @@ In Washington sieht man darin den Versuch, Europa von Amerika zu lösen. ${spdRe
     titel: '„Ich bin ein Berliner“',
     datum: '26. Juni 1963',
     ab: 1963.1, ordnung: 6,
-    wenn: s => geteilt(s) && !s.f.freistadt_vereinbart && (s.f.mauer || s.f.berlinkrise),
+    wenn: s => geteilt(s) && !s.f.freistadt_vereinbart && (s.f.mauer || s.f.berlinkrise) && usaRegime(s) === 'kennedy',
     absender: 'Senatskanzlei Berlin',
     ascii: 'berlin',
     text: s => `Präsident Kennedy besucht die Bundesrepublik und West-Berlin. Hunderttausende säumen die Straßen. Am Schöneberger Rathaus wird er sprechen – vor einer Menge, die bis zum Horizont reicht.${s.f.achse_paris ? ' Seit dem Élysée-Vertrag ohne Präambel ist das Verhältnis zu Washington belastet; der Besuch ist eine Chance.' : ''}`,
@@ -572,6 +592,7 @@ In Washington sieht man darin den Versuch, Europa von Amerika zu lösen. ${spdRe
     datum: 'Frühjahr 1964',
     ab: 1964.1, ordnung: 3,
     wenn: s => !!s.f.nato,
+    ausloeser: 'mlf', ausloeserVon: 'usa',
     absender: 'Botschaft Washington',
     text: `Washington wirbt für eine „Multilateral Force“: eine NATO-Flotte von Überwasserschiffen mit Polaris-Raketen und gemischten Besatzungen. Die Bundesrepublik wäre an Atomwaffen beteiligt, ohne sie selbst zu besitzen – das Veto behielten die USA. Paris lehnt ab, London zögert, Moskau protestiert scharf.`,
     optionen: [

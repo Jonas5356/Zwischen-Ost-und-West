@@ -38,6 +38,7 @@
       <div class="kopf-mitte" id="kopf-regierung"></div>
       <nav class="kopf-knoepfe">
         <button class="knopf klein" id="k-zeitung" title="Die Zeitung zum Halbjahr (Z)">Zeitung<span class="neu-punkt" id="zeitung-neu" hidden aria-label="neue Ausgabe"></span></button>
+        <button class="knopf klein" id="k-dossier" title="Was Washington und Moskau vermutlich wollen (D)">Dossier</button>
         <button class="knopf klein" id="k-chronik" title="Alle bisherigen Entscheidungen (C)">Chronik</button>
         <button class="knopf klein" id="k-speichern" title="Spielstand speichern">Speichern</button>
         <button class="knopf klein" id="k-menue" title="Menü (Esc)">Menü</button>
@@ -61,6 +62,21 @@
       <button class="knopf klein" data-schliessen>Schließen</button>
     </div>
     <div class="zeitung" id="zeitung"></div>
+  </dialog>
+
+  <dialog id="d-neu" class="dialog">
+    <div class="dialog-kopf"><h2>Neues Spiel</h2><button class="knopf klein" data-schliessen>Schließen</button></div>
+    <div class="neu">
+      <p>Washington und Moskau steuert das Spiel. Ihre Regierungen verfolgen eigene Ziele – welche genau, erfährst du nur aus ihrem Handeln und aus Berichten.</p>
+      <label class="regler treue">Geschichtstreue <input type="range" id="n-treue" min="0" max="100" step="5"> <b id="n-treue-wert"></b></label>
+      <p class="hinweis" id="n-treue-text"></p>
+    </div>
+    <div class="dialog-knoepfe"><button class="knopf haupt" id="n-start">Beginnen</button></div>
+  </dialog>
+
+  <dialog id="d-dossier" class="dialog breit">
+    <div class="dialog-kopf"><h2>Dossier: Washington und Moskau</h2><button class="knopf klein" data-schliessen>Schließen</button></div>
+    <div class="dossier" id="dossier"></div>
   </dialog>
 
   <dialog id="d-chronik" class="dialog breit">
@@ -103,9 +119,10 @@
       <p>In jedem Halbjahr landen die historischen Ereignisse als Vorlagen auf deinem Schreibtisch, dazu Briefe von Ministern, Verbänden und Bürgern. Am Ende des Halbjahrs bringst du ein Regierungsvorhaben in den Bundestag ein. Deine Entscheidungen verändern das Lagebild – und sie können die Geschichte in eine andere Richtung lenken: Wer die Stalin-Note ernst nimmt, erlebt vielleicht keinen Mauerbau.</p>
       <p><strong>Wahlen und Regierungswechsel.</strong> 1953, 1957 und 1961 wird gewählt. Kann die Kanzlerpartei eine Mehrheit bilden, wählst du die Koalition. Verliert sie die Mehrheit oder zerbricht die Koalition, bildet sich eine neue Regierung – etwa unter einem SPD-Kanzler – und du führst sie weiter. Die Umfragewerte im Lagebild gelten immer der Partei, die den Kanzler stellt. Vorbei ist das Spiel nur bei einem Krieg mit Moskau, einem Staatsbankrott oder wenn die Westmächte das Besatzungsrecht wieder in Kraft setzen.</p>
       <p><strong>Die Zeitung.</strong> Zu jedem Halbjahr erscheint eine Ausgabe der „Depesche“: was im letzten Halbjahr entschieden wurde, Wahlergebnisse, Wirtschaftsdaten und Meldungen aus aller Welt. Für deine Entscheidungen brauchst du sie nicht, aber sie erzählt die Geschichte mit. Ein Punkt am Knopf „Zeitung“ zeigt eine ungelesene Ausgabe an; ältere Ausgaben kannst du nachblättern.</p>
+      <p><strong>Washington und Moskau.</strong> Die Supermächte steuert das Spiel. Ihre Regierungen wechseln (Wahlen in Amerika, Machtkämpfe im Kreml) und verfolgen eigene Ziele: Ob Moskau die Stalin-Note schickt, ob es der Mauer zustimmt oder Raketen nach Kuba bringt, entscheidet es selbst. Was eine Regierung wirklich will, siehst du nicht. Das Auswärtige Amt schätzt es aus ihrem Handeln und aus Berichten von Botschaften und Diensten; die Einschätzung steht im Lagebild unter „Die Welt“, mit Wahrscheinlichkeiten im Dossier (D). Berichte können irren. Ein Nachrichtendienst und eine Botschaft in Moskau machen sie verlässlicher. Wie nah sich die Welt an die Geschichte hält, stellst du beim neuen Spiel mit dem Regler „Geschichtstreue“ ein.</p>
       <p><strong>Das Lagebild.</strong> Rechts siehst du, wie Washington, Paris, London und Moskau zur Bundesrepublik stehen (hoch heißt immer gut, bei 0 droht bei Moskau der Krieg), wie souverän die Bundesrepublik ist und wie realistisch die Einheit bleibt. Darunter Umfragen, Koalitionsklima und Wirtschaftsdaten. Beziehungen kehren langsam zur Mitte zurück, wenn man sie nicht pflegt; das Ansehen des Kanzlers verblasst mit der Zeit.</p>
       <p><strong>Randvermerke.</strong> Nach jeder Entscheidung erfährst du in violetter Schrift, was tatsächlich geschah. Im Menü kannst du das abschalten, ebenso die Pfeile, die die Richtung der Auswirkungen andeuten.</p>
-      <p><strong>Tastatur.</strong> Mit 1–4 wählst du einen Vorschlag, mit der Eingabetaste geht es weiter. Z öffnet die Zeitung, C die Chronik, Esc das Menü. Geräusche und Lautstärke stellst du im Menü ein.</p>
+      <p><strong>Tastatur.</strong> Mit 1–4 wählst du einen Vorschlag, mit der Eingabetaste geht es weiter. Z öffnet die Zeitung, D das Dossier, C die Chronik, Esc das Menü. Geräusche und Lautstärke stellst du im Menü ein.</p>
     </div>
   </dialog>
 
