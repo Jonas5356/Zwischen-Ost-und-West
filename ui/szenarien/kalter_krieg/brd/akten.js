@@ -1,5 +1,5 @@
 // Akten: kleinere Briefe und Vorlagen, die zufällig auf dem Schreibtisch landen
-import { west, geteilt, vereinigt, imBuendnis, adenauer, regiertMit, hauptstadt } from './hilfen.js';
+import { west, geteilt, vereinigt, imBuendnis, adenauer, regiertMit, hauptstadt, unionRegiert } from './hilfen.js';
 
 const akte = a => ({ art: 'akte', ...a });
 
@@ -36,7 +36,7 @@ export default [
   }),
   akte({
     id: 'a_aa', titel: 'Ein eigenes Auswärtiges Amt', ab: 1951.1, bis: 1951.1, ordnung: 3,
-    wenn: west,
+    wenn: s => west(s) && unionRegiert(s),
     absender: 'Herbert Blankenhorn',
     text: 'Mit der kleinen Revision des Besatzungsstatuts darf die Bundesrepublik ein Auswärtiges Amt einrichten. Wer soll Außenminister werden? Viele denken an Heinrich von Brentano. Du könntest das Amt auch selbst übernehmen.',
     optionen: [
@@ -47,7 +47,7 @@ export default [
   }),
   akte({
     id: 'a_kpd', titel: 'Ein Verbotsantrag gegen die KPD?', ab: 1951.2, bis: 1951.2, ordnung: 11,
-    absender: 'Robert Lehr, Bundesminister des Innern',
+    absender: s => (unionRegiert(s) ? 'Robert Lehr, Bundesminister des Innern' : 'Bundesminister des Innern'),
     text: 'Das Innenministerium will beim neuen Bundesverfassungsgericht das Verbot der rechtsextremen Sozialistischen Reichspartei und der KPD beantragen. Die SRP gewinnt in Niedersachsen Wähler unter früheren Nationalsozialisten, die KPD ist der verlängerte Arm der SED.',
     optionen: [
       { text: 'Beide Verbote beantragen.', hist: true, ergebnis: 'Die Anträge gehen nach Karlsruhe. Die SRP wird 1952 verboten, über die KPD wird noch lange verhandelt.', w: { moskau: -2, usa: 1 }, setze: ['kpd_antrag'] },
@@ -86,6 +86,7 @@ export default [
   }),
   akte({
     id: 'a_familienministerium', titel: 'Ein Ministerium für die Familie', ab: 1953.2, bis: 1953.2, ordnung: 11,
+    wenn: unionRegiert,
     absender: 'Josef Kardinal Frings, Erzbischof von Köln',
     text: 'Die katholischen Bischöfe bitten, im neuen Kabinett ein Familienministerium einzurichten. Franz-Josef Wuermeling, ein streitbarer Katholik, steht bereit. Die FDP spottet über ein „Ministerium für Kinderreichtum“.',
     optionen: [
@@ -99,7 +100,7 @@ export default [
     absender: 'Bundesministerium des Innern',
     text: 'Otto John, Präsident des Bundesamtes für Verfassungsschutz, ist nach einer Gedenkfeier zum 20. Juli in Ost-Berlin aufgetaucht. Im DDR-Rundfunk warnt er vor der Remilitarisierung und den alten Nazis in Bonn. Ob er entführt wurde oder übergelaufen ist, weiß niemand.',
     optionen: [
-      { text: 'Den Innenminister öffentlich in Schutz nehmen.', ergebnis: 'Schröder bleibt im Amt. Die Opposition spottet über die Sicherheitsbehörden.', w: { ansehen: -2 } },
+      { text: 'Den Innenminister öffentlich in Schutz nehmen.', ergebnis: s => `${unionRegiert(s) ? 'Schröder' : 'Der Innenminister'} bleibt im Amt. Die Opposition spottet über die Sicherheitsbehörden.`, w: { ansehen: -2 } },
       { text: 'Eine Untersuchung der Geheimdienste anordnen.', ergebnis: 'Die Untersuchung bringt Ungereimtheiten ans Licht, aber keine Klarheit.', w: { ansehen: 1, usa: 1 } },
     ],
     historisch: 'Otto John wechselte am 20. Juli 1954 nach Ost-Berlin und kehrte im Dezember 1955 zurück. Er wurde wegen Landesverrats verurteilt; ob er entführt worden war, ist bis heute ungeklärt.',
@@ -107,7 +108,7 @@ export default [
   akte({
     id: 'a_baudissin', titel: 'Der Staatsbürger in Uniform', ab: 1955.1, bis: 1956.1, ordnung: 6,
     wenn: imBuendnis,
-    absender: 'Wolf Graf von Baudissin, Amt Blank',
+    absender: s => (unionRegiert(s) ? 'Wolf Graf von Baudissin, Amt Blank' : 'Wolf Graf von Baudissin, Bundesministerium für Verteidigung'),
     text: 'Für die neuen Streitkräfte hat Graf Baudissin das Konzept der „Inneren Führung“ entwickelt: Der Soldat bleibt Staatsbürger mit Grundrechten, Befehle finden ihre Grenze an der Menschenwürde. Ehemalige Wehrmachtsoffiziere halten das für „weiche Welle“.',
     optionen: [
       { text: 'Baudissin den Rücken stärken.', hist: true, ergebnis: 'Die Innere Führung wird Leitbild der Bundeswehr. Im Ausland wird das aufmerksam registriert.', w: { usa: 2, frankreich: 2, ansehen: 1 } },
@@ -117,11 +118,11 @@ export default [
   akte({
     id: 'a_juliusturm', titel: 'Der Juliusturm', ab: 1956.1, bis: 1957.1, ordnung: 3,
     wenn: s => s.w.haushalt >= 35,
-    absender: 'Fritz Schäffer, Bundesminister der Finanzen',
-    text: 'Weil die Aufrüstung langsamer vorankommt als geplant, hat Finanzminister Schäffer Milliarden angespart. Die Presse nennt den Schatz nach dem Spandauer Turm, in dem das Kaiserreich seinen Kriegsschatz lagerte, den „Juliusturm“. Vor der Wahl wollen viele in der Fraktion das Geld ausgeben.',
+    absender: s => (unionRegiert(s) ? 'Fritz Schäffer, Bundesminister der Finanzen' : 'Bundesminister der Finanzen'),
+    text: s => `Weil die Aufrüstung langsamer vorankommt als geplant, hat ${unionRegiert(s) ? 'Finanzminister Schäffer' : 'der Finanzminister'} Milliarden angespart. Die Presse nennt den Schatz nach dem Spandauer Turm, in dem das Kaiserreich seinen Kriegsschatz lagerte, den „Juliusturm“. Vor der Wahl wollen viele in der Fraktion das Geld ausgeben.`,
     optionen: [
       { text: 'Den Juliusturm öffnen: Steuersenkungen und Wohltaten.', hist: true, ergebnis: 'Die Kassen leeren sich, die Wähler freuen sich.', w: { haushalt: -10, ansehen: 4, impuls: 1 } },
-      { text: 'Schäffer schützen – das Geld ist für die Bundeswehr.', ergebnis: 'Der Finanzminister bleibt eisern. Die Fraktion murrt.', w: { koalition: -3, haushalt: 1 } },
+      { text: s => (unionRegiert(s) ? 'Schäffer schützen – das Geld ist für die Bundeswehr.' : 'Den Finanzminister schützen – das Geld ist für die Bundeswehr.'), ergebnis: 'Der Finanzminister bleibt eisern. Die Fraktion murrt.', w: { koalition: -3, haushalt: 1 } },
     ],
   }),
   akte({
@@ -135,7 +136,7 @@ export default [
   }),
   akte({
     id: 'a_gastarbeiter', titel: 'Arbeiter aus Italien', ab: 1955.2, bis: 1956.2, ordnung: 11,
-    absender: 'Anton Storch, Bundesminister für Arbeit',
+    absender: s => (unionRegiert(s) ? 'Anton Storch, Bundesminister für Arbeit' : 'Bundesminister für Arbeit'),
     text: 'In der Landwirtschaft und auf dem Bau fehlen Arbeitskräfte. Italien, wo die Arbeitslosigkeit hoch ist, schlägt ein Abkommen über die Anwerbung italienischer Arbeiter vor. Die Gewerkschaften fürchten Lohndrückerei.',
     optionen: [
       { text: 'Das Anwerbeabkommen schließen.', hist: true, ergebnis: 'Die ersten italienischen Arbeiter treffen in Stuttgart und München ein.', w: { impuls: 0.3, ansehen: -1 }, setze: ['gastarbeiter'] },
@@ -154,7 +155,7 @@ export default [
   }),
   akte({
     id: 'a_halbstarke', titel: 'Die Halbstarken', ab: 1956.2, bis: 1958.2, ordnung: 6,
-    absender: 'Gerhard Schröder, Bundesminister des Innern',
+    absender: s => (unionRegiert(s) ? 'Gerhard Schröder, Bundesminister des Innern' : 'Bundesminister des Innern'),
     text: 'Nach Konzerten und Rock-’n’-Roll-Filmen kommt es in mehreren Städten zu Krawallen Jugendlicher in Lederjacken. Bill Haley hat in Berlin gespielt, im Sportpalast flogen Stühle. Konservative Abgeordnete verlangen ein Jugendschutzgesetz mit harten Strafen.',
     optionen: [
       { text: 'Hart durchgreifen.', ergebnis: 'Ältere Wähler nicken, die Jugend lacht.', w: { ansehen: 1 } },
@@ -184,7 +185,7 @@ export default [
   }),
   akte({
     id: 'a_oberlaender', titel: 'Der Vertriebenenminister', ab: 1960.1, bis: 1960.1, ordnung: 4,
-    wenn: geteilt,
+    wenn: s => geteilt(s) && unionRegiert(s),
     absender: 'Theodor Oberländer, Bundesminister für Vertriebene',
     text: 'Gegen deinen Vertriebenenminister erhebt die DDR schwere Vorwürfe: Er sei 1941 als Offizier des Bataillons „Nachtigall“ an Massakern in Lemberg beteiligt gewesen. Oberländer bestreitet das. Auch in der Koalition wird sein Rücktritt verlangt.',
     optionen: [
@@ -194,6 +195,7 @@ export default [
   }),
   akte({
     id: 'a_volksaktie', titel: 'Volksaktien', ab: 1959.1, bis: 1961.1, ordnung: 6,
+    wenn: unionRegiert,
     absender: 'Ludwig Erhard',
     text: 'Erhard will Bundesunternehmen teilprivatisieren und die Aktien bevorzugt an Kleinsparer verkaufen: zuerst die Preussag, dann das Volkswagenwerk. Eigentum für alle, sagt Erhard. Die SPD spricht vom Ausverkauf des Volksvermögens.',
     optionen: [
@@ -213,6 +215,7 @@ export default [
   }),
   akte({
     id: 'a_schwarzhaupt', titel: 'Eine Frau im Kabinett', ab: 1961.2, bis: 1961.2, ordnung: 11,
+    wenn: unionRegiert,
     absender: 'Helene Weber und die Frauen der Unionsfraktion',
     text: 'Seit 1949 hat noch nie eine Frau einem Bundeskabinett angehört. Die Frauen der Fraktion haben dich in einer Sitzung zur Rede gestellt und kündigen an, nicht mehr zu weichen. Sie schlagen Elisabeth Schwarzhaupt als Gesundheitsministerin vor.',
     optionen: [
@@ -271,11 +274,11 @@ export default [
   akte({
     id: 'a_sed_wahl', titel: 'Wahlhilfe für die SED?', ab: 1953.1, bis: 1955.2, ordnung: 6,
     wenn: s => !!s.f.neutral && !s.f.vereinigt,
-    absender: 'Jakob Kaiser, Bundesminister für gesamtdeutsche Fragen',
-    text: 'Kaiser warnt: Die SED bereitet mit sowjetischem Geld einen großen Wahlkampf vor. Er schlägt vor, über diskrete Kanäle die demokratischen Parteien im Osten zu unterstützen – mit Geld aus dem Kanzleramt.',
+    absender: s => (unionRegiert(s) ? 'Jakob Kaiser, Bundesminister für gesamtdeutsche Fragen' : 'Bundesminister für gesamtdeutsche Fragen'),
+    text: s => `${unionRegiert(s) ? 'Kaiser' : 'Der Minister'} warnt: Die SED bereitet mit sowjetischem Geld einen großen Wahlkampf vor. Er schlägt vor, über diskrete Kanäle die demokratischen Parteien im Osten zu unterstützen – mit Geld aus dem Kanzleramt.`,
     optionen: [
       { text: 'Diskret unterstützen.', ergebnis: 'Das Geld fließt. Die Gefahr, dass es auffliegt, fließt mit.', w: { ansehen: 2, moskau: -4 } },
-      { text: 'Ablehnen – faire Wahlen sind faire Wahlen.', ergebnis: 'Kaiser respektiert es.', w: {} },
+      { text: 'Ablehnen – faire Wahlen sind faire Wahlen.', ergebnis: s => (unionRegiert(s) ? 'Kaiser respektiert es.' : 'Der Minister respektiert es.'), w: {} },
     ],
   }),
   akte({

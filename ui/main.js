@@ -4,6 +4,7 @@ import weltSzenario from './szenarien/kalter_krieg/index.js';
 import { spieleSzene, SZENEN } from './ascii.js';
 import * as Sp from './speicher.js';
 import * as Ton from './ton.js';
+import * as Update from './update.js';
 
 const W = E.bereiteVor(weltSzenario);
 let welt = null;               // der Spielstand: die ganze Welt
@@ -26,6 +27,12 @@ const $ = id => document.getElementById(id);
 const esc = t => String(t ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const zahl = (x, d = 1) => Number(x).toLocaleString('de-DE', { minimumFractionDigits: d, maximumFractionDigits: d });
 const absaetze = t => String(t || '').split(/\n\s*\n/).filter(Boolean).map(p => `<p>${esc(p.trim()).replace(/\n/g, '<br>')}</p>`).join('');
+/** Kurzname der Kanzlerpartei, die zum Halbjahr `zeit` (vor einer Regierungsbildung darin) regierte */
+const kanzlerparteiZu = zeit => {
+  const l = s.kanzlerliste || [];
+  const k = [...l].reverse().find(x => E.zeitIndex(x.ab) < E.zeitIndex(zeit)) || l[0];
+  return k?.partei === 'SPD' ? 'SPD' : 'Union';
+};
 const parteiName = (k, st = s) => (k === 'Kleine' ? sz.modell.kleineName(st) : sz.parteien[k]?.name || k);
 const regierungText = st => {
   const n = st.regierung.map(p => parteiName(p, st));
@@ -48,7 +55,7 @@ async function zeigeTitel() {
   stoppSzene();
   $('spiel').hidden = true;
   $('titel').hidden = false;
-  $('titel-text').innerHTML = absaetze(sz.beschreibung + '\n\nDu spielst die Union als Kanzlerpartei. Jedes Halbjahr legen dir Ministerien und Botschaften Vorgänge zur Entscheidung vor; am Ende bringst du ein Regierungsvorhaben ein. 1953, 1957 und 1961 wird gewählt.');
+  $('titel-text').innerHTML = absaetze(sz.beschreibung + '\n\nDu führst die Bundesregierung. Zu Beginn stellt die Union den Kanzler; verliert sie ihre Mehrheit, regierst du mit der neuen Regierung weiter. Jedes Halbjahr legen dir Ministerien und Botschaften Vorgänge zur Entscheidung vor; am Ende bringst du ein Regierungsvorhaben ein. 1953, 1957 und 1961 wird gewählt.');
   stoppSzene = spieleSzene($('titel-ascii'), 'bundeshaus', { bewegung: bewegung() });
   const auto = await Sp.lade('auto');
   $('k-fortsetzen').hidden = !(ladbar(auto) && !auto.ende);
@@ -136,7 +143,8 @@ function zeichneLage() {
       }
       const warn = (k === 'moskau' && v <= 15) || (k === 'haushalt' && v <= 10) || (k === 'koalition' && v <= 15 && s.regierung.length > 1)
         || (['usa', 'frankreich', 'grossbritannien'].includes(k) && v < 20 && !s.f.vereinigt && s.w.souveraenitaet < 50);
-      html += `<div class="zeile${warn ? ' warnung' : ''}" title="${esc(d.name)}"><span>${esc(d.kurz)}</span><span class="balken" aria-hidden="true">${balken}</span><span class="wert">${wert}</span>${trend || '<span></span>'}</div>`;
+      const titel = k === 'zustimmung' ? `${s.kanzlerpartei === 'SPD' ? 'SPD' : 'Union'} in Umfragen` : d.name;
+      html += `<div class="zeile${warn ? ' warnung' : ''}" title="${esc(titel)}"><span>${esc(d.kurz)}</span><span class="balken" aria-hidden="true">${balken}</span><span class="wert">${wert}</span>${trend || '<span></span>'}</div>`;
     }
     html += '</section>';
   }
@@ -144,7 +152,7 @@ function zeichneLage() {
   const gesamt = Object.values(s.sitze).reduce((a, b) => a + b, 0);
   const reihenfolge = ['KPD', 'SPD', 'FDP', 'Union', 'Kleine', 'Sonstige'];
   const balken = reihenfolge.filter(p => s.sitze[p]).map(p => `<span style="width:${(100 * s.sitze[p] / gesamt).toFixed(2)}%;background:${sz.parteien[p].farbe}" title="${esc(parteiName(p))}: ${s.sitze[p]} Sitze"></span>`).join('');
-  const naechste = (s.wahlplan || []).find(z => E.zeitIndex(z) >= E.zeitIndex(s.zeit));
+  const naechste = (s.wahlplan || []).find(z => E.zeitIndex(z) >= E.zeitIndex(s.zeit) && !s.f['wahl_' + z]);
   const legende = reihenfolge.filter(p => s.sitze[p]).map(p => `${esc(parteiName(p))} ${s.sitze[p]}`).join(', ');
   html += `<section class="karte"><h3>Bundestag</h3><div class="sitzbalken">${balken}</div>
     <div class="legende">${legende}</div>
@@ -242,9 +250,10 @@ function ausgabe(zeit) {
   } else if (wahl) {
     const st = wahl.stimmen;
     const bildung = entscheidungen.find(c => c.id === 'dyn:regierungsbildung');
+    const [erste, zweite] = st.SPD > st.Union ? ['SPD', 'Union'] : ['Union', 'SPD'];
     aufmacher = {
-      titel: `${wahl.gesamtdeutsch ? 'Gesamtdeutsche Wahl' : 'Bundestagswahl'}: Union ${zahl(st.Union)} Prozent`,
-      unter: `SPD ${zahl(st.SPD)} %, FDP ${zahl(st.FDP)} %`,
+      titel: `${wahl.gesamtdeutsch ? 'Gesamtdeutsche Wahl' : 'Bundestagswahl'}: ${erste} ${zahl(st[erste])} Prozent`,
+      unter: `${zweite} ${zahl(st[zweite])} %, FDP ${zahl(st.FDP)} %`,
       text: bildung ? bildung.ergebnis : '',
     };
     if (bildung) rest.splice(rest.indexOf(bildung), 1);
@@ -269,7 +278,7 @@ function ausgabe(zeit) {
     html += `<section class="kasten"><h4>Wirtschaft und Umfragen</h4>
       <p>Wachstum im vergangenen Halbjahr: <b>${zahl(wirtschaft.wachstum)}&nbsp;%</b> (Jahresrate)</p>
       <p>Arbeitslosenquote: <b>${zahl(wirtschaft.arbeitslosigkeit)}&nbsp;%</b>${pfeil(wirtschaft.arbeitslosigkeit, davor?.arbeitslosigkeit)}</p>
-      <p>Die Union in Umfragen: <b>${zahl(wirtschaft.zustimmung)}&nbsp;%</b>${pfeil(wirtschaft.zustimmung, davor?.zustimmung)}</p>
+      <p>${kanzlerparteiZu(vor) === 'SPD' ? 'Die SPD' : 'Die Union'} in Umfragen (Kanzlerpartei): <b>${zahl(wirtschaft.zustimmung)}&nbsp;%</b>${pfeil(wirtschaft.zustimmung, davor?.zustimmung)}</p>
     </section>`;
   }
   if (gleich(zeit, s.zeit) && (s.wahlplan || []).some(z => gleich(z, zeit))) {
@@ -432,7 +441,7 @@ function diagramm() {
   const B_ = 640, H = 200, L = 34, R = 10, T = 12, B = 26;
   const x = i => L + (B_ - L - R) * i / (v.length - 1);
   const reihen = [
-    { key: 'zustimmung', farbe: 'var(--farbband)', name: 'Union in Umfragen' },
+    { key: 'zustimmung', farbe: 'var(--farbband)', name: 'Kanzlerpartei in Umfragen' },
     { key: 'wachstum', farbe: 'var(--gruen)', name: 'Wachstum' },
     { key: 'arbeitslosigkeit', farbe: 'var(--stempel)', name: 'Arbeitslosigkeit' },
   ];
@@ -531,6 +540,58 @@ function einstellungenVerbinden() {
   laut.onchange = () => { Sp.speichereEinstellungen(einst); Ton.glocke(); };
 }
 
+// ---------------------------------------------------------------- Updates
+
+let neueVersion = null;
+
+async function installiereUpdate() {
+  const status = $('update-status');
+  $('update-band-text').textContent = 'Update wird geladen und installiert …';
+  status.textContent = 'Update wird geladen und installiert. Das Programm startet danach neu; der letzte automatische Spielstand bleibt erhalten.';
+  for (const id of ['m-update', 'm-installieren', 'u-installieren', 'u-spaeter']) $(id).disabled = true;
+  try {
+    if (welt && !welt.ende) await Sp.speichere('auto', { ...welt, gespeichert: Date.now() });
+    await Update.installieren();
+  } catch (f) {
+    status.textContent = String(f);
+    $('update-band-text').textContent = 'Update fehlgeschlagen: ' + f;
+    for (const id of ['m-update', 'm-installieren', 'u-installieren', 'u-spaeter']) $(id).disabled = false;
+  }
+}
+
+async function sucheUpdate(still) {
+  const status = $('update-status');
+  if (!still) { status.textContent = 'Suche nach Updates …'; $('m-update').disabled = true; }
+  try {
+    const r = await Update.pruefen();
+    neueVersion = r.verfuegbar ? r.version : null;
+    $('m-installieren').hidden = !neueVersion;
+    if (neueVersion) {
+      status.textContent = `Version ${neueVersion} ist verfügbar.`;
+      $('update-band-text').textContent = `Neue Version ${neueVersion} verfügbar.`;
+      if (still) $('update-band').hidden = false;
+    } else if (!still) {
+      status.textContent = 'Du hast die neueste Version.';
+    }
+  } catch (f) {
+    if (!still) status.textContent = String(f);
+  } finally {
+    $('m-update').disabled = false;
+  }
+}
+
+async function updatesVerbinden() {
+  if (!Update.verfuegbar()) return;   // im Browser kein Update
+  $('programm').hidden = false;
+  const v = await Update.version();
+  $('programm-version').textContent = v ? `Version ${v}` : '';
+  $('m-update').onclick = () => sucheUpdate(false);
+  $('m-installieren').onclick = installiereUpdate;
+  $('u-installieren').onclick = installiereUpdate;
+  $('u-spaeter').onclick = () => { $('update-band').hidden = true; };
+  setTimeout(() => sucheUpdate(true), 1500);
+}
+
 // ---------------------------------------------------------------- Start
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -549,6 +610,7 @@ document.addEventListener('DOMContentLoaded', () => {
   $('m-titel').onclick = () => { $('d-menue').close(); zeigeTitel(); };
   document.querySelectorAll('[data-schliessen]').forEach(b => { b.onclick = () => b.closest('dialog').close(); });
   einstellungenVerbinden();
+  updatesVerbinden();
 
   $('blatt').addEventListener('click', e => {
     if (tippAbbruch && !e.target.closest('button')) tippAbbruch();

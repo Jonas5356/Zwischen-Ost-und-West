@@ -14,6 +14,8 @@ function lagebericht(s) {
   const meldungen = zeitgeschehen
     .filter(m => zeitIndex(m.zeit) === zeitIndex(s.zeit) && (!m.wenn || m.wenn(s)))
     .map(m => (typeof m.text === 'function' ? m.text(s) : m.text));
+  // Notizen aus dem Modell (z. B. Rücktritt eines Kanzlers) erscheinen in der nächsten Ausgabe
+  if (s.notizen?.length) { meldungen.unshift(...s.notizen); s.notizen = []; }
   return { meldungen };
 }
 
@@ -22,8 +24,8 @@ export default {
   name: 'Bundesrepublik Deutschland',
   titel: 'Bundesrepublik Deutschland',
   untertitel: '1949–1964',
-  rolle: 'Bundeskanzler der CDU/CSU',
-  beschreibung: 'Herbst 1949. Konrad Adenauer ist mit einer Stimme Mehrheit zum ersten Bundeskanzler gewählt worden. Das Land ist besetzt, geteilt und zerstört; zwölf Millionen Vertriebene suchen ein Zuhause. Zwischen Washington, Paris, London und Moskau muss die junge Republik ihren Weg finden – und die Union muss Wahlen gewinnen.',
+  rolle: 'Bundesregierung',
+  beschreibung: 'Herbst 1949. Konrad Adenauer ist mit einer Stimme Mehrheit zum ersten Bundeskanzler gewählt worden. Das Land ist besetzt, geteilt und zerstört; zwölf Millionen Vertriebene suchen ein Zuhause. Zwischen Washington, Paris, London und Moskau muss die junge Republik ihren Weg finden – und wer regiert, muss Wahlen gewinnen.',
   wahlen: [1953.2, 1957.2, 1961.2],
   werte: modell.WERTE,
   parteien: modell.PARTEIEN,
@@ -37,7 +39,7 @@ export default {
     aktenProRunde: modell.aktenProRunde,
     lagebericht,
     kleineName: modell.kleineName,
-    nachEntscheidung: s => { s.w.zustimmung = modell.berechneUmfrage(s); },
+    nachEntscheidung: s => { modell.notiereKanzler(s); s.w.zustimmung = modell.berechneUmfrage(s); },
   },
   dynamisch: modell.dynamisch,
   ereignisse: [...teil1, ...teil2, ...teil3, ...einheit, ...akten],

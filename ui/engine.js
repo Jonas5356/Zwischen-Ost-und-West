@@ -193,7 +193,10 @@ export function differenz(M, vorher, s) {
 
 function neuesLand(M) {
   const st = M.startzustand ? M.startzustand() : {};
+  // weitere Felder des Startzustands (z. B. kanzlerpartei) unverändert übernehmen
+  const { w, f, kanzler, regierung, sitze, ...weitere } = st;
   return {
+    ...JSON.parse(JSON.stringify(weitere)),
     w: { ...(st.w || {}) },
     f: { ...(st.f || {}) },
     kanzler: st.kanzler ?? null,

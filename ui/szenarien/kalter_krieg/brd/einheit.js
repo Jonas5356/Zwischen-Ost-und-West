@@ -1,6 +1,6 @@
 // Der alternative Strang: ein neutrales, wiedervereinigtes Deutschland.
 // Er öffnet sich über die Stalin-Note 1952 oder die Berliner Konferenz 1954.
-import { vereinigt, Land, land, hauptstadt } from './hilfen.js';
+import { vereinigt, Land, land, hauptstadt, spdRegiert } from './hilfen.js';
 import { zeitPlus, zeitIndex, jahrVon, zeitText } from '../../../engine.js';
 
 const folgeEreignisse = [
@@ -106,12 +106,24 @@ Offen ist ein Punkt, der alles entscheidet: die Grenze im Osten. Moskau verlangt
     titel: 'Die erste gesamtdeutsche Wahl',
     datum: s => `${zeitText(s.zeit)}`,
     nurGeplant: true, ordnung: 7,
-    absender: 'Bundesgeschäftsstelle der CDU',
+    absender: s => (spdRegiert(s) ? 'Parteivorstand der SPD' : 'Bundesgeschäftsstelle der CDU'),
     ascii: 'urne',
-    text: s => `Zum ersten Mal seit 1933 wählen alle Deutschen frei – von Aachen bis Frankfurt an der Oder. In den neuen Ländern ist die Union schwach: Sachsen und Thüringen waren Hochburgen der Sozialdemokratie, und die Ost-CDU ist durch Jahre der Zusammenarbeit mit der SED belastet. Die SPD hofft auf eine Mehrheit. Die SED tritt als Sozialistische Einheitspartei an und rechnet sich zweistellige Ergebnisse aus.
+    text: s => spdRegiert(s) ? `Zum ersten Mal seit 1933 wählen alle Deutschen frei – von Aachen bis Frankfurt an der Oder. In den neuen Ländern hofft deine Partei auf ihre alten Hochburgen: Sachsen und Thüringen waren Kernland der Sozialdemokratie, bis die SPD dort 1946 in die SED gezwungen wurde. Die Union setzt auf die Ost-CDU, die durch Jahre der Zusammenarbeit mit der SED belastet ist. Die SED rechnet sich zweistellige Ergebnisse aus.
+
+Die SPD steht in Umfragen bei ${String(s.w.zustimmung).replace('.', ',')} Prozent. Wie soll sie den Wahlkampf führen?` : `Zum ersten Mal seit 1933 wählen alle Deutschen frei – von Aachen bis Frankfurt an der Oder. In den neuen Ländern ist die Union schwach: Sachsen und Thüringen waren Hochburgen der Sozialdemokratie, und die Ost-CDU ist durch Jahre der Zusammenarbeit mit der SED belastet. Die SPD hofft auf eine Mehrheit. Die SED tritt als Sozialistische Einheitspartei an und rechnet sich zweistellige Ergebnisse aus.
 
 Die Union steht in Umfragen bei ${String(s.w.zustimmung).replace('.', ',')} Prozent. Wie soll sie den Wahlkampf führen?`,
-    optionen: [
+    optionen: s => (spdRegiert(s) ? [
+      { text: 'Die Sozialdemokratie im Osten neu gründen – gegen die Zwangsvereinigung von 1946.',
+        ergebnis: 'In Leipzig, Dresden und Erfurt füllen sich die Säle. Viele frühere Sozialdemokraten verlassen die SED.',
+        w: { ansehen: 4, moskau: -3 } },
+      { text: 'Die Bilanz der Einheit: Frieden, Freiheit, Arbeit.',
+        ergebnis: 'Die Menschen im Osten wollen die D-Mark und volle Schaufenster.',
+        w: s => ({ ansehen: Math.max(1, Math.round(s.w.wachstum - 4)) }) },
+      { text: 'Ein Wahlkampf gegen die SED und gegen jeden, der mit ihr gemeinsame Sache macht.',
+        ergebnis: 'Polarisierend, aber mobilisierend. Moskau beschwert sich über „Hetze“.',
+        w: { ansehen: 3, moskau: -6 } },
+    ] : [
       { text: 'Mit der Ost-CDU fusionieren und auf Jakob Kaiser setzen, den Gründer der Berliner CDU.',
         ergebnis: 'Kaiser zieht durch die Städte Sachsens und Thüringens. Die Union fasst im Osten Fuß.',
         w: { ansehen: 4, koalition: -2 }, setze: ['ost_cdu'] },
@@ -121,7 +133,7 @@ Die Union steht in Umfragen bei ${String(s.w.zustimmung).replace('.', ',')} Proz
       { text: 'Ein Wahlkampf gegen die SED und gegen jeden, der mit ihr gemeinsame Sache macht.',
         ergebnis: 'Polarisierend, aber mobilisierend. Moskau beschwert sich über „Hetze“.',
         w: { ansehen: 3, moskau: -6 } },
-    ].map(o => ({ ...o, aktion: s => vereinigen(s) })),
+    ]).map(o => ({ ...o, aktion: s => vereinigen(s) })),
     historisch: 'Fiktion. Die erste freie gesamtdeutsche Wahl seit 1932 fand am 2. Dezember 1990 statt.',
   },
   {
@@ -258,7 +270,7 @@ Umstritten ist die Formulierung der Neutralität. Moskau will ein Verbot jeder �
     nurGeplant: true, ordnung: 5,
     wenn: vereinigt,
     absender: 'Amt für Landesverteidigung',
-    text: `Der Friedensvertrag erlaubt Deutschland nationale Streitkräfte zur Verteidigung. Frühere Wehrmachtsoffiziere legen Pläne für ein Heer von 300.000 Mann vor. Die SPD und die Kirchen wollen höchstens einen Grenzschutz. Die Nachbarn – im Osten wie im Westen – sind beunruhigt.`,
+    text: s => `Der Friedensvertrag erlaubt Deutschland nationale Streitkräfte zur Verteidigung. Frühere Wehrmachtsoffiziere legen Pläne für ein Heer von 300.000 Mann vor. ${spdRegiert(s) ? 'Deine Partei' : 'Die SPD'} und die Kirchen wollen höchstens einen Grenzschutz. Die Nachbarn – im Osten wie im Westen – sind beunruhigt.`,
     optionen: [
       { text: 'Ein kleines Verteidigungsheer nach Schweizer Vorbild.',
         ergebnis: 'Ein Milizsystem mit kurzer Wehrpflicht. Die Nachbarn sind beruhigt.',
@@ -397,12 +409,12 @@ Für viele Ungarn war das neutrale Deutschland ein Versprechen. Nun richten sich
     ab: 1953.1, bis: 1964.1, ordnung: 8,
     wenn: s => s.wahlplan.some(z => zeitIndex(z) === zeitIndex(s.zeit))
       && ![1953.2, 1957.2, 1961.2].includes(s.zeit) && !s.f['wk_' + s.zeit],
-    absender: 'Bundesgeschäftsstelle der CDU',
+    absender: s => (spdRegiert(s) ? 'Parteivorstand der SPD' : 'Bundesgeschäftsstelle der CDU'),
     ascii: 'plakat',
-    text: s => `Der nächste Bundestag wird gewählt. Die Union steht bei ${String(s.w.zustimmung).replace('.', ',')} Prozent, die Wirtschaft wächst mit ${String(s.w.wachstum).replace('.', ',')} Prozent, die Arbeitslosigkeit liegt bei ${String(s.w.arbeitslosigkeit).replace('.', ',')} Prozent.`,
+    text: s => `Der nächste Bundestag wird gewählt. Die ${spdRegiert(s) ? 'SPD' : 'Union'} steht bei ${String(s.w.zustimmung).replace('.', ',')} Prozent, die Wirtschaft wächst mit ${String(s.w.wachstum).replace('.', ',')} Prozent, die Arbeitslosigkeit liegt bei ${String(s.w.arbeitslosigkeit).replace('.', ',')} Prozent.`,
     optionen: s => [
       { text: 'Auf den Kanzler setzen.', ergebnis: 'Ein Wahlkampf, ganz auf die Person zugeschnitten.', w: { ansehen: 3 } },
-      { text: 'Auf die Wirtschaft setzen.', ergebnis: 'Erhard zieht durchs Land.', w: { ansehen: Math.max(1, Math.round(s.w.wachstum - 3)) } },
+      { text: 'Auf die Wirtschaft setzen.', ergebnis: spdRegiert(s) ? 'Die Minister ziehen mit der Bilanz der Regierung durchs Land.' : 'Erhard zieht durchs Land.', w: { ansehen: Math.max(1, Math.round(s.w.wachstum - 3)) } },
       { text: 'Auf Sicherheit setzen.', ergebnis: 'Die Angst vor Moskau ist ein verlässlicher Wahlhelfer.', w: { ansehen: s.w.moskau <= 45 ? 5 : 2, moskau: -2 } },
     ].map(o => ({ ...o, setze: ['wk_' + s.zeit] })),
   },

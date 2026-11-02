@@ -1,5 +1,5 @@
 // Hauptereignisse 1954 bis 1958
-import { west, geteilt, vereinigt, imBuendnis, adenauer, regiertMit, land, Land, wahlIn, hauptstadt } from './hilfen.js';
+import { west, geteilt, vereinigt, imBuendnis, adenauer, regiertMit, land, Land, wahlIn, hauptstadt, unionRegiert, spdRegiert, SPD_WAHLKAMPF } from './hilfen.js';
 import { hatMehrheit } from './modell.js';
 
 export default [
@@ -101,7 +101,7 @@ Frankreichs Preis: Die Bundesrepublik soll freiwillig auf die Herstellung atomar
     absender: 'Pierre Mendès France, Ministerpräsident der Französischen Republik',
     text: s => `Paris macht die Ratifizierung ${s.f.evg ? 'der letzten EVG-Durchführungsabkommen' : 'der Pariser Verträge'} von einer Lösung der Saarfrage abhängig. Mendès France schlägt ein „europäisches Statut“ vor: Die Saar erhält einen Kommissar der Westeuropäischen Union, bleibt wirtschaftlich mit Frankreich verbunden, und die Saarländer sollen in einer Volksabstimmung zustimmen.
 
-FDP, BHE und die SPD werfen dir vor, deutsches Land preiszugeben. Du hoffst, dass die Saarländer bei der Abstimmung selbst entscheiden werden.`,
+${spdRegiert(s) ? 'FDP, BHE und Teile deiner eigenen Partei' : 'FDP, BHE und die SPD'} werfen dir vor, deutsches Land preiszugeben. Du hoffst, dass die Saarländer bei der Abstimmung selbst entscheiden werden.`,
     optionen: [
       { text: 'Dem Statut zustimmen und auf die Abstimmung vertrauen.', hist: true, richtung: 'west',
         ergebnis: 'Die Koalitionspartner murren laut. Paris ist zufrieden.',
@@ -121,7 +121,7 @@ FDP, BHE und die SPD werfen dir vor, deutsches Land preiszugeben. Du hoffst, das
     ab: 1955.1, bis: 1956.1, ordnung: 1,
     wenn: s => west(s) && (s.f.pariser_vertraege || s.f.evg),
     absender: 'Kundgebung in der Frankfurter Paulskirche',
-    text: `In der Paulskirche haben Erich Ollenhauer, Gustav Heinemann, Gewerkschafter und Theologen wie Helmut Gollwitzer ein „Deutsches Manifest“ verabschiedet: Die Aufstellung deutscher Streitkräfte in einem Militärbündnis werde die Spaltung Deutschlands auf unabsehbare Zeit vertiefen. Vor jeder Ratifizierung müssten Viermächteverhandlungen stattfinden.
+    text: s => `In der Paulskirche haben ${spdRegiert(s) ? 'Abgeordnete deiner eigenen Fraktion' : 'Erich Ollenhauer'}, Gustav Heinemann, Gewerkschafter und Theologen wie Helmut Gollwitzer ein „Deutsches Manifest“ verabschiedet: Die Aufstellung deutscher Streitkräfte in einem Militärbündnis werde die Spaltung Deutschlands auf unabsehbare Zeit vertiefen. Vor jeder Ratifizierung müssten Viermächteverhandlungen stattfinden.
 
 Hunderttausende unterschreiben. Die Ratifizierungsdebatte im Bundestag steht in vier Wochen an.`,
     optionen: [
@@ -203,7 +203,7 @@ Wie soll der Tag begangen werden?`;
     absender: 'Gesandtschaft in Wien',
     text: s => `Im Belvedere in Wien haben die vier Mächte den Staatsvertrag mit Österreich unterzeichnet. Die Besatzungstruppen ziehen ab, Österreich erklärt sich zur immerwährenden Neutralität.
 
-In der Bundesrepublik fragen sich viele: Warum nicht auch für uns? Die SPD fordert, das österreichische Modell zu prüfen. ${s.f.nato ? 'Doch die Bundesrepublik ist seit wenigen Tagen Mitglied der NATO.' : ''}`,
+In der Bundesrepublik fragen sich viele: Warum nicht auch für uns? ${spdRegiert(s) ? 'In deiner Partei fordern viele' : 'Die SPD fordert'}, das österreichische Modell zu prüfen. ${s.f.nato ? 'Doch die Bundesrepublik ist seit wenigen Tagen Mitglied der NATO.' : ''}`,
     optionen: [
       { text: 'Erklären, dass Österreich kein Modell für Deutschland ist.', hist: true, richtung: 'west',
         ergebnis: 'Der Kanzler verweist auf die Größe und Lage Deutschlands. Neutralität würde das Land zum Spielball machen.',
@@ -323,7 +323,7 @@ Die Planungsgruppe schlägt eine Doktrin vor: Die Bundesrepublik vertritt allein
     titel: 'Der Aufstand der Jungtürken',
     datum: 'Februar 1956',
     ab: 1956.1, ordnung: 2,
-    wenn: regiertMit('FDP'),
+    wenn: s => s.regierung.includes('FDP') && unionRegiert(s),
     absender: 'Thomas Dehler, Vorsitzender der FDP',
     text: `Die FDP unter Thomas Dehler wird zum unbequemen Partner. Dehler attackiert deine Deutschlandpolitik im Bundestag, als stünde er in der Opposition. In der Union wird daher ein neues Wahlrecht erwogen, ein „Grabensystem“, das die kleinen Parteien bei der nächsten Wahl dezimieren würde.
 
@@ -356,10 +356,10 @@ Die jungen Landespolitiker der FDP in Nordrhein-Westfalen – Döring, Weyer, Sc
     datum: 'Juli 1956',
     ab: 1956.2, ordnung: 7,
     wenn: s => imBuendnis(s) && geteilt(s),
-    absender: 'Theodor Blank, Bundesminister für Verteidigung',
-    text: `Die ersten Freiwilligen der Bundeswehr haben im November 1955 ihre Ernennungsurkunden erhalten. Die NATO erwartet 500.000 Soldaten in zwölf Divisionen – mit Freiwilligen allein ist das nicht zu schaffen. Das Verteidigungsministerium legt ein Wehrpflichtgesetz vor.
+    absender: s => (unionRegiert(s) ? 'Theodor Blank, Bundesminister für Verteidigung' : 'Bundesministerium für Verteidigung'),
+    text: s => `Die ersten Freiwilligen der Bundeswehr haben im November 1955 ihre Ernennungsurkunden erhalten. Die NATO erwartet 500.000 Soldaten in zwölf Divisionen – mit Freiwilligen allein ist das nicht zu schaffen. Das Verteidigungsministerium legt ein Wehrpflichtgesetz vor.
 
-Die SPD will eine kleinere Freiwilligenarmee. Die NATO-Planer halten 18 Monate Dienstzeit für das Minimum, Finanzminister Schäffer jeden Monat für zu teuer.`,
+${unionRegiert(s) ? 'Die SPD will eine kleinere Freiwilligenarmee. Die NATO-Planer halten 18 Monate Dienstzeit für das Minimum, Finanzminister Schäffer jeden Monat für zu teuer.' : 'In deiner Partei wollen viele eine kleinere Freiwilligenarmee, die Union verlangt die Wehrpflicht. Die NATO-Planer halten 18 Monate Dienstzeit für das Minimum, der Finanzminister jeden Monat für zu teuer.'}`,
     optionen: [
       { text: 'Wehrpflicht mit 12 Monaten Dienstzeit.', hist: true, richtung: 'west',
         ergebnis: 'Das Gesetz passiert den Bundestag nach einer Marathondebatte. Die NATO findet die Dienstzeit zu kurz.',
@@ -368,7 +368,7 @@ Die SPD will eine kleinere Freiwilligenarmee. Die NATO-Planer halten 18 Monate D
         ergebnis: 'Die Verbündeten sind beeindruckt, die Wähler nicht.',
         w: { usa: 6, grossbritannien: 2, moskau: -5, haushalt: -4, ansehen: -4, bundeswehr: 1 }, setze: ['wehrpflicht'] },
       { text: 'Eine kleinere Berufsarmee.',
-        ergebnis: 'Die SPD stimmt zu, die NATO schüttelt den Kopf.',
+        ergebnis: s => (unionRegiert(s) ? 'Die SPD stimmt zu, die NATO schüttelt den Kopf.' : 'Die eigene Fraktion ist erleichtert, die NATO schüttelt den Kopf.'),
         w: { usa: -6, haushalt: -1, ansehen: 2, koalition: 2 } },
     ],
     historisch: 'Das Wehrpflichtgesetz wurde am 7. Juli 1956 verabschiedet und sah 12 Monate Grundwehrdienst vor. Die ersten Wehrpflichtigen wurden am 1. April 1957 einberufen.',
@@ -442,7 +442,7 @@ Zehntausende Flüchtlinge strömen nach Österreich.`,
     datum: '27. Oktober 1956',
     ab: 1956.2, bis: 1957.1, ordnung: 10,
     wenn: s => !!s.f.saar_nein && !s.f.saar_zurueck,
-    absender: 'Heinrich von Brentano, Bundesminister des Auswärtigen',
+    absender: s => (unionRegiert(s) ? 'Heinrich von Brentano, Bundesminister des Auswärtigen' : 'Bundesminister des Auswärtigen'),
     text: `Nach dem Nein der Saarländer verhandeln Bonn und Paris über die Rückgliederung. Frankreich verlangt Gegenleistungen: die Kanalisierung der Mosel für die lothringische Stahlindustrie, Kohlelieferungen aus dem Warndt und eine Übergangszeit, in der die Saar wirtschaftlich zu Frankreich gehört.`,
     optionen: [
       { text: 'Großzügig sein: Die Saar ist wichtiger als die Mosel.', hist: true,
@@ -462,9 +462,9 @@ Zehntausende Flüchtlinge strömen nach Österreich.`,
     datum: 'Januar 1957',
     ab: 1957.1, ordnung: 1,
     absender: 'Wilfrid Schreiber und das Arbeitsministerium',
-    text: `Die Renten sind ein Skandal: Ein Arbeiter, der ein Leben lang eingezahlt hat, bekommt im Alter oft nur ein Drittel seines letzten Lohns, viele Rentner leben in Armut, während ringsum das Wirtschaftswunder blüht. Der Ökonom Wilfrid Schreiber hat ein Konzept entwickelt: Die Renten sollen nicht mehr aus angespartem Kapital, sondern aus den laufenden Beiträgen finanziert werden und jedes Jahr mit den Löhnen steigen – ein „Vertrag zwischen den Generationen“.
+    text: s => `Die Renten sind ein Skandal: Ein Arbeiter, der ein Leben lang eingezahlt hat, bekommt im Alter oft nur ein Drittel seines letzten Lohns, viele Rentner leben in Armut, während ringsum das Wirtschaftswunder blüht. Der Ökonom Wilfrid Schreiber hat ein Konzept entwickelt: Die Renten sollen nicht mehr aus angespartem Kapital, sondern aus den laufenden Beiträgen finanziert werden und jedes Jahr mit den Löhnen steigen – ein „Vertrag zwischen den Generationen“.
 
-Finanzminister Schäffer und Wirtschaftsminister Erhard halten die dynamische Rente für unbezahlbar und gefährlich. Im September wird gewählt.`,
+${unionRegiert(s) ? 'Finanzminister Schäffer und Wirtschaftsminister Erhard halten' : 'Der Finanzminister und die Wirtschaftsverbände halten'} die dynamische Rente für unbezahlbar und gefährlich. Im September wird gewählt.`,
     optionen: [
       { text: 'Die dynamische Rente durchsetzen.', hist: true,
         ergebnis: 'Über Nacht steigen die Renten um 60 Prozent und mehr. Für Millionen alte Menschen ist es die größte Wohltat, die je ein Staat getan hat.',
@@ -473,7 +473,7 @@ Finanzminister Schäffer und Wirtschaftsminister Erhard halten die dynamische Re
         ergebnis: 'Die Rentner freuen sich, die Fachleute warnen, dass das Problem bald zurückkehrt.',
         w: { ansehen: 3, haushalt: -3 } },
       { text: 'Keine Reform vor der Wahl.',
-        ergebnis: 'Schäffer ist zufrieden. Die SPD macht die Rente zu ihrem Wahlkampfthema.',
+        ergebnis: s => (unionRegiert(s) ? 'Schäffer ist zufrieden. Die SPD macht die Rente zu ihrem Wahlkampfthema.' : 'Der Finanzminister ist zufrieden, die eigene Partei empört. Die Union macht die Rente zu ihrem Wahlkampfthema.'),
         w: { ansehen: -3, haushalt: 1 } },
     ],
     historisch: 'Der Bundestag beschloss die Rentenreform am 21. Januar 1957 mit großer Mehrheit, auch mit Stimmen der SPD. Das Umlageverfahren mit lohndynamischer Rente ist bis heute Grundlage der gesetzlichen Rentenversicherung.',
@@ -487,12 +487,12 @@ Finanzminister Schäffer und Wirtschaftsminister Erhard halten die dynamische Re
     absender: 'Walter Hallstein, Auswärtiges Amt',
     text: s => `Auf der Konferenz von Messina 1955 wurde ein neuer Anlauf beschlossen. Jetzt liegen zwei Verträge vor: eine Europäische Wirtschaftsgemeinschaft mit gemeinsamem Markt und gemeinsamem Außenzoll und eine Atomgemeinschaft.${s.f.paris_suez ? ' Seit deinem Besuch in Paris während der Suezkrise ist Mollet zu Zugeständnissen bereit.' : ''}
 
-Wirtschaftsminister Erhard ist dagegen: Er will keine Zollmauer um sechs Länder, sondern eine große Freihandelszone mit Großbritannien. Frankreich verlangt, dass seine Überseegebiete und seine Landwirtschaft einbezogen werden.`,
+${unionRegiert(s) ? 'Wirtschaftsminister Erhard ist dagegen: Er will' : 'Ludwig Erhard und die Wirtschaftsliberalen in Union und FDP sind dagegen: Sie wollen'} keine Zollmauer um sechs Länder, sondern eine große Freihandelszone mit Großbritannien. Frankreich verlangt, dass seine Überseegebiete und seine Landwirtschaft einbezogen werden.`,
     optionen: [
-      { text: 'Unterzeichnen – gegen Erhards Bedenken.', hist: true, richtung: 'west',
+      { text: s => (unionRegiert(s) ? 'Unterzeichnen – gegen Erhards Bedenken.' : 'Unterzeichnen – gegen die Bedenken der Freihändler.'), hist: true, richtung: 'west',
         ergebnis: 'Im Kapitol in Rom setzen sechs Regierungen ihre Unterschrift unter die Verträge. Hallstein wird erster Präsident der Kommission.',
         w: { europa: 15, frankreich: 8, usa: 3, grossbritannien: -4, impuls: 0.5 }, setze: ['ewg'] },
-      { text: 'Erhard folgen: lieber eine große Freihandelszone mit London.',
+      { text: s => (unionRegiert(s) ? 'Erhard folgen: lieber eine große Freihandelszone mit London.' : 'Den Freihändlern folgen: lieber eine große Freihandelszone mit London.'),
         ergebnis: 'Die Verhandlungen über die Freihandelszone ziehen sich hin. Die Sechsergemeinschaft entsteht ohne die Bundesrepublik nicht.',
         w: { europa: 3, grossbritannien: 8, frankreich: -12 }, setze: ['freihandel'] },
     ],
@@ -505,7 +505,7 @@ Wirtschaftsminister Erhard ist dagegen: Er will keine Zollmauer um sechs Länder
     ab: 1957.1, ordnung: 4,
     wenn: imBuendnis,
     absender: 'Achtzehn Atomwissenschaftler',
-    text: s => `${s.kanzler === 'Adenauer' ? 'Du hast' : 'Der Kanzler hat'} taktische Atomwaffen in einer Pressekonferenz „nichts weiter als die Weiterentwicklung der Artillerie“ genannt. Achtzehn der bekanntesten deutschen Physiker – darunter Otto Hahn, Werner Heisenberg und Carl Friedrich von Weizsäcker – antworten mit einer öffentlichen Erklärung: Taktische Atomwaffen hätten die Zerstörungskraft der Hiroshima-Bombe. Keiner von ihnen werde sich an Herstellung, Erprobung oder Einsatz beteiligen.
+    text: s => `${spdRegiert(s) ? 'Die Union drängt auf taktische Atomwaffen für die Bundeswehr; sie seien' : s.kanzler === 'Adenauer' ? 'Du hast taktische Atomwaffen in einer Pressekonferenz' : 'Der Kanzler hat taktische Atomwaffen in einer Pressekonferenz'} „nichts weiter als die Weiterentwicklung der Artillerie“${spdRegiert(s) ? '' : ' genannt'}. Achtzehn der bekanntesten deutschen Physiker – darunter Otto Hahn, Werner Heisenberg und Carl Friedrich von Weizsäcker – antworten mit einer öffentlichen Erklärung: Taktische Atomwaffen hätten die Zerstörungskraft der Hiroshima-Bombe. Keiner von ihnen werde sich an Herstellung, Erprobung oder Einsatz beteiligen.
 
 Die Erklärung beherrscht die Titelseiten. Im September ist Wahl.`,
     optionen: [
@@ -529,12 +529,12 @@ Die Erklärung beherrscht die Titelseiten. Im September ist Wahl.`,
     datum: 'August 1957',
     ab: 1957.2, ordnung: 8,
     wenn: s => wahlIn(s, 1957.2),
-    absender: 'Bundesgeschäftsstelle der CDU',
+    absender: s => (spdRegiert(s) ? 'Parteivorstand der SPD' : 'Bundesgeschäftsstelle der CDU'),
     ascii: 'plakat',
-    text: s => `Am 15. September ${s.f.vereinigt ? 'wählen die Deutschen in Ost und West' : 'wird der dritte Bundestag gewählt'}. Die Union liegt bei ${String(s.w.zustimmung).replace('.', ',')} Prozent, die Wirtschaft wächst mit ${String(s.w.wachstum).replace('.', ',')} Prozent, die Arbeitslosigkeit ist auf ${String(s.w.arbeitslosigkeit).replace('.', ',')} Prozent gesunken.${s.f.rentenreform ? ' Die Rentenreform wirkt in jedem Briefkasten.' : ''}
+    text: s => `Am 15. September ${s.f.vereinigt ? 'wählen die Deutschen in Ost und West' : 'wird der dritte Bundestag gewählt'}. Die ${spdRegiert(s) ? 'SPD' : 'Union'} liegt bei ${String(s.w.zustimmung).replace('.', ',')} Prozent, die Wirtschaft wächst mit ${String(s.w.wachstum).replace('.', ',')} Prozent, die Arbeitslosigkeit ist auf ${String(s.w.arbeitslosigkeit).replace('.', ',')} Prozent gesunken.${s.f.rentenreform ? ' Die Rentenreform wirkt in jedem Briefkasten.' : ''}
 
-Die Werbeagentur schlägt einen Slogan vor, der ganz auf die Person des Kanzlers setzt.`,
-    optionen: [
+${spdRegiert(s) ? 'Womit soll die SPD in den Wahlkampf ziehen?' : 'Die Werbeagentur schlägt einen Slogan vor, der ganz auf die Person des Kanzlers setzt.'}`,
+    optionen: s => (spdRegiert(s) ? SPD_WAHLKAMPF : [
       { text: '„Keine Experimente!“ – Stabilität und der Kanzler.', hist: true,
         ergebnis: 'Das Plakat zeigt nur ein Porträt und zwei Worte. Es trifft die Stimmung eines Landes, das genug Experimente erlebt hat.',
         w: s => ({ ansehen: s.w.wachstum >= 4 && s.w.arbeitslosigkeit < 5 ? 4 : 2 }) },
@@ -544,7 +544,7 @@ Die Werbeagentur schlägt einen Slogan vor, der ganz auf die Person des Kanzlers
       { text: s => (s.f.vereinigt ? 'Die Sicherheitspolitik: „Ein freies Deutschland braucht Schutz – die SPD würde es wehrlos machen.“' : 'Die Sicherheitspolitik: „Gegen den Atomtod der SPD – für die Sicherheit im Bündnis.“'),
         ergebnis: 'Ein polarisierender Wahlkampf, der die eigene Anhängerschaft mobilisiert.',
         w: s => ({ ansehen: s.w.moskau <= 45 ? 5 : 2, moskau: -2 }) },
-    ],
+    ]),
     historisch: 'Mit „Keine Experimente!“ errang die Union am 15. September 1957 mit 50,2 Prozent die absolute Mehrheit der Stimmen – das einzige Mal in der Geschichte der Bundesrepublik.',
   },
   {
@@ -596,9 +596,9 @@ In ${hauptstadt(s)} fragen Forschungspolitiker und Industrie, ob ${land(s)} nich
     ab: 1958.1, ordnung: 2,
     wenn: geteilt,
     absender: 'Note der polnischen Regierung',
-    text: `Der polnische Außenminister Adam Rapacki schlägt eine atomwaffenfreie Zone in Mitteleuropa vor: Polen, die Tschechoslowakei und beide deutsche Staaten sollen keine Atomwaffen herstellen, lagern oder stationieren.
+    text: s => `Der polnische Außenminister Adam Rapacki schlägt eine atomwaffenfreie Zone in Mitteleuropa vor: Polen, die Tschechoslowakei und beide deutsche Staaten sollen keine Atomwaffen herstellen, lagern oder stationieren.
 
-Die SPD und viele Kirchenleute sehen darin eine Chance. Das Auswärtige Amt warnt: Die Zone würde die Bundesrepublik vom Bündnis abkoppeln und die DDR aufwerten.`,
+${spdRegiert(s) ? 'Deine Partei und viele Kirchenleute sehen darin eine Chance, die Union spricht von einer Falle.' : 'Die SPD und viele Kirchenleute sehen darin eine Chance.'} Das Auswärtige Amt warnt: Die Zone würde die Bundesrepublik vom Bündnis abkoppeln und die DDR aufwerten.`,
     optionen: [
       { text: 'Ablehnen.', hist: true, richtung: 'west',
         ergebnis: 'Bonn und Washington lehnen den Plan ab. Rapacki legt im November eine abgeschwächte Fassung vor – ohne Erfolg.',
@@ -615,13 +615,13 @@ Die SPD und viele Kirchenleute sehen darin eine Chance. Das Auswärtige Amt warn
     datum: 'März 1958',
     ab: 1958.1, ordnung: 3,
     wenn: s => imBuendnis(s) && !s.f.atomverzicht_bundeswehr,
-    absender: 'Franz Josef Strauß, Bundesminister der Verteidigung',
-    text: `Die NATO stellt ihre Strategie auf atomare Abschreckung um. Verteidigungsminister Strauß will die Bundeswehr mit Trägersystemen ausrüsten, die atomare Sprengköpfe verschießen können – die Sprengköpfe selbst blieben unter amerikanischer Kontrolle.
+    absender: s => (unionRegiert(s) ? 'Franz Josef Strauß, Bundesminister der Verteidigung' : 'Bundesministerium der Verteidigung'),
+    text: s => `Die NATO stellt ihre Strategie auf atomare Abschreckung um. ${unionRegiert(s) ? 'Verteidigungsminister Strauß will' : 'Die NATO-Planer und die Union wollen'} die Bundeswehr mit Trägersystemen ausrüsten, die atomare Sprengköpfe verschießen können – die Sprengköpfe selbst blieben unter amerikanischer Kontrolle.
 
-Die SPD, die Gewerkschaften und die Kirchen rufen zur Kampagne „Kampf dem Atomtod“ auf. SPD-geführte Länder planen Volksbefragungen. Im Bundestag steht eine viertägige Redeschlacht bevor.`,
+${unionRegiert(s) ? 'Die SPD, die Gewerkschaften und die Kirchen rufen zur Kampagne „Kampf dem Atomtod“ auf. SPD-geführte Länder planen Volksbefragungen.' : 'Die Gewerkschaften, die Kirchen und große Teile deiner eigenen Partei rufen zur Kampagne „Kampf dem Atomtod“ auf.'} Im Bundestag steht eine viertägige Redeschlacht bevor.`,
     optionen: [
       { text: 'Ausrüstung mit atomwaffenfähigen Trägern beschließen – Sprengköpfe in amerikanischer Hand.', hist: true, richtung: 'west',
-        ergebnis: 'Der Bundestag folgt dem Kanzler. Die Volksbefragungen werden vom Verfassungsgericht untersagt, die Kampagne verebbt.',
+        ergebnis: s => (unionRegiert(s) ? 'Der Bundestag folgt dem Kanzler. Die Volksbefragungen werden vom Verfassungsgericht untersagt, die Kampagne verebbt.' : 'Der Bundestag folgt dem Kanzler, mit den Stimmen der Union und gegen einen Teil der eigenen Fraktion. Die Kampagne verebbt.'),
         w: { usa: 6, moskau: -8, einheit: -5, ansehen: -2, bundeswehr: 1 }, setze: ['atombewaffnung'] },
       { text: 'Verzichten – die Bundeswehr bleibt konventionell.', richtung: 'ost',
         ergebnis: 'Die NATO ist enttäuscht, die Kampagne „Kampf dem Atomtod“ hat ihr Ziel erreicht.',
@@ -637,7 +637,7 @@ Die SPD, die Gewerkschaften und die Kirchen rufen zur Kampagne „Kampf dem Atom
     titel: 'Geheimgespräche mit Paris und Rom',
     datum: 'April 1958',
     ab: 1958.1, ordnung: 4,
-    wenn: s => imBuendnis(s) && !s.f.atomverzicht_bundeswehr,
+    wenn: s => imBuendnis(s) && !s.f.atomverzicht_bundeswehr && unionRegiert(s),
     absender: 'Franz Josef Strauß, streng geheim',
     text: `Seit Ende 1957 verhandeln die Verteidigungsminister Frankreichs, Italiens und der Bundesrepublik im Geheimen über eine Zusammenarbeit in der Rüstung – auch bei Kernwaffen. Frankreich steht kurz vor seinem ersten Atomtest. Strauß will das Protokoll unterzeichnen: Die Bundesrepublik würde sich an der Finanzierung einer Isotopentrennanlage beteiligen.
 

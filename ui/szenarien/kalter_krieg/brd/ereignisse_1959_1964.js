@@ -1,5 +1,9 @@
 // Hauptereignisse 1959 bis Frühjahr 1964
-import { west, geteilt, vereinigt, imBuendnis, adenauer, land, Land, hauptstadt, wahlIn } from './hilfen.js';
+import { west, geteilt, vereinigt, imBuendnis, adenauer, land, Land, hauptstadt, wahlIn, unionRegiert, spdRegiert, SPD_WAHLKAMPF } from './hilfen.js';
+import { kandidat, vollerName } from './modell.js';
+
+/** Ist Brandt selbst Kanzler, spricht für Berlin der Senat */
+const brandtKanzler = s => s.kanzler === 'Brandt';
 
 const mauerKommt = s => geteilt(s) && !s.f.freistadt_vereinbart && (s.w.flucht >= 35 || s.f.berlinkrise);
 
@@ -12,9 +16,9 @@ export default [
     ab: 1959.1, ordnung: 3,
     wenn: s => !!s.f.freistadt_verhandlung && geteilt(s),
     absender: 'Sowjetischer Vertragsentwurf',
-    text: `Auf deine Verhandlungsbereitschaft hin hat Moskau einen Entwurf vorgelegt: West-Berlin wird eine entmilitarisierte Freie Stadt unter Garantie der vier Mächte und der Vereinten Nationen. Die westlichen Truppen ziehen ab. Die Zugangswege kontrolliert die DDR, die sich zur Einhaltung „verpflichtet“.
+    text: s => `Auf deine Verhandlungsbereitschaft hin hat Moskau einen Entwurf vorgelegt: West-Berlin wird eine entmilitarisierte Freie Stadt unter Garantie der vier Mächte und der Vereinten Nationen. Die westlichen Truppen ziehen ab. Die Zugangswege kontrolliert die DDR, die sich zur Einhaltung „verpflichtet“.
 
-Willy Brandt warnt, dass West-Berlin binnen weniger Jahre zu einer Insel ohne Lebensadern würde. Die Westmächte lassen durchblicken, dass sie nicht gegen den Willen Bonns handeln werden.`,
+${brandtKanzler(s) ? 'Der Berliner Senat warnt' : 'Willy Brandt warnt'}, dass West-Berlin binnen weniger Jahre zu einer Insel ohne Lebensadern würde. Die Westmächte lassen durchblicken, dass sie nicht gegen den Willen Bonns handeln werden.`,
     optionen: [
       { text: 'Zustimmen – ein Krieg um Berlin wäre schlimmer.', richtung: 'ost',
         ergebnis: 'Die Freie Stadt wird ausgerufen. Die Fluchtwege über Berlin werden von der DDR kontrolliert und versiegen. In West-Berlin packen Zehntausende die Koffer.',
@@ -31,15 +35,15 @@ Willy Brandt warnt, dass West-Berlin binnen weniger Jahre zu einer Insel ohne Le
     ab: 1959.1, ordnung: 5,
     wenn: s => geteilt(s) && !!s.f.berlinkrise && !s.f.freistadt_vereinbart,
     absender: 'Beobachterdelegation in Genf',
-    text: `In Genf verhandeln die Außenminister der vier Mächte über Berlin und Deutschland. Erstmals sitzen beide deutsche Delegationen im Saal – an „Katzentischen“ als Beobachter, aber sichtbar nebeneinander.
+    text: s => `In Genf verhandeln die Außenminister der vier Mächte über Berlin und Deutschland. Erstmals sitzen beide deutsche Delegationen im Saal – an „Katzentischen“ als Beobachter, aber sichtbar nebeneinander.
 
-Die SPD hat im März einen „Deutschlandplan“ vorgelegt: militärische Entspannungszone, gesamtdeutsche Konferenz, stufenweise Annäherung bis zur Konföderation. Die Westmächte haben einen „Herter-Plan“ mit freien Wahlen am Ende eines Stufenprozesses.`,
+${spdRegiert(s) ? 'Deine Partei' : 'Die SPD'} hat im März einen „Deutschlandplan“ vorgelegt: militärische Entspannungszone, gesamtdeutsche Konferenz, stufenweise Annäherung bis zur Konföderation. Die Westmächte haben einen „Herter-Plan“ mit freien Wahlen am Ende eines Stufenprozesses.`,
     optionen: [
       { text: 'Den Herter-Plan unterstützen und jede Aufwertung der DDR vermeiden.', hist: true, richtung: 'west',
         ergebnis: 'Die Konferenz vertagt sich ergebnislos. Das Ultimatum ist stillschweigend vom Tisch.',
         w: { usa: 2, einheit: -2 } },
-      { text: 'Elemente des SPD-Plans aufgreifen: eine gesamtdeutsche Kommission.', richtung: 'ost',
-        ergebnis: 'Die SPD ist überrascht, Washington misstrauisch. Moskau spricht von einem „Schritt der Vernunft“, ohne sich zu bewegen.',
+      { text: s => (spdRegiert(s) ? 'Den Deutschlandplan zur Regierungslinie machen: eine gesamtdeutsche Kommission.' : 'Elemente des SPD-Plans aufgreifen: eine gesamtdeutsche Kommission.'), richtung: 'ost',
+        ergebnis: s => `${spdRegiert(s) ? 'Die Union spricht von Illusionen, Washington ist misstrauisch' : 'Die SPD ist überrascht, Washington misstrauisch'}. Moskau spricht von einem „Schritt der Vernunft“, ohne sich zu bewegen.`,
         w: { einheit: 5, usa: -6, moskau: 5 }, setze: ['spd_dialog'] },
     ],
     historisch: 'Die Konferenz tagte vom 11. Mai bis 5. August 1959 ohne Ergebnis. Die SPD zog ihren Deutschlandplan 1960 zurück.',
@@ -100,11 +104,22 @@ Im Präsidium wird ein anderer Gedanke laut: Du selbst könntest Bundespräsiden
     titel: 'Godesberg',
     datum: 'November 1959',
     ab: 1959.2, ordnung: 11,
-    absender: 'Nachrichtenagentur dpa',
-    text: `Auf einem Parteitag in Bad Godesberg hat die SPD ein neues Grundsatzprogramm beschlossen. Der Marxismus spielt keine Rolle mehr; die SPD bekennt sich zur Marktwirtschaft („Wettbewerb so weit wie möglich – Planung so weit wie nötig“), zur Landesverteidigung und sucht den Frieden mit den Kirchen. Aus der Arbeiterpartei wird eine Volkspartei.
+    absender: s => (spdRegiert(s) ? 'Parteitag der SPD, Bad Godesberg' : 'Nachrichtenagentur dpa'),
+    text: s => (spdRegiert(s)
+      ? `In Bad Godesberg berät deine Partei ein neues Grundsatzprogramm. Der Entwurf verabschiedet sich vom Marxismus, bekennt sich zur Marktwirtschaft („Wettbewerb so weit wie möglich – Planung so weit wie nötig“), zur Landesverteidigung und sucht den Frieden mit den Kirchen. Aus der Arbeiterpartei soll eine Volkspartei werden.
 
-Für die Union ist die Lage neu: Die SPD wird für bürgerliche Wähler wählbar.`,
-    optionen: [
+Der linke Flügel spricht von Verrat. Ohne den Kanzler ist der Entwurf nicht durchzusetzen.`
+      : `Auf einem Parteitag in Bad Godesberg hat die SPD ein neues Grundsatzprogramm beschlossen. Der Marxismus spielt keine Rolle mehr; die SPD bekennt sich zur Marktwirtschaft („Wettbewerb so weit wie möglich – Planung so weit wie nötig“), zur Landesverteidigung und sucht den Frieden mit den Kirchen. Aus der Arbeiterpartei wird eine Volkspartei.
+
+Für die Union ist die Lage neu: Die SPD wird für bürgerliche Wähler wählbar.`),
+    optionen: s => (spdRegiert(s) ? [
+      { text: 'Sich hinter den Entwurf stellen: Die SPD wird Volkspartei.', hist: true,
+        ergebnis: 'Der Parteitag nimmt das Programm mit großer Mehrheit an. Die Partei der Regierung öffnet sich der Mitte.',
+        w: { ansehen: 2, usa: 2, koalition: 3 }, setze: ['godesberg'] },
+      { text: 'Den Parteitag vertagen – keine Spaltung der Partei in der Regierungszeit.',
+        ergebnis: 'Die Programmdebatte wird verschoben. Der linke Flügel ist beruhigt, die Wechselwähler sind es nicht.',
+        w: { ansehen: -1, usa: -1 } },
+    ] : [
       { text: 'Polemisieren: „Der Wolf im Schafspelz.“',
         ergebnis: 'Die eigenen Anhänger nicken. Die Wechselwähler weniger.',
         w: { ansehen: 1 } },
@@ -114,7 +129,7 @@ Für die Union ist die Lage neu: Die SPD wird für bürgerliche Wähler wählbar
       { text: 'Der SPD eine gemeinsame Außenpolitik anbieten.',
         ergebnis: 'Herbert Wehner nimmt den Ball auf. Die FDP ist alarmiert.',
         w: { koalition: -4, einheit: 1, ansehen: 1 }, setze: ['spd_dialog'] },
-    ].map(o => ({ ...o, setze: [...(o.setze || []), 'godesberg'] })),
+    ].map(o => ({ ...o, setze: [...(o.setze || []), 'godesberg'] }))),
     historisch: 'Das Godesberger Programm wurde am 15. November 1959 beschlossen. Im Juni 1960 erklärte Herbert Wehner im Bundestag, die SPD akzeptiere die Westbindung – die Grundlage für ihren späteren Weg in die Regierung.',
   },
 
@@ -161,6 +176,7 @@ Für die Union ist die Lage neu: Die SPD wird für bürgerliche Wähler wählbar
     titel: 'Ein Fernsehen des Bundes?',
     datum: 'Juli 1960',
     ab: 1960.2, ordnung: 7,
+    wenn: unionRegiert,
     absender: 'Bundespresseamt',
     text: `Die ARD wird von den Ländern getragen. Du hältst ihr Programm für einseitig und SPD-nah. Im Kanzleramt ist ein Plan entstanden: eine Deutschland-Fernsehen-GmbH, deren Gesellschafter der Bund ist, mit einem zweiten Programm, das ab 1961 senden soll. Die Länder sprechen von einem Verfassungsbruch – Rundfunk sei Ländersache.`,
     optionen: [
@@ -212,8 +228,8 @@ Für die Union ist die Lage neu: Die SPD wird für bürgerliche Wähler wählbar
     titel: 'Aufwertung der D-Mark',
     datum: 'März 1961',
     ab: 1961.1, ordnung: 3,
-    absender: 'Ludwig Erhard und Karl Blessing, Präsident der Bundesbank',
-    text: s => `${Land(s)} exportiert so viel, dass Devisen in Strömen hereinfließen. Die Bundesbank kann die Geldmenge kaum noch kontrollieren, die Preise steigen. Erhard und Bundesbankpräsident Blessing wollen die D-Mark gegenüber dem Dollar aufwerten. Die Exportindustrie und der BDI unter Fritz Berg laufen Sturm. Die Amerikaner würden eine Aufwertung begrüßen, weil sie ihre Zahlungsbilanz entlastet.`,
+    absender: s => (unionRegiert(s) ? 'Ludwig Erhard und Karl Blessing, Präsident der Bundesbank' : 'Bundesministerium für Wirtschaft und Karl Blessing, Präsident der Bundesbank'),
+    text: s => `${Land(s)} exportiert so viel, dass Devisen in Strömen hereinfließen. Die Bundesbank kann die Geldmenge kaum noch kontrollieren, die Preise steigen. ${unionRegiert(s) ? 'Erhard' : 'Der Wirtschaftsminister'} und Bundesbankpräsident Blessing wollen die D-Mark gegenüber dem Dollar aufwerten. Die Exportindustrie und der BDI unter Fritz Berg laufen Sturm. Die Amerikaner würden eine Aufwertung begrüßen, weil sie ihre Zahlungsbilanz entlastet.`,
     optionen: [
       { text: 'Um fünf Prozent aufwerten.', hist: true,
         ergebnis: 'Die Preise beruhigen sich, die Industrie klagt. Washington ist erfreut.',
@@ -260,12 +276,12 @@ Am 15. Juni hat Walter Ulbricht auf einer Pressekonferenz erklärt: „Niemand h
     wenn: mauerKommt,
     absender: 'Bundesministerium für gesamtdeutsche Fragen',
     ascii: 'mauer',
-    text: `In der Nacht haben Volkspolizei und Kampfgruppen die Sektorengrenze in Berlin abgeriegelt. Stacheldraht, aufgerissenes Pflaster, bald Betonblöcke. S-Bahn und U-Bahn halten nicht mehr an den Grenzbahnhöfen. Familien werden auseinandergerissen. Die Westmächte protestieren – aber sie greifen nicht ein. Der Zugang nach West-Berlin bleibt unangetastet.
+    text: s => `In der Nacht haben Volkspolizei und Kampfgruppen die Sektorengrenze in Berlin abgeriegelt. Stacheldraht, aufgerissenes Pflaster, bald Betonblöcke. S-Bahn und U-Bahn halten nicht mehr an den Grenzbahnhöfen. Familien werden auseinandergerissen. Die Westmächte protestieren – aber sie greifen nicht ein. Der Zugang nach West-Berlin bleibt unangetastet.
 
-Willy Brandt, Regierender Bürgermeister und Kanzlerkandidat der SPD, verlangt Taten. In vier Wochen ist Bundestagswahl.`,
+${brandtKanzler(s) ? 'Der Berliner Senat verlangt Taten.' : spdRegiert(s) ? 'Willy Brandt, Regierender Bürgermeister, verlangt Taten.' : 'Willy Brandt, Regierender Bürgermeister und Kanzlerkandidat der SPD, verlangt Taten.'}${wahlIn(s, 1961.2) ? ' In vier Wochen ist Bundestagswahl.' : ''}`,
     optionen: [
       { text: 'Ruhe bewahren, den Wahlkampf fortsetzen, später nach Berlin reisen.', hist: true,
-        ergebnis: 'Der Kanzler spricht am nächsten Tag in Regensburg und greift Brandt persönlich an. Erst neun Tage später besucht er Berlin und wird ausgepfiffen. Viele nehmen ihm diese Zeit übel.',
+        ergebnis: s => (unionRegiert(s) ? 'Der Kanzler spricht am nächsten Tag in Regensburg und greift Brandt persönlich an. Erst neun Tage später besucht er Berlin und wird ausgepfiffen. Viele nehmen ihm diese Zeit übel.' : 'Der Kanzler bleibt in Bonn und setzt den Wahlkampf fort. Erst neun Tage später besucht er Berlin und wird ausgepfiffen. Viele nehmen ihm diese Zeit übel.'),
         w: { ansehen: -3, moskau: -4, einheit: -12 } },
       { text: 'Sofort nach Berlin fliegen.',
         ergebnis: 'Der Kanzler steht am Potsdamer Platz vor dem Stacheldraht. Die Bilder gehen um die Welt.',
@@ -301,10 +317,12 @@ Ost-Berlin sucht nun wirtschaftliche Hilfe. Über die Treuhandstelle für den In
     datum: 'September 1961',
     ab: 1961.2, ordnung: 8.5,
     wenn: s => wahlIn(s, 1961.2),
-    absender: 'Bundesgeschäftsstelle der CDU',
+    absender: s => (spdRegiert(s) ? 'Parteivorstand der SPD' : 'Bundesgeschäftsstelle der CDU'),
     ascii: 'plakat',
-    text: s => `Am 17. September wird gewählt. ${s.f.godesberg ? 'Die SPD tritt nach Godesberg erstmals als Volkspartei an, mit dem jungen Willy Brandt als Kanzlerkandidaten.' : 'Die SPD tritt mit Willy Brandt an.'} Die FDP wirbt mit dem Slogan „Mit der CDU – aber ohne Adenauer“.${s.kanzler === 'Adenauer' ? ' Du bist 85 Jahre alt.' : ''} Die Union steht bei ${String(s.w.zustimmung).replace('.', ',')} Prozent.`,
-    optionen: [
+    text: s => spdRegiert(s) ? `Am 17. September wird gewählt. Die Union tritt mit ${vollerName(kandidat(s, 'Union'))} als Kanzlerkandidaten an und verspricht die Rückkehr zur bürgerlichen Mehrheit. Die SPD steht bei ${String(s.w.zustimmung).replace('.', ',')} Prozent.
+
+Womit soll die SPD in den Wahlkampf ziehen?` : `Am 17. September wird gewählt. ${s.f.godesberg ? 'Die SPD tritt nach Godesberg erstmals als Volkspartei an, mit dem jungen Willy Brandt als Kanzlerkandidaten.' : 'Die SPD tritt mit Willy Brandt an.'} Die FDP wirbt mit dem Slogan „Mit der CDU – aber ohne Adenauer“.${s.kanzler === 'Adenauer' ? ' Du bist 85 Jahre alt.' : ''} Die Union steht bei ${String(s.w.zustimmung).replace('.', ',')} Prozent.`,
+    optionen: s => (spdRegiert(s) ? SPD_WAHLKAMPF : [
       { text: s => `Auf Erfahrung setzen: der Kanzler, der ${s.f.vereinigt ? 'die Einheit erreicht' : 'die Bundesrepublik aufgebaut'} hat.`, hist: true,
         ergebnis: 'Für die einen ein Garant der Stabilität, für die anderen ein Mann von gestern.',
         w: s => ({ ansehen: s.kanzler === 'Adenauer' ? 2 : 4 }) },
@@ -314,7 +332,7 @@ Ost-Berlin sucht nun wirtschaftliche Hilfe. Über die Treuhandstelle für den In
       { text: 'Sicherheit und Freiheit – die Union als Bollwerk gegen den Kommunismus.',
         ergebnis: 'Nach den Ereignissen des Sommers verfängt die Botschaft.',
         w: s => ({ ansehen: s.f.mauer ? 4 : 2 }) },
-    ],
+    ]),
     historisch: 'Die Union verlor am 17. September 1961 die absolute Mehrheit (45,3 Prozent). Die FDP erzielte mit 12,8 Prozent ihr bis dahin bestes Ergebnis.',
   },
   {
@@ -419,7 +437,7 @@ Ost-Berlin sucht nun wirtschaftliche Hilfe. Über die Treuhandstelle für den In
     titel: 'Die Spiegel-Affäre',
     datum: 'Oktober/November 1962',
     ab: 1962.2, ordnung: 10.5,
-    wenn: imBuendnis,
+    wenn: s => imBuendnis(s) && unionRegiert(s),
     absender: 'Bundesanwaltschaft',
     ascii: 'presse',
     text: `Der Spiegel hat unter dem Titel „Bedingt abwehrbereit“ über ein NATO-Manöver berichtet: Die Bundeswehr sei einem sowjetischen Angriff kaum gewachsen. Die Bundesanwaltschaft lässt die Redaktion in Hamburg besetzen, Herausgeber Rudolf Augstein wird verhaftet, der Redakteur Conrad Ahlers in Spanien festgenommen – offenbar auf Betreiben von Verteidigungsminister Strauß, der den Bundestag darüber falsch informiert hat.
@@ -449,13 +467,13 @@ Die Justizministerin der FDP war nicht eingeweiht. Studenten demonstrieren für 
     absender: 'Charles de Gaulle',
     text: s => `Eine Woche bevor ${s.kanzler === 'Adenauer' ? 'du' : 'der Kanzler'} nach Paris reisen sollte, hat de Gaulle auf einer Pressekonferenz den britischen Beitritt zur EWG abgelehnt. Die Partner sind empört. Im Élysée-Palast liegt dennoch ein Vertrag über die deutsch-französische Zusammenarbeit zur Unterschrift bereit: regelmäßige Gipfeltreffen, Abstimmung in der Außen- und Verteidigungspolitik, Jugendaustausch.
 
-In Washington sieht man darin den Versuch, Europa von Amerika zu lösen. In der Union wächst die Zahl der „Atlantiker“, die einen klaren Vorbehalt verlangen.`,
+In Washington sieht man darin den Versuch, Europa von Amerika zu lösen. ${spdRegiert(s) ? 'In deiner Partei und in der Opposition verlangen viele einen klaren Vorbehalt zugunsten der USA.' : 'In der Union wächst die Zahl der „Atlantiker“, die einen klaren Vorbehalt verlangen.'}`,
     optionen: [
       { text: s => (s.f.vereinigt ? 'Unterzeichnen – mit einer Präambel, die Deutschlands Neutralität und die Freundschaft zu den USA bekräftigt.' : 'Unterzeichnen – der Bundestag soll eine Präambel voranstellen, die die NATO bekräftigt.'), hist: true,
         ergebnis: 'Der Vertrag wird unterzeichnet, de Gaulle umarmt den Kanzler. Im Mai stellt der Bundestag eine atlantische Präambel voran. Der General ist enttäuscht: „Verträge sind wie junge Mädchen und Rosen – sie halten, solange sie halten.“',
         w: { frankreich: 6, usa: 1, grossbritannien: -2, europa: 2 }, setze: ['elysee'] },
       { text: 'Unterzeichnen und gegen jede Präambel verteidigen.',
-        ergebnis: 'Eine deutsch-französische Achse entsteht. Washington ist alarmiert, Erhard und Schröder rebellieren.',
+        ergebnis: s => (unionRegiert(s) ? 'Eine deutsch-französische Achse entsteht. Washington ist alarmiert, Erhard und Schröder rebellieren.' : 'Eine deutsch-französische Achse entsteht. Washington ist alarmiert, in der Koalition rumort es.'),
         w: { frankreich: 14, usa: -8, grossbritannien: -6, koalition: -6 }, setze: ['elysee', 'achse_paris'] },
       { text: 'Wegen des Vetos gegen London die Unterzeichnung verschieben.',
         ergebnis: 'De Gaulle ist tief gekränkt. London und Washington loben die Bonner Solidarität.',
@@ -476,8 +494,8 @@ In Washington sieht man darin den Versuch, Europa von Amerika zu lösen. In der 
       { text: 'Kennedy auf der ganzen Reise begleiten.', hist: true,
         ergebnis: '„Ich bin ein Berliner.“ Ein Satz, der bleibt.',
         w: { usa: 5, ansehen: 2 } },
-      { text: 'Willy Brandt die Bühne in Berlin überlassen.',
-        ergebnis: 'Brandt und Kennedy im offenen Wagen – die Bilder nützen der SPD.',
+      { text: s => (brandtKanzler(s) ? 'Dem Regierenden Bürgermeister die Bühne in Berlin überlassen.' : 'Willy Brandt die Bühne in Berlin überlassen.'),
+        ergebnis: s => (brandtKanzler(s) ? 'Der Regierende Bürgermeister und Kennedy im offenen Wagen – der Kanzler steht am Rand.' : unionRegiert(s) ? 'Brandt und Kennedy im offenen Wagen – die Bilder nützen der SPD.' : 'Brandt und Kennedy im offenen Wagen – der Kanzler steht am Rand.'),
         w: { usa: 3, ansehen: -2 } },
     ],
     historisch: 'Kennedy besuchte die Bundesrepublik vom 23. bis 26. Juni 1963. Adenauer und Brandt begleiteten ihn in Berlin.',
@@ -534,14 +552,14 @@ In Washington sieht man darin den Versuch, Europa von Amerika zu lösen. In der 
     datum: 'Dezember 1963',
     ab: 1963.2, ordnung: 12,
     wenn: s => !!s.f.mauer,
-    absender: 'Willy Brandt, Regierender Bürgermeister von Berlin',
-    text: `Der Senat von West-Berlin hat mit Beamten der DDR ein Abkommen ausgehandelt: West-Berliner dürfen über Weihnachten ihre Verwandten im Ostteil der Stadt besuchen – zum ersten Mal seit dem Mauerbau. Die Unterschriften stehen auf einem Papier, auf dem auch „Regierung der DDR“ steht. Brandt bittet Bonn um Zustimmung.`,
+    absender: s => (brandtKanzler(s) ? 'Der Regierende Bürgermeister von Berlin' : 'Willy Brandt, Regierender Bürgermeister von Berlin'),
+    text: s => `Der Senat von West-Berlin hat mit Beamten der DDR ein Abkommen ausgehandelt: West-Berliner dürfen über Weihnachten ihre Verwandten im Ostteil der Stadt besuchen – zum ersten Mal seit dem Mauerbau. Die Unterschriften stehen auf einem Papier, auf dem auch „Regierung der DDR“ steht. ${brandtKanzler(s) ? 'Der Senat' : 'Brandt'} bittet Bonn um Zustimmung.`,
     optionen: [
       { text: 'Zustimmen – die Menschen gehen vor.', hist: true,
         ergebnis: 'Über 1,2 Millionen Besuche in zweieinhalb Wochen. An den Übergangsstellen spielen sich bewegende Szenen ab.',
         w: { ansehen: 2, einheit: 3, moskau: 3 } },
       { text: 'Ablehnen – keine Aufwertung der DDR.',
-        ergebnis: 'Brandt macht den Kanzler öffentlich verantwortlich. Die West-Berliner verstehen es nicht.',
+        ergebnis: s => `${brandtKanzler(s) ? 'Der Senat' : 'Brandt'} macht den Kanzler öffentlich verantwortlich. Die West-Berliner verstehen es nicht.`,
         w: { ansehen: -5, usa: 1 } },
     ],
     historisch: 'Das erste Passierscheinabkommen wurde am 17. Dezember 1963 unterzeichnet. Bis zum 5. Januar 1964 wurden rund 1,2 Millionen Besuche gezählt.',
@@ -571,6 +589,7 @@ In Washington sieht man darin den Versuch, Europa von Amerika zu lösen. In der 
     titel: 'Atlantiker und Gaullisten',
     datum: 'Frühjahr 1964',
     ab: 1964.1, ordnung: 5,
+    wenn: unionRegiert,
     absender: 'Präsidium der CDU',
     text: s => `In der Union tobt ein Richtungsstreit. Die „Atlantiker“ um Außenminister Gerhard Schröder setzen auf die USA, auf Freihandel und auf vorsichtige Bewegung gegenüber Osteuropa. Die „Gaullisten“ um ${s.kanzler === 'Adenauer' ? 'Franz Josef Strauß' : 'Adenauer und Franz Josef Strauß'} wollen ein Europa unter deutsch-französischer Führung, unabhängiger von Washington.
 

@@ -39,7 +39,7 @@ export default [
     beschreibung: 'Kasernen, Ausrüstung, Ausbildung: Die Streitkräfte wachsen nur, wenn Geld fließt. Die Verbündeten zählen die Divisionen.',
     ergebnis: 'Neue Divisionen werden aufgestellt.', w: s => (vereinigt(s) ? { bundeswehr: 1, moskau: -4, souveraenitaet: 2 } : { bundeswehr: 1, usa: 5, grossbritannien: 2, souveraenitaet: 3, moskau: -4 }) },
   { id: 'kartellgesetz', titel: 'Gesetz gegen Wettbewerbsbeschränkungen', ab: 1955.1, bis: 1958.1, kosten: 0,
-    beschreibung: 'Erhards Herzensanliegen: ein Verbot von Kartellen und ein Bundeskartellamt. Der BDI unter Fritz Berg kämpft dagegen.',
+    beschreibung: s => ((s.kanzlerpartei || 'Union') === 'Union' ? 'Erhards Herzensanliegen: ein Verbot von Kartellen und ein Bundeskartellamt. Der BDI unter Fritz Berg kämpft dagegen.' : 'Ein Verbot von Kartellen und ein Bundeskartellamt – ein Anliegen, das Ludwig Erhard seit Jahren verfolgt. Der BDI unter Fritz Berg kämpft dagegen.'),
     ergebnis: 'Das „Grundgesetz der Marktwirtschaft“ wird beschlossen, mit vielen Ausnahmen.', w: { koalition: -2, usa: 1 }, setze: ['kartellgesetz'],
     historisch: 'Das GWB wurde im Juli 1957 verabschiedet und trat 1958 in Kraft.' },
   { id: 'bundesbank', titel: 'Bundesbankgesetz', ab: 1955.2, bis: 1957.2, kosten: 0,

@@ -1,5 +1,6 @@
 //! Zwischen Ost und West – Programmhülle.
-//! Die Spiellogik liegt vollständig in `ui/`; hier werden nur Spielstände gespeichert.
+//! Die Spiellogik liegt vollständig in `ui/`; hier werden nur Spielstände gespeichert
+//! und Updates über GitHub-Releases geholt.
 
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
@@ -53,12 +54,51 @@ fn spielstand_loeschen(app: tauri::AppHandle, name: String) -> Result<(), String
     Ok(())
 }
 
+// ---------------------------------------------------------------------------
+// Updates über GitHub-Releases (latest.json, signiert)
+
+/// Sucht nach einer neueren Version. Antwort: {verfuegbar, version, notizen}
+#[tauri::command]
+async fn update_pruefen(app: tauri::AppHandle) -> Result<serde_json::Value, String> {
+    use tauri_plugin_updater::UpdaterExt;
+    let neu = app
+        .updater()
+        .map_err(|e| e.to_string())?
+        .check()
+        .await
+        .map_err(|e| format!("Suche nach Updates fehlgeschlagen: {e}"))?;
+    Ok(match neu {
+        Some(u) => serde_json::json!({ "verfuegbar": true, "version": u.version, "notizen": u.body }),
+        None => serde_json::json!({ "verfuegbar": false }),
+    })
+}
+
+/// Lädt die neue Version, installiert sie und startet das Programm neu.
+#[tauri::command]
+async fn update_installieren(app: tauri::AppHandle) -> Result<(), String> {
+    use tauri_plugin_updater::UpdaterExt;
+    let neu = app
+        .updater()
+        .map_err(|e| e.to_string())?
+        .check()
+        .await
+        .map_err(|e| format!("Suche nach Updates fehlgeschlagen: {e}"))?;
+    let Some(u) = neu else { return Ok(()) };
+    u.download_and_install(|_, _| {}, || {})
+        .await
+        .map_err(|e| format!("Update fehlgeschlagen: {e}"))?;
+    app.restart();
+}
+
 fn main() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .invoke_handler(tauri::generate_handler![
             spielstand_speichern,
             spielstand_laden,
-            spielstand_loeschen
+            spielstand_loeschen,
+            update_pruefen,
+            update_installieren
         ])
         .run(tauri::generate_context!())
         .expect("Programm konnte nicht gestartet werden");

@@ -1,5 +1,5 @@
 // Hauptereignisse Herbst 1949 bis Ende 1953
-import { west, geteilt, adenauer, regiertMit, wahlIn } from './hilfen.js';
+import { west, geteilt, adenauer, regiertMit, wahlIn, unionRegiert, spdRegiert, SPD_WAHLKAMPF } from './hilfen.js';
 
 export default [
   // ------------------------------------------------------------------ 1949/II
@@ -58,9 +58,9 @@ Für die SPD ist das Unterwerfung. Schumacher wird dir im Bundestag zurufen, du 
     ab: 1950.1, ordnung: 3,
     wenn: west,
     absender: 'Auswärtiges Referat im Kanzleramt',
-    text: `Frankreich hat mit der Regierung des Saarlandes Konventionen geschlossen, die die wirtschaftliche Anbindung der Saar an Frankreich auf Dauer festschreiben. Gleichzeitig werden die Bundesrepublik und das Saarland eingeladen, als assoziierte Mitglieder dem neuen Europarat in Straßburg beizutreten.
+    text: s => `Frankreich hat mit der Regierung des Saarlandes Konventionen geschlossen, die die wirtschaftliche Anbindung der Saar an Frankreich auf Dauer festschreiben. Gleichzeitig werden die Bundesrepublik und das Saarland eingeladen, als assoziierte Mitglieder dem neuen Europarat in Straßburg beizutreten.
 
-Treten Bonn und Saarbrücken gleichzeitig bei, sieht das wie eine Anerkennung der Saar als eigener Staat aus. Bleibt Bonn draußen, verpasst es den ersten Platz an einem europäischen Tisch seit dem Krieg. Die SPD und Teile der FDP lehnen den Beitritt ab.`,
+Treten Bonn und Saarbrücken gleichzeitig bei, sieht das wie eine Anerkennung der Saar als eigener Staat aus. Bleibt Bonn draußen, verpasst es den ersten Platz an einem europäischen Tisch seit dem Krieg. ${spdRegiert(s) ? 'In der eigenen Partei und in Teilen der FDP gibt es Widerstand gegen den Beitritt.' : 'Die SPD und Teile der FDP lehnen den Beitritt ab.'}`,
     optionen: [
       { text: 'Beitreten – Europa ist wichtiger als Prinzipienstreit um die Saar.', hist: true, richtung: 'west',
         ergebnis: 'Der Bundestag stimmt dem Beitritt zu. In Straßburg sitzen erstmals wieder deutsche Abgeordnete neben ihren früheren Kriegsgegnern.',
@@ -81,9 +81,9 @@ Treten Bonn und Saarbrücken gleichzeitig bei, sieht das wie eine Anerkennung de
     ab: 1950.1, ordnung: 5,
     wenn: west,
     absender: 'Robert Schuman, Außenminister der Französischen Republik',
-    text: `Ein Bote überbringt dir einen persönlichen Brief des französischen Außenministers, noch bevor das französische Kabinett davon erfährt. Schuman schlägt vor, die gesamte deutsche und französische Kohle- und Stahlproduktion einer gemeinsamen Hohen Behörde zu unterstellen, offen für weitere Länder. Krieg zwischen beiden Ländern solle dadurch „nicht nur undenkbar, sondern materiell unmöglich“ werden.
+    text: s => `Ein Bote überbringt dir einen persönlichen Brief des französischen Außenministers, noch bevor das französische Kabinett davon erfährt. Schuman schlägt vor, die gesamte deutsche und französische Kohle- und Stahlproduktion einer gemeinsamen Hohen Behörde zu unterstellen, offen für weitere Länder. Krieg zwischen beiden Ländern solle dadurch „nicht nur undenkbar, sondern materiell unmöglich“ werden.
 
-Für die deutsche Schwerindustrie heißt das Abgabe von Souveränität – aber zum ersten Mal auf Augenhöhe, nicht als Besiegte. Die Ruhrbehörde würde überflüssig. Die SPD warnt vor einem „kleineuropäischen, klerikalen, kapitalistischen“ Block, der die Teilung vertieft.`,
+Für die deutsche Schwerindustrie heißt das Abgabe von Souveränität – aber zum ersten Mal auf Augenhöhe, nicht als Besiegte. Die Ruhrbehörde würde überflüssig. ${spdRegiert(s) ? 'In der eigenen Partei warnen viele' : 'Die SPD warnt'} vor einem „kleineuropäischen, klerikalen, kapitalistischen“ Block, der die Teilung vertieft.`,
     optionen: [
       { text: 'Sofort und vorbehaltlos zustimmen.', hist: true, richtung: 'west',
         ergebnis: 'Bonn antwortet noch am selben Tag. Jean Monnet beginnt mit den Verhandlungen; Italien und die Benelux-Staaten schließen sich an.',
@@ -107,9 +107,9 @@ Für die deutsche Schwerindustrie heißt das Abgabe von Souveränität – aber 
     wenn: west,
     absender: 'Gerhard Graf von Schwerin, Berater für Sicherheitsfragen',
     ascii: 'korea',
-    text: `Am 25. Juni haben nordkoreanische Truppen die Grenze zum Süden überschritten. In der Bundesrepublik geht die Angst um: Was in Korea geschieht, könnte morgen an der Elbe geschehen. Die kasernierte Volkspolizei der DDR umfasst bereits rund 50.000 Mann, die Bundesrepublik hat keine eigenen Streitkräfte.
+    text: s => `Am 25. Juni haben nordkoreanische Truppen die Grenze zum Süden überschritten. In der Bundesrepublik geht die Angst um: Was in Korea geschieht, könnte morgen an der Elbe geschehen. Die kasernierte Volkspolizei der DDR umfasst bereits rund 50.000 Mann, die Bundesrepublik hat keine eigenen Streitkräfte.
 
-Die Amerikaner fragen inzwischen offen nach einem deutschen Verteidigungsbeitrag. Du könntest ihn in einem Memorandum an die Hohen Kommissare anbieten – gegen mehr Gleichberechtigung. Das Kabinett weiß noch nichts davon. Innenminister Heinemann und große Teile der evangelischen Kirche lehnen jede Wiederbewaffnung ab; unter jungen Leuten macht das Wort „Ohne mich“ die Runde.`,
+Die Amerikaner fragen inzwischen offen nach einem deutschen Verteidigungsbeitrag. Du könntest ihn in einem Memorandum an die Hohen Kommissare anbieten – gegen mehr Gleichberechtigung. Das Kabinett weiß noch nichts davon. ${unionRegiert(s) ? 'Innenminister Heinemann und große Teile der evangelischen Kirche lehnen' : 'Die eigene Partei und große Teile der evangelischen Kirche lehnen'} jede Wiederbewaffnung ab; unter jungen Leuten macht das Wort „Ohne mich“ die Runde.`,
     optionen: [
       { text: 'Einen deutschen Wehrbeitrag anbieten, ohne das Kabinett zu fragen.', hist: true, richtung: 'west',
         ergebnis: 'Das Memorandum des Kanzlers vom 29. August liegt in Washington auf dem Tisch. Die Westmächte beginnen, über deutsche Soldaten zu reden – und über das Ende des Besatzungsstatuts.',
@@ -119,7 +119,7 @@ Die Amerikaner fragen inzwischen offen nach einem deutschen Verteidigungsbeitrag
         ergebnis: 'Die Hohen Kommissare reagieren zurückhaltend. Eine Polizei ist besser als nichts, eine Armee ist sie nicht.',
         w: { usa: 3, moskau: -2, ansehen: 1 }, setze: ['bundespolizei'] },
       { text: 'Keine deutsche Beteiligung – die Sicherheit ist Sache der Besatzungsmächte.', richtung: 'ost',
-        ergebnis: 'Die SPD und die Kirchen loben die Zurückhaltung des Kanzlers. In Washington wird man ungeduldig.',
+        ergebnis: s => `${spdRegiert(s) ? 'Die eigene Partei' : 'Die SPD'} und die Kirchen loben die Zurückhaltung des Kanzlers. In Washington wird man ungeduldig.`,
         w: { usa: -8, einheit: 3, moskau: 3, ansehen: 2 } },
     ],
     historisch: 'Adenauer übergab am 29. August 1950 zwei Memoranden an die Hohen Kommissare, in denen er einen Wehrbeitrag anbot und eine Revision des Besatzungsstatuts forderte. Das Kabinett war nicht eingeweiht. Der Korea-Krieg löste zugleich den „Korea-Boom“ der deutschen Exportwirtschaft aus.',
@@ -129,7 +129,7 @@ Die Amerikaner fragen inzwischen offen nach einem deutschen Verteidigungsbeitrag
     titel: 'Der Innenminister tritt zurück',
     datum: 'Oktober 1950',
     ab: 1950.2, ordnung: 10,
-    wenn: s => !!s.f.wehrbeitrag,
+    wenn: s => !!s.f.wehrbeitrag && unionRegiert(s),
     absender: 'Gustav Heinemann, Bundesminister des Innern',
     text: `Gustav Heinemann, Präses der Synode der Evangelischen Kirche und dein Innenminister, hat aus der Zeitung von deinem Sicherheitsmemorandum erfahren. Er hält eine Wiederbewaffnung für falsch, solange sie die Teilung Deutschlands vertieft, und er empört sich über deinen Alleingang. Sein Rücktrittsgesuch liegt auf deinem Tisch.
 
@@ -194,20 +194,20 @@ Der 75-jährige Hans Böckler bittet dich um ein persönliches Gespräch. Die FD
     titel: 'Die Zahlungsbilanzkrise',
     datum: 'Februar 1951',
     ab: 1951.1, ordnung: 2,
-    absender: 'Ludwig Erhard, Bundesminister für Wirtschaft',
-    text: `Der Korea-Boom hat eine Kehrseite: Die Industrie importiert Rohstoffe in Massen, die Preise steigen, und die Bundesrepublik hat ihre Kreditlinie bei der Europäischen Zahlungsunion überzogen. Die Devisenreserven sind praktisch erschöpft. Die amerikanische Marshallplan-Verwaltung verlangt, die Liberalisierung der Einfuhren auszusetzen, und manche fordern die Rückkehr zur Bewirtschaftung von Rohstoffen.
+    absender: s => (unionRegiert(s) ? 'Ludwig Erhard, Bundesminister für Wirtschaft' : 'Bundesministerium für Wirtschaft'),
+    text: s => `Der Korea-Boom hat eine Kehrseite: Die Industrie importiert Rohstoffe in Massen, die Preise steigen, und die Bundesrepublik hat ihre Kreditlinie bei der Europäischen Zahlungsunion überzogen. Die Devisenreserven sind praktisch erschöpft. Die amerikanische Marshallplan-Verwaltung verlangt, die Liberalisierung der Einfuhren auszusetzen, und manche fordern die Rückkehr zur Bewirtschaftung von Rohstoffen.
 
-Erhard hält das für den Anfang vom Ende der Marktwirtschaft. Die Industrie verlangt Planung, die SPD erst recht.`,
+${unionRegiert(s) ? 'Erhard hält das für den Anfang vom Ende der Marktwirtschaft. Die Industrie verlangt Planung, die SPD erst recht.' : 'Die Gewerkschaften und viele in der eigenen Partei halten das für richtig, Union und FDP sprechen vom Rückfall in die Planwirtschaft.'}`,
     optionen: [
       { text: 'Die Einfuhrliberalisierung vorübergehend aussetzen und einen Kredit der Zahlungsunion annehmen.', hist: true,
         ergebnis: 'Die Bank deutscher Länder bremst den Kredit. Nach wenigen Monaten dreht die Handelsbilanz ins Plus – für Jahrzehnte.',
         w: { usa: 2, europa: 2, impuls: -0.5, haushalt: 2 } },
       { text: 'Rohstoffe wieder staatlich bewirtschaften.',
-        ergebnis: 'Ämter verteilen Kontingente. Erhard droht mit Rücktritt, die Wirtschaft verliert Schwung.',
+        ergebnis: s => (unionRegiert(s) ? 'Ämter verteilen Kontingente. Erhard droht mit Rücktritt, die Wirtschaft verliert Schwung.' : 'Ämter verteilen Kontingente. Die FDP protestiert, die Wirtschaft verliert Schwung.'),
         w: { impuls: -1.5, koalition: -6, ansehen: 1 } },
       { text: 'An der Liberalisierung festhalten und abwarten.',
         zufall: [
-          { p: 0.5, ergebnis: 'Es geht gut: Die Exporte ziehen rechtzeitig an. Erhard ist ein Held.', w: { impuls: 1, ansehen: 2 } },
+          { p: 0.5, ergebnis: s => (unionRegiert(s) ? 'Es geht gut: Die Exporte ziehen rechtzeitig an. Erhard ist ein Held.' : 'Es geht gut: Die Exporte ziehen rechtzeitig an. Die Regierung hat Nerven bewiesen.'), w: { impuls: 1, ansehen: 2 } },
           { ergebnis: 'Die Zahlungsunion sperrt weitere Kredite. Die Einfuhren müssen abrupt gestoppt werden.', w: { impuls: -2, usa: -3, europa: -2, ansehen: -2 } },
         ] },
     ],
@@ -220,9 +220,9 @@ Erhard hält das für den Anfang vom Ende der Marktwirtschaft. Die Industrie ver
     ab: 1951.1, ordnung: 4,
     wenn: s => west(s) && !!s.f.schuman,
     absender: 'Delegation Walter Hallstein, Paris',
-    text: `Der Vertrag über die Europäische Gemeinschaft für Kohle und Stahl ist ausgehandelt. Sechs Staaten – Frankreich, die Bundesrepublik, Italien und die Benelux-Länder – unterstellen ihre Montanindustrie einer Hohen Behörde. Die Ruhrbehörde wird aufgelöst, die Produktionsbeschränkungen für deutschen Stahl fallen.
+    text: s => `Der Vertrag über die Europäische Gemeinschaft für Kohle und Stahl ist ausgehandelt. Sechs Staaten – Frankreich, die Bundesrepublik, Italien und die Benelux-Länder – unterstellen ihre Montanindustrie einer Hohen Behörde. Die Ruhrbehörde wird aufgelöst, die Produktionsbeschränkungen für deutschen Stahl fallen.
 
-Es ist der erste Vertrag, den die Bundesrepublik als gleichberechtigter Partner unterzeichnet. Die SPD wird im Bundestag dagegen stimmen.`,
+Es ist der erste Vertrag, den die Bundesrepublik als gleichberechtigter Partner unterzeichnet. ${spdRegiert(s) ? 'Ein Teil der eigenen Fraktion wird im Bundestag dagegen stimmen.' : 'Die SPD wird im Bundestag dagegen stimmen.'}`,
     optionen: [
       { text: 'Den Vertrag in Paris selbst unterzeichnen.', hist: true, richtung: 'west',
         ergebnis: 'Der Kanzler reist zum ersten Mal als Regierungschef nach Paris. Die Montanunion tritt 1952 in Kraft.',
@@ -285,11 +285,11 @@ In der eigenen Fraktion gibt es Widerstand. Viele meinen, die Bundesrepublik hab
     wenn: west,
     absender: 'Note der Sowjetregierung an die Westmächte',
     ascii: 'note',
-    text: `Moskau hat den drei Westmächten den Entwurf eines Friedensvertrages mit Deutschland übermittelt. Der Inhalt ist sensationell: Ein wiedervereinigtes Deutschland, alle Besatzungstruppen raus binnen eines Jahres, eigene nationale Streitkräfte, freie Betätigung demokratischer Parteien. Bedingungen: Deutschland darf keinem Bündnis beitreten, das sich gegen einen der Siegerstaaten richtet, und die Grenzen von Potsdam – die Oder-Neiße-Linie – werden anerkannt.
+    text: s => `Moskau hat den drei Westmächten den Entwurf eines Friedensvertrages mit Deutschland übermittelt. Der Inhalt ist sensationell: Ein wiedervereinigtes Deutschland, alle Besatzungstruppen raus binnen eines Jahres, eigene nationale Streitkräfte, freie Betätigung demokratischer Parteien. Bedingungen: Deutschland darf keinem Bündnis beitreten, das sich gegen einen der Siegerstaaten richtet, und die Grenzen von Potsdam – die Oder-Neiße-Linie – werden anerkannt.
 
 Von freien, international überwachten Wahlen ist keine Rede. Die Note kommt genau in dem Moment, in dem der Deutschlandvertrag und der EVG-Vertrag unterschriftsreif sind.
 
-Ist es ein ernstes Angebot oder ein Störmanöver gegen die Westintegration? In der Bevölkerung, bei der SPD, in Teilen der FDP und sogar in deinem Kabinett gibt es Stimmen, die verlangen, das Angebot wenigstens auszuloten.`,
+Ist es ein ernstes Angebot oder ein Störmanöver gegen die Westintegration? ${spdRegiert(s) ? 'In der Bevölkerung, in deiner Partei und in Teilen der FDP gibt es Stimmen, die verlangen, das Angebot wenigstens auszuloten. Die Union warnt vor der Falle.' : 'In der Bevölkerung, bei der SPD, in Teilen der FDP und sogar in deinem Kabinett gibt es Stimmen, die verlangen, das Angebot wenigstens auszuloten.'}`,
     optionen: [
       { text: 'Als Störmanöver behandeln. Die Westverträge haben Vorrang.', hist: true, richtung: 'west',
         ergebnis: 'Die Westmächte antworten mit der Forderung nach freien Wahlen unter UN-Aufsicht. Ein Notenwechsel folgt, ohne Annäherung. Die Westverträge können unterzeichnet werden.',
@@ -299,7 +299,7 @@ Ist es ein ernstes Angebot oder ein Störmanöver gegen die Westintegration? In 
         w: { usa: -7, grossbritannien: -2, frankreich: -2, einheit: 12, moskau: 8, ansehen: 3 },
         setze: ['stalin_geprueft'], plane: [{ id: 'n_viermaechte', in: 1 }] },
       { text: 'Auf das Angebot eingehen: Neutralität für die Einheit.', richtung: 'ost',
-        ergebnis: 'Ein Beben in der westlichen Welt. In Washington spricht man vom „Verrat von Bonn“, die CSU droht mit dem Bruch. Doch die Viermächtekonferenz kommt.',
+        ergebnis: s => `Ein Beben in der westlichen Welt. In Washington spricht man vom „Verrat von Bonn“, ${spdRegiert(s) ? 'die Union spricht von einem zweiten Rapallo' : 'die CSU droht mit dem Bruch'}. Doch die Viermächtekonferenz kommt.`,
         w: { usa: -18, grossbritannien: -10, frankreich: -6, einheit: 20, moskau: 14, koalition: -12, ansehen: 2 },
         setze: ['stalin_angenommen'], plane: [{ id: 'n_viermaechte', in: 1 }] },
     ],
@@ -314,7 +314,7 @@ Ist es ein ernstes Angebot oder ein Störmanöver gegen die Westintegration? In 
     absender: 'Walter Hallstein, Staatssekretär des Auswärtigen Amtes',
     text: s => `Die Verträge sind unterschriftsreif. Der Deutschlandvertrag soll das Besatzungsstatut ablösen und der Bundesrepublik weitgehend die Souveränität zurückgeben; die Alliierten behalten Rechte für Berlin und Deutschland als Ganzes. Der Vertrag über die Europäische Verteidigungsgemeinschaft sieht deutsche Kontingente in einer europäischen Armee vor.
 
-Umstritten ist die „Bindungsklausel“: Ein wiedervereinigtes Deutschland wäre an diese Verträge gebunden. Für die SPD ist das das Ende der Wiedervereinigung; auch Heinrich von Brentano, Fraktionschef der Union, verlangt Nachbesserungen.${s.f.chance_vertan ? '\n\nNach dem Scheitern der Viermächtekonferenz drängen die Westmächte nun auf die Unterschrift.' : ''}`,
+Umstritten ist die „Bindungsklausel“: Ein wiedervereinigtes Deutschland wäre an diese Verträge gebunden. ${spdRegiert(s) ? 'Für viele in deiner Partei ist das das Ende der Wiedervereinigung; auch die FDP verlangt Nachbesserungen.' : 'Für die SPD ist das das Ende der Wiedervereinigung; auch Heinrich von Brentano, Fraktionschef der Union, verlangt Nachbesserungen.'}${s.f.chance_vertan ? '\n\nNach dem Scheitern der Viermächtekonferenz drängen die Westmächte nun auf die Unterschrift.' : ''}`,
     optionen: [
       { text: 'Unterzeichnen, wie ausgehandelt.', hist: true, richtung: 'west',
         ergebnis: 'In Bonn und Paris werden die Verträge unterzeichnet. Die Ratifizierung im Bundestag wird zur Zerreißprobe, aber sie gelingt. Nun hängt alles an Paris.',
@@ -343,10 +343,10 @@ Umstritten ist die „Bindungsklausel“: Ein wiedervereinigtes Deutschland wär
     absender: 'Franz Böhm, Leiter der Delegation in Wassenaar',
     text: s => `Nach monatelangen Verhandlungen in Wassenaar liegt ein Abkommen vor: Die Bundesrepublik soll Israel über zwölf Jahre Waren und Leistungen im Wert von drei Milliarden DM liefern und der Jewish Claims Conference 450 Millionen DM zahlen.${s.f.wiedergutmachung_erklaert ? '' : ' Die Verhandlungen sind ohne eine vorherige feierliche Erklärung zustande gekommen und standen mehrfach vor dem Abbruch.'}
 
-Finanzminister Schäffer hält die Summe für untragbar, die Arabische Liga droht mit einem Boykott deutscher Waren. In der Union ist eine Mehrheit ablehnend oder gleichgültig. Die SPD unter Ollenhauer steht geschlossen hinter dem Abkommen.`,
+${unionRegiert(s) ? 'Finanzminister Schäffer hält die Summe für untragbar, die Arabische Liga droht mit einem Boykott deutscher Waren. In der Union ist eine Mehrheit ablehnend oder gleichgültig. Die SPD unter Ollenhauer steht geschlossen hinter dem Abkommen.' : 'Der Finanzminister hält die Summe für kaum tragbar, die Arabische Liga droht mit einem Boykott deutscher Waren. Deine Partei steht geschlossen hinter dem Abkommen, in der Union ist eine Mehrheit ablehnend oder gleichgültig.'}`,
     optionen: [
-      { text: 'Unterzeichnen und die Ratifizierung notfalls mit den Stimmen der SPD durchsetzen.', hist: true,
-        ergebnis: 'Der Kanzler unterschreibt in Luxemburg zusammen mit Moshe Sharett. Bei der Abstimmung im Bundestag enthält sich fast die Hälfte der Union; die SPD-Stimmen sichern die Mehrheit. Der Boykott der Arabischen Liga bleibt aus.',
+      { text: s => (unionRegiert(s) ? 'Unterzeichnen und die Ratifizierung notfalls mit den Stimmen der SPD durchsetzen.' : 'Unterzeichnen und die Ratifizierung auch gegen Widerstand im Bundestag durchsetzen.'), hist: true,
+        ergebnis: s => (unionRegiert(s) ? 'Der Kanzler unterschreibt in Luxemburg zusammen mit Moshe Sharett. Bei der Abstimmung im Bundestag enthält sich fast die Hälfte der Union; die SPD-Stimmen sichern die Mehrheit. Der Boykott der Arabischen Liga bleibt aus.' : 'Der Kanzler unterschreibt in Luxemburg zusammen mit Moshe Sharett. Bei der Abstimmung im Bundestag stimmt die Regierungsmehrheit geschlossen zu, die Union ist gespalten. Der Boykott der Arabischen Liga bleibt aus.'),
         w: { usa: 6, grossbritannien: 3, frankreich: 2, haushalt: -6, ansehen: -1, koalition: -3 }, setze: ['luxemburger_abkommen'] },
       { text: 'Die Summe deutlich kürzen.',
         ergebnis: 'Die israelische Delegation reist ab und kehrt erst nach amerikanischer Vermittlung zurück. Das Abkommen kommt kleiner und mit bitterem Nachgeschmack zustande.',
@@ -458,12 +458,12 @@ Die Westmächte machen klar, dass sie nicht eingreifen werden. Der RIAS sendet B
     datum: 'August 1953',
     ab: 1953.2, ordnung: 8,
     wenn: s => !s.f.neutral && wahlIn(s, 1953.2),
-    absender: 'Bundesgeschäftsstelle der CDU',
+    absender: s => (spdRegiert(s) ? 'Parteivorstand der SPD' : 'Bundesgeschäftsstelle der CDU'),
     ascii: 'plakat',
-    text: s => `Am 6. September wird der zweite Bundestag gewählt. Die Union liegt in den Umfragen bei ${String(s.w.zustimmung).replace('.', ',')} Prozent. Die Wirtschaft wächst mit ${String(s.w.wachstum).replace('.', ',')} Prozent, die Arbeitslosigkeit liegt bei ${String(s.w.arbeitslosigkeit).replace('.', ',')} Prozent.
+    text: s => `Am 6. September wird der zweite Bundestag gewählt. Die ${spdRegiert(s) ? 'SPD' : 'Union'} liegt in den Umfragen bei ${String(s.w.zustimmung).replace('.', ',')} Prozent. Die Wirtschaft wächst mit ${String(s.w.wachstum).replace('.', ',')} Prozent, die Arbeitslosigkeit liegt bei ${String(s.w.arbeitslosigkeit).replace('.', ',')} Prozent.
 
-Womit soll die Union in den Wahlkampf ziehen?`,
-    optionen: [
+Womit soll die ${spdRegiert(s) ? 'SPD' : 'Union'} in den Wahlkampf ziehen?`,
+    optionen: s => (spdRegiert(s) ? SPD_WAHLKAMPF : [
       { text: '„Alle Wege des Marxismus führen nach Moskau“ – Sicherheit und Westbindung.', hist: true,
         ergebnis: 'Die Plakate sind drastisch, aber nach dem 17. Juni wirken sie.',
         w: s => ({ ansehen: s.w.moskau <= 45 ? 4 : 2, moskau: -2 }) },
@@ -473,7 +473,7 @@ Womit soll die Union in den Wahlkampf ziehen?`,
       { text: 'Einheit in Freiheit – die Union als Partei der Wiedervereinigung.',
         ergebnis: 'Ein Wahlkampf, der vor allem Vertriebene und Protestanten anspricht.',
         w: s => ({ ansehen: Math.round(s.w.einheit / 10) + 1 }) },
-    ],
+    ]),
     historisch: 'Die Union gewann die Wahl am 6. September 1953 mit 45,2 Prozent deutlich. Das Plakat „Alle Wege des Marxismus führen nach Moskau“ wurde zu einem der bekanntesten Motive der Adenauer-Zeit.',
   },
 ];

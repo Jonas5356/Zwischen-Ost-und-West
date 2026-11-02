@@ -244,6 +244,13 @@ button { font: inherit; color: inherit; }
 .diagramm { width: 100%; max-width: 640px; height: auto; margin: 10px 0 18px; }
 .diagramm text { font-family: var(--din); font-size: 12px; fill: var(--grau); }
 
+/* Programm und Updates */
+.programm { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 18px; padding-top: 14px; border-top: 1px dashed var(--linie); }
+.programm-version { font-family: var(--din); color: var(--grau); margin-right: auto; }
+.programm-status { flex-basis: 100%; margin: 0; font-size: 15px; min-height: 1.3em; }
+.update-band { position: fixed; top: 12px; left: 50%; transform: translateX(-50%); z-index: 20; display: flex; align-items: center; gap: 12px; max-width: calc(100vw - 32px);
+  background: var(--papier); color: var(--farbband); border: 1px solid var(--linie); border-left: 6px solid var(--gruen); padding: 8px 12px 8px 16px; font-family: var(--din); box-shadow: 0 10px 22px rgba(0,0,0,.35); }
+.update-band[hidden] { display: none; }
 .meldung { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--farbband); color: var(--papier); font-family: var(--din); padding: 8px 18px; box-shadow: 0 10px 20px rgba(0,0,0,.4); }
 
 @media (max-width: 1000px) {

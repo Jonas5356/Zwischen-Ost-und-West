@@ -1,33 +1,10 @@
 // Enden des Spiels und der Abschlussbericht
 import { jahrVon, zeitText } from '../../../engine.js';
+import { vollerName } from './modell.js';
 
 const pct = x => `${x.toFixed(1).replace('.', ',')}\u00a0%`;
 
-function spdKandidat(s) {
-  const j = jahrVon(s.zeit);
-  if (j < 1960) return 'Erich Ollenhauer';
-  return 'Willy Brandt';
-}
-
 export const ENDEN = {
-  wahlniederlage: {
-    titel: 'Die Union in der Opposition',
-    ascii: 'urne',
-    text: s => {
-      const e = s.wahlen[s.wahlen.length - 1];
-      const j = jahrVon(s.zeit);
-      return `${e.gesamtdeutsch ? 'Bei der Wahl im vereinten Deutschland' : `Bei der Bundestagswahl ${j}`} kommt die Union auf ${pct(e.stimmen.Union)}. Für eine Regierung reicht es nicht. ${spdKandidat(s)} wird mit den Stimmen von SPD${e.sitze.FDP ? ' und FDP' : ''} zum Bundeskanzler gewählt.
-
-${e.gesamtdeutsch ? 'Die Einheit, für die du so viel riskiert hast, wird nun von anderen gestaltet. In den Geschichtsbüchern wirst du trotzdem stehen: als der Kanzler, der sie möglich gemacht hat.' : `${s.kanzler} räumt das Palais Schaumburg. Die Union muss lernen, was Opposition heißt.`}`;
-    },
-  },
-  misstrauensvotum: {
-    titel: 'Das konstruktive Misstrauensvotum',
-    ascii: 'bundeshaus',
-    text: s => `Die Koalition ist zerbrochen. Mit den Stimmen der früheren Partner wählt der Bundestag ${spdKandidat(s)} zum neuen Bundeskanzler. Das Grundgesetz hat genau diesen Fall vorgesehen: Ein Kanzler kann nur gestürzt werden, wenn zugleich ein neuer gewählt wird.
-
-Die Ära der Union endet ${zeitText(s.zeit)} – früher als in der Geschichte.`,
-  },
   krieg: {
     titel: 'Der Krieg',
     ascii: 'pilz',
@@ -57,6 +34,16 @@ Die Bundesrepublik, kaum gegründet, ist wieder ein besetztes Land. ${zeitText(s
     text: s => bericht(s).text,
   },
 };
+
+/** Alle Kanzler mit Partei und Amtszeit, z. B. „Adenauer (CDU/CSU, 1949–1957), Ollenhauer (SPD, seit 1957)“ */
+function kanzlerText(s) {
+  const l = s.kanzlerliste?.length ? s.kanzlerliste : [{ name: s.kanzler, partei: 'Union', ab: 1949.2 }];
+  return l.map((k, i) => {
+    const bis = l[i + 1]?.ab;
+    const zeit = bis === undefined ? `seit ${jahrVon(k.ab)}` : jahrVon(k.ab) === jahrVon(bis) ? `${jahrVon(k.ab)}` : `${jahrVon(k.ab)}–${jahrVon(bis)}`;
+    return `${vollerName(k.name)} (${k.partei === 'SPD' ? 'SPD' : 'CDU/CSU'}, ${zeit})`;
+  }).join(', ');
+}
 
 export function bericht(s) {
   const w = s.w;
@@ -89,9 +76,9 @@ export function bericht(s) {
   absaetze.push(`Die Wirtschaft ist im Durchschnitt um ${pct(mittel)} im Jahr gewachsen (historisch rund 8 %). Die Arbeitslosigkeit liegt bei ${pct(w.arbeitslosigkeit)} (historisch 1963: 0,8 %). Die Haushaltslage ist ${w.haushalt >= 50 ? 'solide' : w.haushalt >= 25 ? 'angespannt, aber beherrschbar' : 'kritisch'}.`);
   // Innenpolitik
   if (s.wahlen.length) {
-    absaetze.push('Wahlergebnisse der Union: ' + s.wahlen.map(e => `${jahrVon(e.zeit)}: ${pct(e.stimmen.Union)}`).join(' · ') + ' (historisch 1953: 45,2 %, 1957: 50,2 %, 1961: 45,3 %).');
+    absaetze.push('Wahlergebnisse: ' + s.wahlen.map(e => `${jahrVon(e.zeit)}: Union ${pct(e.stimmen.Union)}, SPD ${pct(e.stimmen.SPD)}`).join(' · ') + ' (historisch 1953: 45,2 % und 28,8 %, 1957: 50,2 % und 31,8 %, 1961: 45,3 % und 36,2 %).');
   }
-  absaetze.push(`Kanzler: ${s.kanzler}${f.praesident_adenauer ? ' – Konrad Adenauer ist Bundespräsident' : ''}. Regierungsparteien: ${s.regierung.map(p => ({ Union: 'CDU/CSU', SPD: 'SPD', FDP: 'FDP', Kleine: 'DP/BHE' }[p] || p)).join(', ')}.`);
+  absaetze.push(`Bundeskanzler: ${kanzlerText(s)}${f.praesident_adenauer ? '. Konrad Adenauer ist Bundespräsident' : ''}. Regierungsparteien zuletzt: ${s.regierung.map(p => ({ Union: 'CDU/CSU', SPD: 'SPD', FDP: 'FDP', Kleine: 'DP/BHE' }[p] || p)).join(', ')}.`);
   // Geschichtsnähe
   const mitHist = s.chronik.filter(c => c.hist !== null);
   const gleich = mitHist.filter(c => c.hist).length;

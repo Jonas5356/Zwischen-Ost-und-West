@@ -1,6 +1,6 @@
 # Plan: Mehrere Länder mit Regierungen und Zielen
 
-Stand: November 2026. Phase 1 ist umgesetzt (Version 0.2.0).
+Stand: November 2026. Phase 1 ist umgesetzt (Version 0.2.0). Seit 0.3.0 kann in der BRD auch die SPD regieren, ohne dass das Spiel endet – Voraussetzung dafür, dass die BRD später vom Spiel gesteuert werden kann.
 
 ## Ziel
 
@@ -16,6 +16,7 @@ Eine gemeinsame Welt 1949–1964, später erweiterbar, mit mehreren Ländern. Je
 - **Zeitraum:** vorerst 1949–1964, mit dem Ziel späterer Erweiterung.
 - **Spielstände:** Beim Umbau dürfen alte Spielstände ungültig werden.
 - **Länderreihenfolge** nach Frankreich: entscheidet Jonas später.
+- **Gespielt wird ein Staat, nicht eine Partei:** Regierungswechsel beenden das Spiel nicht; der Spieler führt die neue Regierung weiter (umgesetzt für die BRD in 0.3.0: Union oder SPD als Kanzlerpartei, Koalitionswahl nur, wenn die Kanzlerpartei regieren kann). Für die BRD-Regierungen in Phase 2 heißt das: Union- und SPD-Regierungen bekommen eigene Ziele.
 - **Offen:** Ziele der anderen Länder offen anzeigen (wie HOI4) oder nur vermutet (über Botschaftsberichte, verborgene Typen, z. B. ob die Stalin-Note ernst gemeint ist)?
 
 ## Aufbau
