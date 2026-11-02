@@ -21,7 +21,7 @@
         <span class="schild-zeit">1949–1964</span>
       </div>
       <pre class="ascii titel-ascii" id="titel-ascii" aria-hidden="true"></pre>
-      <p class="deckel-text" id="titel-text"></p>
+      <div class="deckel-text" id="titel-text"></div>
       <div class="deckel-knoepfe">
         <button class="knopf haupt" id="k-neu">Neues Spiel</button>
         <button class="knopf" id="k-fortsetzen" hidden>Fortsetzen</button>
@@ -37,6 +37,7 @@
       <div class="eingang" id="eingang" aria-live="polite"></div>
       <div class="kopf-mitte" id="kopf-regierung"></div>
       <nav class="kopf-knoepfe">
+        <button class="knopf klein" id="k-zeitung" title="Die Zeitung zum Halbjahr (Z)">Zeitung<span class="neu-punkt" id="zeitung-neu" hidden aria-label="neue Ausgabe"></span></button>
         <button class="knopf klein" id="k-chronik" title="Alle bisherigen Entscheidungen (C)">Chronik</button>
         <button class="knopf klein" id="k-speichern" title="Spielstand speichern">Speichern</button>
         <button class="knopf klein" id="k-menue" title="Menü (Esc)">Menü</button>
@@ -51,6 +52,17 @@
   </div>
 
   <!-- Dialoge -->
+  <dialog id="d-zeitung" class="dialog breit zeitung-dialog">
+    <div class="dialog-kopf">
+      <div class="zeitung-blaettern">
+        <button class="knopf klein" id="z-aelter">Ältere Ausgabe</button>
+        <button class="knopf klein" id="z-neuer">Neuere Ausgabe</button>
+      </div>
+      <button class="knopf klein" data-schliessen>Schließen</button>
+    </div>
+    <div class="zeitung" id="zeitung"></div>
+  </dialog>
+
   <dialog id="d-chronik" class="dialog breit">
     <div class="dialog-kopf"><h2>Chronik</h2><button class="knopf klein" data-schliessen>Schließen</button></div>
     <ol class="chronik" id="chronik-liste"></ol>
@@ -84,9 +96,10 @@
       <p>Du führst die Union als Kanzlerpartei durch die ersten fünfzehn Jahre der Bundesrepublik, vom Herbst 1949 bis zum Frühjahr 1964. Jede Runde ist ein Halbjahr.</p>
       <p>In jedem Halbjahr landen die historischen Ereignisse als Vorlagen auf deinem Schreibtisch, dazu Briefe von Ministern, Verbänden und Bürgern. Am Ende des Halbjahrs bringst du ein Regierungsvorhaben in den Bundestag ein. Deine Entscheidungen verändern das Lagebild – und sie können die Geschichte in eine andere Richtung lenken: Wer die Stalin-Note ernst nimmt, erlebt vielleicht keinen Mauerbau.</p>
       <p><strong>An der Macht bleiben.</strong> 1953, 1957 und 1961 wird gewählt. Verliert die Union die Mehrheit oder findet sie keinen Koalitionspartner, ist das Spiel vorbei. Auch ein Bruch der Koalition, ein leerer Haushalt, eine Eskalation mit Moskau oder der Vertrauensverlust bei den Westmächten können das Ende bedeuten. Ein Kanzlerwechsel innerhalb der Union beendet das Spiel nicht.</p>
+      <p><strong>Die Zeitung.</strong> Zu jedem Halbjahr erscheint eine Ausgabe der „Depesche“: was im letzten Halbjahr entschieden wurde, Wahlergebnisse, Wirtschaftsdaten und Meldungen aus aller Welt. Für deine Entscheidungen brauchst du sie nicht, aber sie erzählt die Geschichte mit. Ein Punkt am Knopf „Zeitung“ zeigt eine ungelesene Ausgabe an; ältere Ausgaben kannst du nachblättern.</p>
       <p><strong>Das Lagebild.</strong> Rechts siehst du, wie Washington, Paris, London und Moskau zur Bundesrepublik stehen (hoch heißt immer gut, bei 0 droht bei Moskau der Krieg), wie souverän die Bundesrepublik ist und wie realistisch die Einheit bleibt. Darunter Umfragen, Koalitionsklima und Wirtschaftsdaten. Beziehungen kehren langsam zur Mitte zurück, wenn man sie nicht pflegt; das Ansehen des Kanzlers verblasst mit der Zeit.</p>
       <p><strong>Randvermerke.</strong> Nach jeder Entscheidung erfährst du in violetter Schrift, was tatsächlich geschah. Im Menü kannst du das abschalten, ebenso die Pfeile, die die Richtung der Auswirkungen andeuten.</p>
-      <p><strong>Tastatur.</strong> Mit 1–4 wählst du einen Vorschlag, mit der Eingabetaste geht es weiter. C öffnet die Chronik, Esc das Menü. Geräusche und Lautstärke stellst du im Menü ein.</p>
+      <p><strong>Tastatur.</strong> Mit 1–4 wählst du einen Vorschlag, mit der Eingabetaste geht es weiter. Z öffnet die Zeitung, C die Chronik, Esc das Menü. Geräusche und Lautstärke stellst du im Menü ein.</p>
     </div>
   </dialog>
 

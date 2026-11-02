@@ -59,7 +59,7 @@ Der Kern des Streits ist die Reihenfolge. Der Westen verlangt zuerst freie, inte
           { p: 0.65,
             ergebnis: 'Der Gesamtdeutsche Rat tritt zusammen. Ost-CDU, LDPD und SED sitzen neben Union, SPD und FDP. Ein Vertrag über die Einheit wird ausgehandelt.',
             w: { einheit: 18, moskau: 10 }, setze: ['neutral', 'paritaet'], plane: [{ id: 'n_abkommen', in: 1 }] },
-          { ergebnis: 'Trotz deines Entgegenkommens zieht Moskau die Verhandlungen in die Länge. Der Westen verliert die Geduld; die Konferenz zerfällt.',
+          { ergebnis: 'Trotz des Bonner Entgegenkommens zieht Moskau die Verhandlungen in die Länge. Der Westen verliert die Geduld; die Konferenz zerfällt.',
             w: { einheit: -5 }, aktion: s => scheitern(s) },
         ] },
       { text: 'Die Konferenz für gescheitert erklären und zu den Westverträgen zurückkehren.', richtung: 'west',
@@ -82,7 +82,7 @@ Offen ist ein Punkt, der alles entscheidet: die Grenze im Osten. Moskau verlangt
         w: { ansehen: -8, koalition: -15, einheit: 15 },
         zufall: [
           { p: s => 0.8 - Math.max(0, 50 - s.w.moskau) / 100,
-            ergebnis: 'Der Vertrag wird unterzeichnet. In Vertriebenenversammlungen werden Bilder von dir verbrannt. Aber Deutschland wird eins sein.',
+            ergebnis: 'Der Vertrag wird unterzeichnet. In Vertriebenenversammlungen werden Bilder des Kanzlers verbrannt. Aber Deutschland wird eins sein.',
             setze: ['grenze_anerkannt'], plane: [{ id: 'n_wahlkampf', in: 1 }] },
           { ergebnis: 'Selbst dieses Zugeständnis reicht nicht. Im Kreml hat sich die Linie geändert, die DDR soll bleiben. Die Verhandlungen brechen ab.',
             w: { einheit: -20 }, aktion: s => scheitern(s) },
@@ -369,7 +369,7 @@ Für viele Ungarn war das neutrale Deutschland ein Versprechen. Nun richten sich
       { text: 'Klarstellen: Die Grenze ist endgültig.', ergebnis: 'Die Verbände toben, die Nachbarn sind beruhigt.', w: { ansehen: -3, moskau: 4 } },
       { text: 'Verständnis für die Vertriebenen zeigen.', ergebnis: 'Warschau und Moskau horchen auf.', w: { ansehen: 2, moskau: -8 } },
     ] : [
-      { text: 'Die Grenze jetzt anerkennen.', ergebnis: 'Ein schmerzhafter Schritt, den viele dir nie verzeihen werden.', w: { ansehen: -5, moskau: 10, koalition: -6 }, setze: ['grenze_anerkannt'] },
+      { text: 'Die Grenze jetzt anerkennen.', ergebnis: 'Ein schmerzhafter Schritt, den viele dem Kanzler nie verzeihen werden.', w: { ansehen: -5, moskau: 10, koalition: -6 }, setze: ['grenze_anerkannt'] },
       { text: 'Am Rechtsstandpunkt festhalten.', ergebnis: 'Moskau erhöht den Druck.', w: { ansehen: 2, moskau: -8 } },
     ]),
   },

@@ -7,6 +7,10 @@
 @font-face { font-family: 'Barlow SC'; src: url(fonts/barlow-semi-condensed-latin-500-normal.woff2) format('woff2'); font-weight: 500; }
 @font-face { font-family: 'Barlow SC'; src: url(fonts/barlow-semi-condensed-latin-600-normal.woff2) format('woff2'); font-weight: 600; }
 @font-face { font-family: 'Barlow SC'; src: url(fonts/barlow-semi-condensed-latin-700-normal.woff2) format('woff2'); font-weight: 700; }
+@font-face { font-family: 'UnifrakturMaguntia'; src: url(fonts/unifrakturmaguntia-latin-400-normal.woff2) format('woff2'); font-weight: 400; }
+@font-face { font-family: 'Old Standard TT'; src: url(fonts/old-standard-tt-latin-400-normal.woff2) format('woff2'); font-weight: 400; font-style: normal; }
+@font-face { font-family: 'Old Standard TT'; src: url(fonts/old-standard-tt-latin-400-italic.woff2) format('woff2'); font-weight: 400; font-style: italic; }
+@font-face { font-family: 'Old Standard TT'; src: url(fonts/old-standard-tt-latin-700-normal.woff2) format('woff2'); font-weight: 700; font-style: normal; }
 
 :root {
   --schreibtisch: #2b3530;   /* grüner Filz der Schreibunterlage */
@@ -258,3 +262,26 @@ button { font: inherit; color: inherit; }
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; }
 }
+
+/* ---------- Zeitung ---------- */
+.knopf .neu-punkt { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--stempel); margin-left: 6px; vertical-align: 1px; }
+.zeitung-dialog { --zeitungspapier: #ece6d4; --druckschwarz: #24221e; background: var(--zeitungspapier); width: min(980px, calc(100vw - 32px)); }
+.zeitung-dialog .dialog-kopf { background: var(--zeitungspapier); }
+.zeitung-blaettern { display: flex; gap: 8px; }
+.zeitung { padding: 8px 40px 40px !important; color: var(--druckschwarz); font-family: 'Old Standard TT', Georgia, serif; font-size: 16px; line-height: 1.5; }
+.zkopf { text-align: center; border-bottom: 4px double var(--druckschwarz); padding-bottom: 8px; margin-bottom: 18px; }
+.zkopf-meta { display: flex; justify-content: space-between; font-size: 13px; border-bottom: 1px solid var(--druckschwarz); padding: 4px 0; font-style: italic; }
+.titelzeile { font-family: 'UnifrakturMaguntia', 'Old Standard TT', serif; font-size: clamp(48px, 8vw, 84px); line-height: 1.05; margin: 10px 0 2px; }
+.zkopf-unter { font-size: 13px; letter-spacing: .04em; }
+.aufmacher { border-bottom: 1px solid var(--druckschwarz); padding-bottom: 14px; margin-bottom: 16px; }
+.aufmacher h3 { font-family: 'Barlow SC', sans-serif; font-weight: 700; font-size: clamp(30px, 4.6vw, 44px); line-height: 1.02; margin: 0 0 6px; }
+.aufmacher .unterzeile { font-style: italic; font-size: 18px; margin: 0 0 10px; }
+.aufmacher p { margin: 0 0 .6em; max-width: 72ch; }
+.spalten { columns: 3 16em; column-gap: 28px; column-rule: 1px solid #b9b19c; }
+.spalten section { break-inside: avoid-column; margin-bottom: 18px; }
+.spalten h4 { font-family: 'Barlow SC', sans-serif; font-weight: 700; font-size: 18px; margin: 0 0 6px; border-bottom: 1px solid var(--druckschwarz); }
+.meldung-z { margin-bottom: 10px; }
+.meldung-z h5 { font-family: 'Old Standard TT', serif; font-weight: 700; font-size: 16px; margin: 0 0 2px; }
+.meldung-z p { margin: 0 0 6px; text-align: justify; hyphens: auto; }
+.kasten p { margin: 0 0 6px; }
+.kasten { border: 1px solid var(--druckschwarz); padding: 8px 10px; }

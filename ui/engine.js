@@ -351,16 +351,21 @@ export function starteRunde(W, welt) {
 
   for (const land of Object.keys(W.laender)) {
     const M = W.laender[land];
-    if (M.modell?.lagebericht) welt.laender[land].lage = M.modell.lagebericht(sicht(W, welt, land));
+    if (!M.modell?.lagebericht) continue;
+    const L = welt.laender[land];
+    L.lage = M.modell.lagebericht(sicht(W, welt, land));
+    // Meldungen jedes Halbjahrs aufheben, damit ältere Zeitungsausgaben nachlesbar bleiben
+    (L.ausgaben ||= []).push({ zeit: welt.zeit, meldungen: L.lage?.meldungen || [] });
   }
-  welt.phase = 'lage';
+  // Das Halbjahr beginnt direkt mit dem ersten Vorgang (der Lagebericht steht in der Zeitung)
+  welt.phase = 'spiel';
 }
 
 /** Der Vorgang, um den es gerade geht – aus Sicht des Spielers */
 export function aktuelles(W, welt) {
   if (welt.ende) return { typ: 'ende' };
   const land = welt.spieler[0];
-  if (welt.phase === 'lage') return { typ: 'lage', land };
+  if (welt.phase === 'lage') welt.phase = 'spiel'; // ältere Spielstände
   if (welt.phase === 'wahl') {
     const L = welt.laender[welt.wahlLand];
     return { typ: 'wahl', land: welt.wahlLand, ergebnis: L.wahlen[L.wahlen.length - 1] };

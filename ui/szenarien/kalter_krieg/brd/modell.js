@@ -243,7 +243,7 @@ export const dynamisch = {
           aktion: st => { st.regierung = partner; st.w.koalition = 45; delete st.f.grosse_koalition; } });
         opts.push({ text: 'Koalition mit der FDP ohne jede Zusage durchsetzen.',
           zufall: [
-            { p: 0.35, ergebnis: 'Die FDP fällt um. Die Zeitungen sprechen von der „Umfallerpartei“ – du regierst ohne Befristung weiter.',
+            { p: 0.35, ergebnis: 'Die FDP fällt um. Die Zeitungen sprechen von der „Umfallerpartei“ – der Kanzler regiert ohne Befristung weiter.',
               aktion: st => { st.regierung = partner; st.w.koalition = 30; } },
             { ergebnis: 'Die FDP bricht die Verhandlungen ab. Eine andere Mehrheit muss her.',
               aktion: (st, a) => { st.f['fdp_lehnt_ab_' + st.zeit] = true; st.einschub = ['dyn:regierungsbildung']; delete st.erledigt['dyn:regierungsbildung']; } },
@@ -295,7 +295,7 @@ export const dynamisch = {
     const zugestaendnisFlag = 'zugestaendnis_' + (s.f.legislatur || 1);
     if (!s.f[zugestaendnisFlag]) {
       opts.push({ text: `Der ${name} weitreichende Zugeständnisse machen, um die Koalition zu retten.`,
-        ergebnis: 'Der Koalitionsausschuss tagt bis in die Nacht. Die Regierung bleibt im Amt – um den Preis deiner Autorität.',
+        ergebnis: 'Der Koalitionsausschuss tagt bis in die Nacht. Die Regierung bleibt im Amt – um den Preis der Autorität des Kanzlers.',
         w: { ansehen: -5, koalition: 40 }, setze: [zugestaendnisFlag] });
     }
     if (rest.length && hatMehrheit(s, rest)) {
@@ -338,16 +338,16 @@ export const dynamisch = {
         : 'Sowjetische Panzerverbände sind in der DDR in Bereitschaft versetzt worden, die Zugangswege nach Berlin sind gesperrt. Moskau macht die Bundesregierung persönlich für die Lage verantwortlich. Die Westmächte fragen, wie weit Bonn zu gehen bereit ist.',
       optionen: [
         { text: 'Einlenken: öffentliche Zugeständnisse an Moskau.',
-          ergebnis: 'Die Krise flaut ab. In Washington und in der eigenen Partei wird dir Schwäche vorgeworfen.',
+          ergebnis: 'Die Krise flaut ab. In Washington und in der eigenen Partei wird dem Kanzler Schwäche vorgeworfen.',
           w: { moskau: 35, usa: -8, ansehen: -6, souveraenitaet: -4 } },
         { text: 'Die Supermächte zur Vermittlung drängen und selbst schweigen.',
-          ergebnis: 'Hinter verschlossenen Türen verhandeln Washington und Moskau – über deinen Kopf hinweg.',
+          ergebnis: 'Hinter verschlossenen Türen verhandeln Washington und Moskau – über Bonns Kopf hinweg.',
           w: { moskau: 22, ansehen: -3, einheit: -3, usa: -2 } },
         { text: 'Standhalten.',
           zufall: [
             { p: s2 => 0.25, ergebnis: s2 => (s2.f.vereinigt ? 'Ein Zwischenfall an der Oder gerät außer Kontrolle.' : 'Ein Zwischenfall an der Zonengrenze gerät außer Kontrolle.'),
               aktion: (st, a) => a.ende('krieg') },
-            { ergebnis: 'Moskau zieht die Panzer zurück. Du hast gepokert – und gewonnen.',
+            { ergebnis: 'Moskau zieht die Panzer zurück. Der Kanzler hat gepokert – und gewonnen.',
               w: { moskau: 20, ansehen: 5, usa: 3 } },
           ] },
       ],

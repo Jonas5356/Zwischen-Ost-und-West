@@ -23,4 +23,6 @@ Der Ausbauplan (mehrere Länder, Regierungen mit Zielen, vom Spiel gesteuerte L�
 - Neue Ereignisse brauchen einen Weg, auf dem sie erreichbar sind (Test „Jedes Ereignis kommt vor“).
 - Ereignisse, die auch im vereinigten Deutschland vorkommen, dürfen dort nicht von DDR, Mauer, Zonengrenze oder „Bundesrepublik“ sprechen: Texte als Funktion schreiben (`land(s)`, `hauptstadt(s)`) oder das Ereignis mit `geteilt` einschränken. `tests/einheit.test.mjs` prüft das.
 - Vorhaben ohne Kosten sind immer wählbar, auch bei leerem Haushalt.
+- Vorlagen (Ereignistexte, Optionen) sprechen den Spieler mit „du“ an; Ergebnistexte (`ergebnis`) stehen in der dritten Person („der Kanzler“, „Bonn“), weil sie im Vermerk und in der Zeitung erscheinen. `tests/spieler.mjs` prüft das.
+- Das Halbjahr beginnt ohne Lagebericht direkt mit dem ersten Vorgang. Zeitgeschehen und Rückblick stehen in der Zeitung (`main.js`, `ausgabe()`); die Meldungen jedes Halbjahrs liegen in `L.ausgaben`.
 - Historische Angaben in `historisch` und `zeitgeschehen.js` sorgfältig prüfen; erfundene Ereignisse im Alternativstrang als Fiktion kennzeichnen.

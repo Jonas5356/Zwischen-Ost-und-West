@@ -1,7 +1,7 @@
 {
   "name": "zwischen-ost-und-west",
   "private": true,
-  "version": "0.2.0",
+  "version": "0.2.1",
   "type": "module",
   "description": "Historische Politiksimulation: die Bundesrepublik zwischen Ost und West, 1949–1964",
   "license": "MIT",

@@ -48,7 +48,7 @@ async function zeigeTitel() {
   stoppSzene();
   $('spiel').hidden = true;
   $('titel').hidden = false;
-  $('titel-text').textContent = sz.beschreibung;
+  $('titel-text').innerHTML = absaetze(sz.beschreibung + '\n\nDu spielst die Union als Kanzlerpartei. Jedes Halbjahr legen dir Ministerien und Botschaften Vorgänge zur Entscheidung vor; am Ende bringst du ein Regierungsvorhaben ein. 1953, 1957 und 1961 wird gewählt.');
   stoppSzene = spieleSzene($('titel-ascii'), 'bundeshaus', { bewegung: bewegung() });
   const auto = await Sp.lade('auto');
   $('k-fortsetzen').hidden = !(ladbar(auto) && !auto.ende);
@@ -68,9 +68,15 @@ function zeigeSpiel() {
 
 // ---------------------------------------------------------------- Zeichnen
 
+let angezeigteZeit = null;
+
 function zeichne() {
   stoppSzene();
   tippAbbruch = null;
+  if (angezeigteZeit !== null && angezeigteZeit !== s.zeit && !s.ende) {
+    meldung(`${E.zeitLang(s.zeit)}: Die neue Ausgabe der Depesche liegt bereit.`);
+  }
+  angezeigteZeit = s.zeit;
   zeichneKopf();
   zeichneLage();
   const a = E.aktuelles(W, welt);
@@ -78,9 +84,9 @@ function zeichne() {
   blatt.className = 'blatt';
   blatt.scrollTop = 0;
   blatt.closest('.mappe').scrollTop = 0;
-  if (['lage', 'ereignis', 'vorhaben', 'ende'].includes(a.typ)) Ton.blatt();
+  if (a.typ === 'lage') { E.lageGesehen(W, welt); return zeichne(); }
+  if (['ereignis', 'vorhaben', 'ende'].includes(a.typ)) Ton.blatt();
   switch (a.typ) {
-    case 'lage': zeichneLagebericht(blatt); break;
     case 'ereignis': zeichneEreignis(blatt, a.ev, a.land); break;
     case 'ergebnis': zeichneErgebnis(blatt, a.ergebnis); break;
     case 'vorhaben': zeichneVorhaben(blatt, a.liste); break;
@@ -95,6 +101,7 @@ function zeichne() {
 function zeichneKopf() {
   $('eingang').innerHTML = `<span class="stempel">${esc(E.zeitLang(s.zeit))}<small>Runde ${s.runde} von ${E.zeitIndex(W.ende) - E.zeitIndex(W.start) + 1}</small></span>`;
   $('kopf-regierung').innerHTML = `<strong>Bundeskanzler ${esc(s.kanzler)}</strong>, Regierung aus ${esc(regierungText(s))}`;
+  $('zeitung-neu').hidden = s.zeitungGelesen === s.zeit;
 }
 
 const SKALA = {
@@ -202,34 +209,88 @@ function pfeileHtml(o) {
   return teile.length ? `<span class="pfeile">${teile.join('')}</span>` : '';
 }
 
-// ---------------------------------------------------------------- Lagebericht
+// ---------------------------------------------------------------- Zeitung
 
-function zeichneLagebericht(blatt) {
-  const v = s.verlauf;
-  const letzt = v[v.length - 1];
-  const vor = v.length > 1 ? v[v.length - 2] : null;
-  let html = briefkopf('Lagebericht', 'Presse- und Informationsamt der Bundesregierung');
-  html += `<pre class="ascii" aria-hidden="true"></pre>`;
-  html += `<h2>Die Lage zu Beginn des ${esc(E.zeitLang(s.zeit).replace('Erstes', 'ersten').replace('Zweites', 'zweiten'))}</h2>`;
-  html += `<div class="text">`;
-  if (s.runde === 1) html += absaetze(sz.beschreibung + '\n\nDu spielst die Union als Kanzlerpartei. Jedes Halbjahr legen dir Ministerien und Botschaften Vorgänge zur Entscheidung vor; am Ende bringst du ein Regierungsvorhaben ein. 1953, 1957 und 1961 wird gewählt.');
-  const meldungen = s.lage?.meldungen || [];
+const MONATE = { 1: 'Januar', 2: 'Juli' };
+let zeitungZeit = null;
+
+/** Eine Ausgabe zu Beginn des Halbjahrs `zeit`: berichtet über das vergangene Halbjahr */
+function ausgabe(zeit) {
+  const vor = E.zeitPlus(zeit, -1);
+  const gleich = (a, b) => E.zeitIndex(a) === E.zeitIndex(b);
+  const meldungen = (s.ausgaben || []).find(a => gleich(a.zeit, zeit))?.meldungen
+    ?? (gleich(zeit, s.zeit) ? s.lage?.meldungen : null) ?? [];
+  const entscheidungen = s.chronik.filter(c => gleich(c.zeit, vor));
+  const wahl = s.wahlen.find(w => gleich(w.zeit, vor));
+  const wirtschaft = s.verlauf.find(v => gleich(v.zeit, vor));
+  const davor = s.verlauf.find(v => gleich(v.zeit, E.zeitPlus(vor, -1)));
+  const erste = gleich(zeit, W.start);
+  const nr = E.zeitIndex(zeit) - E.zeitIndex(W.start) + 1;
+
+  let html = `<header class="zkopf">
+    <div class="zkopf-meta"><span>Nr. ${nr}</span><span>${s.f.hauptstadt_berlin ? 'Berlin' : 'Bonn'}, ${erste ? 'September' : MONATE[E.halbVon(zeit)]} ${E.jahrVon(zeit)}</span><span>Preis 20 Pfennig</span></div>
+    <div class="titelzeile">Die Depesche</div>
+    <div class="zkopf-unter">Unabhängige Zeitung für Politik, Wirtschaft und Kultur</div>
+  </header>`;
+
+  // Aufmacher
+  const hauptsachen = entscheidungen.filter(c => c.art === 'haupt' && !c.id.startsWith('dyn:'));
+  let aufmacher = null;
+  const rest = [...entscheidungen];
+  if (erste) {
+    aufmacher = { titel: 'Die neue Republik', unter: `Bundeskanzler ${s.kanzler === 'Adenauer' ? 'Adenauer' : s.kanzler} tritt sein Amt an`, text: sz.beschreibung };
+  } else if (wahl) {
+    const st = wahl.stimmen;
+    const bildung = entscheidungen.find(c => c.id === 'dyn:regierungsbildung');
+    aufmacher = {
+      titel: `${wahl.gesamtdeutsch ? 'Gesamtdeutsche Wahl' : 'Bundestagswahl'}: Union ${zahl(st.Union)} Prozent`,
+      unter: `SPD ${zahl(st.SPD)} %, FDP ${zahl(st.FDP)} %`,
+      text: bildung ? bildung.ergebnis : '',
+    };
+    if (bildung) rest.splice(rest.indexOf(bildung), 1);
+  } else if (hauptsachen.length) {
+    const c = hauptsachen[0];
+    aufmacher = { titel: c.titel, unter: `Bonn entscheidet: ${c.wahl}`, text: c.ergebnis };
+    rest.splice(rest.indexOf(c), 1);
+  }
+  if (aufmacher) {
+    html += `<article class="aufmacher"><h3>${esc(aufmacher.titel)}</h3><p class="unterzeile">${esc(aufmacher.unter)}</p>${absaetze(aufmacher.text)}</article>`;
+  }
+
+  html += `<div class="spalten">`;
+  if (rest.length) {
+    html += `<section><h4>Aus der Bundespolitik</h4>${rest.map(c => `<div class="meldung-z"><h5>${esc(c.titel)}</h5><p>${esc(c.ergebnis || c.wahl)}</p></div>`).join('')}</section>`;
+  }
   if (meldungen.length) {
-    html += `<p class="unterueberschrift">Aus dem Zeitgeschehen</p><ul class="meldungen">${meldungen.map(m => `<li>${esc(m)}</li>`).join('')}</ul>`;
+    html += `<section><h4>Aus aller Welt</h4>${meldungen.map(m => `<div class="meldung-z"><p>${esc(m)}</p></div>`).join('')}</section>`;
   }
-  if (letzt) {
-    html += `<p class="unterueberschrift">Wirtschaft</p>`;
-    html += `<p>Die Wirtschaft ist im vergangenen Halbjahr mit einer Jahresrate von ${zahl(letzt.wachstum)}&nbsp;% gewachsen, die Arbeitslosenquote liegt bei ${zahl(letzt.arbeitslosigkeit)}&nbsp;%${vor ? ` (vorher ${zahl(vor.arbeitslosigkeit)}&nbsp;%)` : ''}. Die Union kommt in Umfragen auf ${zahl(letzt.zustimmung)}&nbsp;%.</p>`;
+  if (wirtschaft) {
+    const pfeil = (a, b) => (b === undefined ? '' : a > b ? ' (gestiegen)' : a < b ? ' (gesunken)' : '');
+    html += `<section class="kasten"><h4>Wirtschaft und Umfragen</h4>
+      <p>Wachstum im vergangenen Halbjahr: <b>${zahl(wirtschaft.wachstum)}&nbsp;%</b> (Jahresrate)</p>
+      <p>Arbeitslosenquote: <b>${zahl(wirtschaft.arbeitslosigkeit)}&nbsp;%</b>${pfeil(wirtschaft.arbeitslosigkeit, davor?.arbeitslosigkeit)}</p>
+      <p>Die Union in Umfragen: <b>${zahl(wirtschaft.zustimmung)}&nbsp;%</b>${pfeil(wirtschaft.zustimmung, davor?.zustimmung)}</p>
+    </section>`;
   }
-  const wahl = (s.wahlplan || []).some(z => E.zeitIndex(z) === E.zeitIndex(s.zeit));
-  if (wahl) html += `<p><strong>In diesem Halbjahr wird ein neuer Bundestag gewählt.</strong></p>`;
-  const anzahl = welt.queue.filter(q => q.land === s.land && q.id !== '@vorhaben').length;
-  html += `<p>Auf dem Schreibtisch liegen ${anzahl === 1 ? 'ein Vorgang' : `${anzahl} Vorgänge`} zur Entscheidung.</p>`;
-  html += `</div><div class="weiter-zeile"><button class="knopf haupt" data-primaer id="k-weiter">Zum ersten Vorgang</button><span class="tastenhinweis">Eingabetaste</span></div>`;
-  blatt.innerHTML = html;
-  szene(blatt, s.runde === 1 ? 'bundeshaus' : null);
-  $('k-weiter').onclick = () => { E.lageGesehen(W, welt); zeichne(); };
-  tippe(blatt.querySelector('.text'));
+  if (gleich(zeit, s.zeit) && (s.wahlplan || []).some(z => gleich(z, zeit))) {
+    html += `<section class="kasten"><h4>Wahljahr</h4><p>In diesem Halbjahr wählen die Bürger einen neuen Bundestag. Die Parteien rüsten zum Wahlkampf.</p></section>`;
+  }
+  if (!rest.length && !meldungen.length && !wirtschaft) html += `<section><p>Ein ruhiges Halbjahr.</p></section>`;
+  html += `</div>`;
+  return html;
+}
+
+function zeigeZeitung(zeit = s.zeit) {
+  zeitungZeit = zeit;
+  $('zeitung').innerHTML = ausgabe(zeit);
+  $('zeitung').scrollTop = 0;
+  $('z-aelter').disabled = E.zeitIndex(zeit) <= E.zeitIndex(W.start);
+  $('z-neuer').disabled = E.zeitIndex(zeit) >= E.zeitIndex(s.zeit);
+  if (E.zeitIndex(zeit) === E.zeitIndex(s.zeit)) {
+    s.zeitungGelesen = s.zeit;
+    $('zeitung-neu').hidden = true;
+  }
+  if (!$('d-zeitung').open) { $('d-zeitung').showModal(); Ton.blatt(); }
 }
 
 // ---------------------------------------------------------------- Ereignis
@@ -477,6 +538,9 @@ document.addEventListener('DOMContentLoaded', () => {
   $('k-fortsetzen').onclick = async () => { const st = await Sp.lade('auto'); if (ladbar(st)) { uebernehme(st); zeigeSpiel(); } };
   $('k-laden').onclick = () => zeigePlaetze('laden');
   $('k-chronik').onclick = zeigeChronik;
+  $('k-zeitung').onclick = () => zeigeZeitung();
+  $('z-aelter').onclick = () => { Ton.blatt(); zeigeZeitung(E.zeitPlus(zeitungZeit, -1)); };
+  $('z-neuer').onclick = () => { Ton.blatt(); zeigeZeitung(E.zeitPlus(zeitungZeit, 1)); };
   $('k-speichern').onclick = () => zeigePlaetze('speichern');
   $('k-menue').onclick = () => $('d-menue').showModal();
   $('m-speichern').onclick = () => zeigePlaetze('speichern');
@@ -502,6 +566,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (b && document.activeElement?.tagName !== 'BUTTON') { e.preventDefault(); b.click(); }
     } else if (e.key === 'c' || e.key === 'C') {
       zeigeChronik();
+    } else if (e.key === 'z' || e.key === 'Z') {
+      zeigeZeitung();
     } else if (e.key === 'Escape') {
       $('d-menue').showModal();
     }

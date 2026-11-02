@@ -19,7 +19,11 @@ export function spiele(seed, strategie = 'zufall', log = null) {
     const a = E.aktuelles(W, welt);
     if (a.typ === 'lage') { E.lageGesehen(W, welt); continue; }
     if (a.typ === 'ergebnis') {
-      for (const x of a.ergebnis.texte) if (typeof x !== 'string' || x.includes('undefined')) throw new Error('Ergebnistext fehlerhaft: ' + a.ergebnis.titel);
+      for (const x of a.ergebnis.texte) {
+        if (typeof x !== 'string' || x.includes('undefined')) throw new Error('Ergebnistext fehlerhaft: ' + a.ergebnis.titel);
+        // Ergebnisse stehen in Vermerk und Zeitung, daher in der dritten Person
+        if (/\b(du|dich|dir|dein\w*|Du|Dein\w*)\b/.test(x)) throw new Error('Ergebnistext in der zweiten Person: ' + x);
+      }
     }
     if (a.typ === 'ergebnis' || a.typ === 'wahl') { E.weiter(W, welt); continue; }
     if (a.typ === 'rundenende') { E.weiter(W, welt); continue; }
