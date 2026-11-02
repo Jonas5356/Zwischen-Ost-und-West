@@ -1,8 +1,15 @@
-// Spielablauf – unabhängig vom konkreten Szenario.
-// Der Spielstand ist ein reines Datenobjekt (speicherbar als JSON); alle Regeln,
-// Texte und Funktionen liegen im Szenario.
+// Spielablauf – unabhängig von den konkreten Ländern.
+//
+// Der Spielstand („Welt“) ist ein reines Datenobjekt und als JSON speicherbar. Er enthält
+// alle Länder, die gerichteten Beziehungen zwischen ihnen (0–100, hoch = gut), ein Postfach
+// für Nachrichten zwischen Ländern, Weltflags und die Vorgänge des laufenden Halbjahrs.
+//
+// Die Inhalte eines Landes (Ereignisse, Modell, Texte) sehen nicht die ganze Welt, sondern
+// eine „Landsicht“: ein Objekt, das sich wie früher der Spielstand eines einzelnen Landes
+// verhält (s.w, s.f, s.zeit …). Werte, die eine Beziehung sind (z. B. „usa“ bei der BRD),
+// werden dabei in die Beziehungstabelle der Welt umgeleitet.
 
-export const VERSION = 1;
+export const VERSION = 2;
 
 // ---------- Zeit: Halbjahre als 1952.1 (I) und 1952.2 (II) ----------
 
@@ -20,7 +27,7 @@ export const halbVon = z => Math.round((z - jahrVon(z)) * 10);
 export const zeitText = z => `${jahrVon(z)}/${halbVon(z) === 1 ? 'I' : 'II'}`;
 export const zeitLang = z => `${halbVon(z) === 1 ? 'Erstes' : 'Zweites'} Halbjahr ${jahrVon(z)}`;
 
-// ---------- Zufall (reproduzierbar, Zustand im Spielstand) ----------
+// ---------- Zufall (reproduzierbar, Zustand in der Welt) ----------
 
 export function zufall(s) {
   let t = (s.rng = (s.rng + 0x6d2b79f5) >>> 0);
@@ -38,23 +45,93 @@ export function normal(s) {
 
 export const txt = (x, s) => (typeof x === 'function' ? x(s) : x);
 export const runde1 = x => Math.round(x * 10) / 10;
+const ordnungVon = ev => ev?.ordnung ?? 6;
 
-export function begrenze(sz, s, key) {
-  const d = sz.werte[key];
+// ---------- Beziehungen ----------
+
+export const STANDARD_BEZIEHUNG = 50;
+
+/** Wie sieht Land `von` das Land `zu`? 0 = feindlich, 100 = engste Partnerschaft */
+export function beziehung(welt, von, zu) {
+  return welt.beziehungen[von]?.[zu] ?? STANDARD_BEZIEHUNG;
+}
+export function setzeBeziehung(welt, von, zu, wert) {
+  (welt.beziehungen[von] ||= {})[zu] = wert;
+}
+
+// ---------- Landsicht ----------
+
+const WELTFELDER = new Set(['zeit', 'runde', 'seed', 'rng', 'ende']);
+const sichten = new WeakMap();
+
+/**
+ * Sicht eines Landes auf die Welt. Verhält sich wie der Zustand eines einzelnen Landes:
+ * eigene Werte und Flags, dazu Zeit und Zufall der Welt. Werte mit `beziehung: 'usa'`
+ * in der Wertedefinition stehen für „wie die USA dieses Land sehen“.
+ */
+export function sicht(W, welt, land = welt.spieler[0]) {
+  let proLand = sichten.get(welt);
+  if (!proLand) sichten.set(welt, (proLand = new Map()));
+  const L = welt.laender[land];
+  const alt = proLand.get(land);
+  if (alt && alt.ziel === L) return alt.sicht;
+
+  const werte = W.laender[land].werte || {};
+  const quelle = k => werte[k]?.beziehung;
+  const w = new Proxy(L.w, {
+    get(t, k) {
+      const von = typeof k === 'string' && quelle(k);
+      return von ? beziehung(welt, von, land) : t[k];
+    },
+    set(t, k, v) {
+      const von = typeof k === 'string' && quelle(k);
+      if (von) setzeBeziehung(welt, von, land, v);
+      else t[k] = v;
+      return true;
+    },
+    has(t, k) { return !!quelle(k) || k in t; },
+  });
+  const s = new Proxy(L, {
+    get(t, k) {
+      if (k === 'w') return w;
+      if (k === 'land') return land;
+      if (k === 'welt') return welt;
+      if (k === 'weltflags') return welt.weltflags;
+      if (WELTFELDER.has(k)) return welt[k];
+      return t[k];
+    },
+    set(t, k, v) {
+      if (WELTFELDER.has(k)) welt[k] = v;
+      else t[k] = v;
+      return true;
+    },
+  });
+  proLand.set(land, { ziel: L, sicht: s });
+  return s;
+}
+
+const istMensch = (welt, land) => welt.spieler.includes(land);
+
+// ---------- Wirkungen ----------
+
+export function begrenze(M, s, key) {
+  const d = M.werte[key];
   if (!d) return;
   if (d.min !== undefined && s.w[key] < d.min) s.w[key] = d.min;
   if (d.max !== undefined && s.w[key] > d.max) s.w[key] = d.max;
 }
 
 /** Wendet eine Wirkung an: { w:{wert:delta}, setze, loesche, plane, kanzler, aktion } */
-export function wende(sz, s, eff) {
+export function wende(W, welt, land, eff) {
   if (!eff) return;
+  const M = W.laender[land];
+  const s = sicht(W, welt, land);
   const w = txt(eff.w, s);
   if (w) {
     for (const [k, d] of Object.entries(w)) {
       if (s.w[k] === undefined) s.w[k] = 0;
       s.w[k] += d;
-      begrenze(sz, s, k);
+      begrenze(M, s, k);
     }
   }
   if (eff.setze) {
@@ -66,30 +143,45 @@ export function wende(sz, s, eff) {
     for (const p of eff.plane) s.geplant.push({ id: p.id, zeit: zeitPlus(s.zeit, p.in ?? 1) });
   }
   if (eff.kanzler) s.kanzler = eff.kanzler;
-  if (eff.aktion) eff.aktion(s, api(sz, s));
-  for (const k of Object.keys(sz.werte)) begrenze(sz, s, k);
+  if (eff.aktion) eff.aktion(s, api(W, welt, land));
+  for (const k of Object.keys(M.werte)) begrenze(M, s, k);
 }
 
-/** Werkzeuge für eigene Aktionen in Szenarien */
-export function api(sz, s) {
+/** Werkzeuge für eigene Aktionen in den Inhalten eines Landes */
+export function api(W, welt, land) {
+  const s = sicht(W, welt, land);
   return {
-    zufall: () => zufall(s),
-    normal: () => normal(s),
-    wende: eff => wende(sz, s, eff),
-    plane: (id, n = 1) => s.geplant.push({ id, zeit: zeitPlus(s.zeit, n) }),
-    ende: id => { s.ende = { id, zeit: s.zeit }; },
+    zufall: () => zufall(welt),
+    normal: () => normal(welt),
+    wende: eff => wende(W, welt, land, eff),
+    plane: (id, n = 1) => s.geplant.push({ id, zeit: zeitPlus(welt.zeit, n) }),
+    ende: id => { welt.ende = { id, zeit: welt.zeit, land }; },
+    sende: (an, art, daten = {}) => sende(welt, land, an, art, daten),
+    weltflag: (name, wert = true) => { welt.weltflags[name] = wert; },
   };
 }
 
-function schnappschuss(sz, s) {
+// ---------- Postfach ----------
+
+/** Eine Nachricht von einem Land an ein anderes, z. B. ein Verhandlungsangebot */
+export function sende(welt, von, an, art, daten = {}) {
+  welt.postfach.push({ nr: (welt.naechsteNachricht = (welt.naechsteNachricht || 0) + 1), von, an, art, daten, zeit: welt.zeit, offen: true });
+}
+export function offeneNachricht(welt, an, art, von) {
+  return welt.postfach.find(n => n.offen && n.an === an && n.art === art && (!von || n.von === von)) || null;
+}
+
+// ---------- Schnappschüsse ----------
+
+function schnappschuss(M, s) {
   const o = {};
-  for (const k of Object.keys(sz.werte)) o[k] = s.w[k];
+  for (const k of Object.keys(M.werte)) o[k] = s.w[k];
   return o;
 }
-export function differenz(sz, vorher, s) {
+export function differenz(M, vorher, s) {
   const d = [];
-  for (const k of Object.keys(sz.werte)) {
-    const def = sz.werte[k];
+  for (const k of Object.keys(M.werte)) {
+    const def = M.werte[k];
     if (def.versteckt) continue;
     const delta = runde1((s.w[k] ?? 0) - (vorher[k] ?? 0));
     if (Math.abs(delta) >= 0.5) d.push({ key: k, delta });
@@ -99,128 +191,228 @@ export function differenz(sz, vorher, s) {
 
 // ---------- Spiel anlegen ----------
 
-export function neuesSpiel(sz, seed = (Date.now() ^ (Math.random() * 1e9)) >>> 0) {
-  const st = sz.startzustand();
-  const s = {
-    version: VERSION,
-    szenario: sz.id,
-    seed,
-    rng: seed >>> 0,
-    zeit: sz.start,
-    runde: 1,
-    w: { ...st.w },
+function neuesLand(M) {
+  const st = M.startzustand ? M.startzustand() : {};
+  return {
+    w: { ...(st.w || {}) },
     f: { ...(st.f || {}) },
-    kanzler: st.kanzler,
+    kanzler: st.kanzler ?? null,
     regierung: [...(st.regierung || [])],
     sitze: { ...(st.sitze || {}) },
     geplant: [],
-    wahlplan: [...(sz.wahlen || [])],
+    wahlplan: [...(M.wahlen || [])],
     erledigt: {},
     vorhabenErledigt: {},
+    vorhabenZuletzt: {},
     chronik: [],
     wahlen: [],
     verlauf: [],
+    einschub: [],
+    lage: null,
+  };
+}
+
+export function neueWelt(W, { spieler, seed } = {}) {
+  seed ??= (Date.now() ^ (Math.random() * 1e9)) >>> 0;
+  spieler ??= [W.spielbar[0]];
+  const welt = {
+    version: VERSION,
+    szenario: W.id,
+    seed,
+    rng: seed >>> 0,
+    zeit: W.start,
+    runde: 1,
+    spieler: [...spieler],
+    laender: {},
+    beziehungen: {},
+    postfach: [],
+    weltflags: {},
+    weltErledigt: {},
     queue: [],
     pos: 0,
     phase: 'lage',
     ergebnis: null,
     ende: null,
-    lage: null,
   };
-  sz.modell.initialisiere?.(s, api(sz, s));
-  starteRunde(sz, s);
-  return s;
+  for (const [id, M] of Object.entries(W.laender)) welt.laender[id] = neuesLand(M);
+  for (const [von, ziele] of Object.entries(W.startBeziehungen || {})) {
+    for (const [zu, wert] of Object.entries(ziele)) setzeBeziehung(welt, von, zu, wert);
+  }
+  for (const id of Object.keys(W.laender)) {
+    W.laender[id].modell?.initialisiere?.(sicht(W, welt, id), api(W, welt, id));
+  }
+  starteRunde(W, welt);
+  return welt;
 }
 
-// ---------- Rundenablauf ----------
+// ---------- Ereignisse finden ----------
 
 function imFenster(ev, z) {
   const ab = ev.ab ?? ev.zeit;
   const bis = ev.bis ?? ev.zeit ?? ab;
+  if (ab === undefined) return true; // z. B. Ereignisse, die nur durch eine Nachricht ausgelöst werden
   return zeitIndex(z) >= zeitIndex(ab) && zeitIndex(z) <= zeitIndex(bis);
 }
 
-export function findeEreignis(sz, s, id) {
+export function findeEreignis(W, welt, land, id) {
+  const M = W.laender[land];
   if (id.startsWith('dyn:')) {
-    const name = id.slice(4);
-    const bau = sz.dynamisch[name];
-    return bau ? { id, ...bau(s, api(sz, s)), dynamisch: true } : null;
+    const bau = M.dynamisch?.[id.slice(4)];
+    const s = sicht(W, welt, land);
+    return bau ? { id, ...bau(s, api(W, welt, land)), dynamisch: true } : null;
   }
-  return sz.ereignisIndex[id] || null;
+  return M.ereignisIndex[id] || null;
 }
 
-export function starteRunde(sz, s) {
-  s.queue = [];
-  s.pos = 0;
-  s.ergebnis = null;
-  s.modellGelaufen = false;
+/** Kann das Ereignis jetzt vorkommen (Zeitfenster, Bedingung, Auslöser)? */
+function moeglich(W, welt, land, ev, s) {
+  const L = welt.laender[land];
+  if (!ev.wiederholbar && L.erledigt[ev.id] !== undefined) return false;
+  if (!imFenster(ev, welt.zeit)) return false;
+  if (ev.ausloeser && !offeneNachricht(welt, land, ev.ausloeser, ev.ausloeserVon)) return false;
+  return !ev.wenn || ev.wenn(s);
+}
+
+const istHauptereignis = ev => ev.art !== 'akte' && !ev.nurGeplant;
+const istVorhaben = item => item.id === '@vorhaben';
+
+// ---------- Rundenablauf ----------
+
+function weltereignisse(W, welt) {
+  for (const ev of W.weltereignisse || []) {
+    if (welt.weltErledigt[ev.id] || !imFenster(ev, welt.zeit)) continue;
+    if (ev.wenn && !ev.wenn(welt)) continue;
+    welt.weltErledigt[ev.id] = welt.zeit;
+    ev.aktion?.(welt, {
+      weltflag: (name, wert = true) => { welt.weltflags[name] = wert; },
+      sende: (von, an, art, daten) => sende(welt, von, an, art, daten),
+      plane: (land, id, n = 0) => welt.laender[land].geplant.push({ id, zeit: zeitPlus(welt.zeit, n) }),
+    });
+  }
+}
+
+/** Vorgänge eines Landes für das neue Halbjahr, nach Monat sortiert */
+function vorgaengeEinesLandes(W, welt, land) {
+  const M = W.laender[land];
+  const L = welt.laender[land];
+  const s = sicht(W, welt, land);
+  if (!M.ereignisse?.length) return [];
 
   // 1. Geplante Folgeereignisse
-  const faellig = s.geplant.filter(g => zeitIndex(g.zeit) <= zeitIndex(s.zeit));
-  s.geplant = s.geplant.filter(g => zeitIndex(g.zeit) > zeitIndex(s.zeit));
+  const faellig = L.geplant.filter(g => zeitIndex(g.zeit) <= zeitIndex(welt.zeit));
+  L.geplant = L.geplant.filter(g => zeitIndex(g.zeit) > zeitIndex(welt.zeit));
   const geplant = [];
   for (const g of faellig) {
-    const ev = findeEreignis(sz, s, g.id);
-    if (!ev || s.erledigt[g.id] !== undefined) continue;
+    const ev = findeEreignis(W, welt, land, g.id);
+    if (!ev || L.erledigt[g.id] !== undefined) continue;
     if (ev.wenn && !ev.wenn(s)) continue;
     geplant.push(ev);
   }
 
-  // 2. Hauptereignisse, deren Zeitfenster passt
-  const haupt = sz.ereignisse.filter(ev =>
-    ev.art !== 'akte' && !ev.nurGeplant && s.erledigt[ev.id] === undefined &&
-    imFenster(ev, s.zeit) && (!ev.wenn || ev.wenn(s)));
-
+  // 2. Hauptereignisse, deren Zeitfenster passt (oder deren Auslöser im Postfach liegt)
+  const haupt = M.ereignisse.filter(ev => istHauptereignis(ev) && moeglich(W, welt, land, ev, s));
   const alle = [...geplant, ...haupt.filter(h => !geplant.includes(h))];
-  alle.sort((a, b) => (a.ordnung ?? 6) - (b.ordnung ?? 6));
-  for (const ev of alle) s.queue.push(ev.id);
+  alle.sort((a, b) => ordnungVon(a) - ordnungVon(b));
 
-  // 3. Akten (Briefe) – zufällig aus den passenden
-  const anzahl = sz.modell.aktenProRunde ? sz.modell.aktenProRunde(s, alle.length) : 1;
-  const pool = sz.ereignisse.filter(ev =>
-    ev.art === 'akte' && s.erledigt[ev.id] === undefined &&
-    imFenster(ev, s.zeit) && (!ev.wenn || ev.wenn(s)));
-  // Akten, deren Fenster bald schließt, bevorzugen
-  pool.sort((a, b) => zeitIndex(a.bis ?? a.ab) - zeitIndex(b.bis ?? b.ab));
-  const gewaehlt = [];
-  while (gewaehlt.length < anzahl && pool.length) {
-    const dringend = pool.filter(p => zeitIndex(p.bis ?? p.ab) === zeitIndex(s.zeit));
-    const quelle = dringend.length ? dringend : pool;
-    const ev = quelle[Math.floor(zufall(s) * quelle.length)];
-    gewaehlt.push(ev);
-    pool.splice(pool.indexOf(ev), 1);
+  // 3. Akten (Briefe) – nur für gespielte Länder, zufällig aus den passenden
+  let gewaehlt = [];
+  if (istMensch(welt, land)) {
+    const anzahl = M.modell?.aktenProRunde ? M.modell.aktenProRunde(s, alle.length) : 1;
+    const pool = M.ereignisse.filter(ev => ev.art === 'akte' && moeglich(W, welt, land, ev, s));
+    // Akten, deren Fenster bald schließt, bevorzugen
+    pool.sort((a, b) => zeitIndex(a.bis ?? a.ab) - zeitIndex(b.bis ?? b.ab));
+    while (gewaehlt.length < anzahl && pool.length) {
+      const dringend = pool.filter(p => zeitIndex(p.bis ?? p.ab) === zeitIndex(welt.zeit));
+      const quelle = dringend.length ? dringend : pool;
+      const ev = quelle[Math.floor(zufall(welt) * quelle.length)];
+      gewaehlt.push(ev);
+      pool.splice(pool.indexOf(ev), 1);
+    }
   }
-  gewaehlt.sort((a, b) => (a.ordnung ?? 6) - (b.ordnung ?? 6));
   // Akten zwischen die Hauptereignisse mischen, chronologisch nach "ordnung"
-  const gemischt = [...alle, ...gewaehlt].sort((a, b) => (a.ordnung ?? 6) - (b.ordnung ?? 6));
-  s.queue = gemischt.map(e => e.id);
-
-  // 4. Regierungsvorhaben
-  s.queue.push('@vorhaben');
-
-  s.lage = sz.modell.lagebericht ? sz.modell.lagebericht(s) : null;
-  s.phase = 'lage';
+  return [...alle, ...gewaehlt].sort((a, b) => ordnungVon(a) - ordnungVon(b)).map(ev => ({ land, id: ev.id, ordnung: ordnungVon(ev) }));
 }
 
-export function aktuelles(sz, s) {
-  if (s.ende) return { typ: 'ende' };
-  if (s.phase === 'lage') return { typ: 'lage' };
-  if (s.phase === 'wahl') return { typ: 'wahl', ergebnis: s.wahlen[s.wahlen.length - 1] };
-  if (s.phase === 'ergebnis') return { typ: 'ergebnis', ergebnis: s.ergebnis };
-  const id = s.queue[s.pos];
-  if (id === undefined) return { typ: 'rundenende' };
-  if (id === '@vorhaben') return { typ: 'vorhaben', liste: verfuegbareVorhaben(sz, s) };
-  const ev = findeEreignis(sz, s, id);
-  if (!ev || (!ev.dynamisch && ev.wenn && !ev.wenn(s))) {
-    s.pos++;
-    if (s.queue[s.pos] === undefined) { weiter(sz, s); return aktuelles(sz, s); }
-    return aktuelles(sz, s);
+export function starteRunde(W, welt) {
+  welt.queue = [];
+  welt.pos = 0;
+  welt.ergebnis = null;
+  welt.modellGelaufen = false;
+  weltereignisse(W, welt);
+
+  const items = [];
+  for (const land of Object.keys(W.laender)) items.push(...vorgaengeEinesLandes(W, welt, land));
+  // Stabil nach Monat sortieren: bei Gleichstand bleibt die Reihenfolge der Länder
+  items.sort((a, b) => a.ordnung - b.ordnung);
+  welt.queue = items.map(({ land, id }) => ({ land, id }));
+
+  // Regierungsvorhaben der gespielten Länder am Ende des Halbjahrs
+  for (const land of welt.spieler) if (W.laender[land].vorhaben?.length) welt.queue.push({ land, id: '@vorhaben' });
+
+  for (const land of Object.keys(W.laender)) {
+    const M = W.laender[land];
+    if (M.modell?.lagebericht) welt.laender[land].lage = M.modell.lagebericht(sicht(W, welt, land));
   }
-  return { typ: 'ereignis', ev };
+  welt.phase = 'lage';
+}
+
+/** Der Vorgang, um den es gerade geht – aus Sicht des Spielers */
+export function aktuelles(W, welt) {
+  if (welt.ende) return { typ: 'ende' };
+  const land = welt.spieler[0];
+  if (welt.phase === 'lage') return { typ: 'lage', land };
+  if (welt.phase === 'wahl') {
+    const L = welt.laender[welt.wahlLand];
+    return { typ: 'wahl', land: welt.wahlLand, ergebnis: L.wahlen[L.wahlen.length - 1] };
+  }
+  if (welt.phase === 'ergebnis') return { typ: 'ergebnis', land: welt.ergebnisLand, ergebnis: welt.ergebnis };
+  vorruecken(W, welt);
+  if (welt.ende) return { typ: 'ende' };
+  if (welt.phase !== 'spiel') return aktuelles(W, welt);
+  const item = welt.queue[welt.pos];
+  if (!item) return { typ: 'rundenende' };
+  if (istVorhaben(item)) return { typ: 'vorhaben', land: item.land, liste: verfuegbareVorhaben(W, welt, item.land) };
+  return { typ: 'ereignis', land: item.land, ev: findeEreignis(W, welt, item.land, item.id) };
+}
+
+/**
+ * Hinfällige Vorgänge überspringen und Vorgänge von Ländern, die nicht gespielt werden,
+ * automatisch entscheiden, bis ein Vorgang des Spielers ansteht oder das Halbjahr endet.
+ */
+function vorruecken(W, welt) {
+  for (let schutz = 0; schutz < 10000; schutz++) {
+    if (welt.ende || welt.phase !== 'spiel') return;
+    const item = welt.queue[welt.pos];
+    if (!item) {
+      if (!welt.modellGelaufen) rundenende(W, welt);
+      else abschliessen(W, welt);
+      continue;
+    }
+    if (istVorhaben(item)) return;
+    const ev = findeEreignis(W, welt, item.land, item.id);
+    const s = sicht(W, welt, item.land);
+    if (!ev || (!ev.dynamisch && ev.wenn && !ev.wenn(s))) { welt.pos++; continue; }
+    if (istMensch(welt, item.land)) return;
+    // Land wird vom Spiel gesteuert: entscheiden und weiter
+    const index = automatischeWahl(W, welt, item.land, ev);
+    entscheide(W, welt, item.land, ev, index);
+    naechsterVorgang(W, welt, false);
+  }
+  throw new Error('Endlosschleife im Spielablauf');
+}
+
+/** Platzhalter bis zur eigentlichen Entscheidungslogik: die historische, sonst die erste mögliche Option */
+function automatischeWahl(W, welt, land, ev) {
+  const s = sicht(W, welt, land);
+  if (W.ki) return W.ki(s, ev, optionen(W, welt, land, ev));
+  const opts = optionen(W, welt, land, ev).filter(o => o.verfuegbar);
+  if (!opts.length) throw new Error(`Keine mögliche Option bei ${land}:${ev.id}`);
+  return (opts.find(o => o.hist) || opts[0]).index;
 }
 
 /** Optionen eines Ereignisses mit Verfügbarkeit */
-export function optionen(sz, s, ev) {
+export function optionen(W, welt, land, ev) {
+  const s = sicht(W, welt, land);
   return (txt(ev.optionen, s) || []).map((o, i) => ({
     ...o,
     index: i,
@@ -229,24 +421,28 @@ export function optionen(sz, s, ev) {
   })).filter(o => o.sichtbar);
 }
 
-export function lageGesehen(sz, s) {
-  if (s.phase === 'lage') s.phase = 'spiel';
+export function lageGesehen(W, welt) {
+  if (welt.phase === 'lage') welt.phase = 'spiel';
+  vorruecken(W, welt);
 }
 
-export function waehle(sz, s, index) {
-  const ev = findeEreignis(sz, s, s.queue[s.pos]);
+/** Kern einer Entscheidung, gleich für Spieler und automatisch gesteuerte Länder */
+function entscheide(W, welt, land, ev, index) {
+  const M = W.laender[land];
+  const L = welt.laender[land];
+  const s = sicht(W, welt, land);
   const opts = txt(ev.optionen, s);
   const o = opts[index];
   if (!o || (o.wenn && !o.wenn(s))) throw new Error('Option nicht verfügbar');
-  const vorher = schnappschuss(sz, s);
+  const vorher = schnappschuss(M, s);
   const texte = [];
 
-  wende(sz, s, o);
-  sz.modell.nachOption?.(s, o, ev, api(sz, s));
+  wende(W, welt, land, o);
+  M.modell?.nachOption?.(s, o, ev, api(W, welt, land));
   if (o.ergebnis) texte.push(txt(o.ergebnis, s));
 
   if (o.zufall) {
-    const r = zufall(s);
+    const r = zufall(welt);
     let summe = 0;
     let treffer = null;
     for (const z of o.zufall) {
@@ -255,205 +451,274 @@ export function waehle(sz, s, index) {
       if (r < summe) { treffer = z; break; }
     }
     if (treffer) {
-      wende(sz, s, treffer);
+      wende(W, welt, land, treffer);
       if (treffer.ergebnis) texte.push(txt(treffer.ergebnis, s));
     }
   }
 
-  s.erledigt[ev.id] = index;
-  s.letzteOrdnung = ev.dynamisch ? 99 : (ev.ordnung ?? 6);
-  ev.nachher?.(s, api(sz, s));
+  // Auslösende Nachricht ist damit beantwortet
+  if (ev.ausloeser) {
+    const n = offeneNachricht(welt, land, ev.ausloeser, ev.ausloeserVon);
+    if (n) n.offen = false;
+  }
+
+  L.erledigt[ev.id] = index;
+  welt.letzteOrdnung = ev.dynamisch ? 99 : ordnungVon(ev);
+  ev.nachher?.(s, api(W, welt, land));
   const hatHist = opts.some(x => x.hist);
-  s.chronik.push({
-    zeit: s.zeit,
+  L.chronik.push({
+    zeit: welt.zeit,
     id: ev.id,
     titel: txt(ev.titel, s),
-    datum: txt(ev.datum, s),
+    datum: txt(ev.datum, s) ?? null,
     art: ev.art || 'haupt',
     wahl: txt(o.text, s),
     hist: hatHist ? !!o.hist : null,
     ergebnis: texte.join(' '),
   });
 
-  s.ergebnisVorhaben = false;
-  s.ergebnis = {
+  const ergebnis = {
     titel: txt(ev.titel, s),
     texte,
     historisch: txt(ev.historisch, s) || null,
     hist: hatHist ? !!o.hist : null,
-    aenderungen: differenz(sz, vorher, s),
+    aenderungen: differenz(M, vorher, s),
     ascii: txt(o.ascii, s) || null,
   };
-  sz.modell.pruefeKrise?.(s, api(sz, s));
-  sz.modell.nachEntscheidung?.(s);
-  s.phase = 'ergebnis';
-  return s.ergebnis;
+  M.modell?.pruefeKrise?.(s, api(W, welt, land));
+  M.modell?.nachEntscheidung?.(s);
+  return ergebnis;
+}
+
+/** Der Spieler entscheidet den aktuellen Vorgang */
+export function waehle(W, welt, index) {
+  const item = welt.queue[welt.pos];
+  if (!item || istVorhaben(item) || !istMensch(welt, item.land)) throw new Error('Kein Vorgang des Spielers');
+  const ev = findeEreignis(W, welt, item.land, item.id);
+  welt.ergebnis = entscheide(W, welt, item.land, ev, index);
+  welt.ergebnisLand = item.land;
+  welt.ergebnisVorhaben = false;
+  welt.phase = 'ergebnis';
+  return welt.ergebnis;
 }
 
 /** Kostenlose Vorhaben gehen immer, auch bei leerer Kasse; sonst muss der Haushalt reichen */
 const istLeistbar = (s, v) => !v.kosten || s.w.haushalt - v.kosten >= 0;
 
-export function verfuegbareVorhaben(sz, s) {
-  return sz.vorhaben
-    .filter(v => imFenster(v, s.zeit) && (!v.wenn || v.wenn(s)))
+export function verfuegbareVorhaben(W, welt, land = welt.spieler[0]) {
+  const M = W.laender[land];
+  const L = welt.laender[land];
+  const s = sicht(W, welt, land);
+  return (M.vorhaben || [])
+    .filter(v => imFenster(v, welt.zeit) && (!v.wenn || v.wenn(s)))
     .filter(v => {
-      const n = s.vorhabenErledigt[v.id] || 0;
+      const n = L.vorhabenErledigt[v.id] || 0;
       if (!v.wiederholbar) return n === 0;
       if (v.max && n >= v.max) return false;
-      const zuletzt = s.vorhabenZuletzt?.[v.id];
-      return zuletzt === undefined || zeitIndex(s.zeit) - zeitIndex(zuletzt) >= (v.abstand ?? 2);
+      const zuletzt = L.vorhabenZuletzt?.[v.id];
+      return zuletzt === undefined || zeitIndex(welt.zeit) - zeitIndex(zuletzt) >= (v.abstand ?? 2);
     })
     .map(v => ({ ...v, leistbar: istLeistbar(s, v) }));
 }
 
-export function waehleVorhaben(sz, s, id) {
-  const vorher = schnappschuss(sz, s);
+export function waehleVorhaben(W, welt, id) {
+  const item = welt.queue[welt.pos];
+  if (!item || !istVorhaben(item)) throw new Error('Kein Regierungsvorhaben an der Reihe');
+  const land = item.land;
+  const M = W.laender[land];
+  const L = welt.laender[land];
+  const s = sicht(W, welt, land);
+  const vorher = schnappschuss(M, s);
   const texte = [];
   let titel = 'Kein neues Vorhaben';
   let historisch = null;
   if (id) {
-    const v = sz.vorhaben.find(x => x.id === id);
+    const v = M.vorhaben.find(x => x.id === id);
     if (!v) throw new Error('Unbekanntes Vorhaben');
     if (!istLeistbar(s, v)) throw new Error('Nicht finanzierbar');
     s.w.haushalt -= v.kosten || 0;
-    wende(sz, s, v);
-    s.vorhabenErledigt[v.id] = (s.vorhabenErledigt[v.id] || 0) + 1;
-    s.vorhabenZuletzt = s.vorhabenZuletzt || {};
-    s.vorhabenZuletzt[v.id] = s.zeit;
+    wende(W, welt, land, v);
+    L.vorhabenErledigt[v.id] = (L.vorhabenErledigt[v.id] || 0) + 1;
+    L.vorhabenZuletzt[v.id] = welt.zeit;
     titel = txt(v.titel, s);
     if (v.ergebnis) texte.push(txt(v.ergebnis, s));
     historisch = txt(v.historisch, s) || null;
-    s.chronik.push({ zeit: s.zeit, id: 'vorhaben:' + v.id, titel, art: 'vorhaben', wahl: 'Regierungsvorhaben', hist: null, ergebnis: texte.join(' ') });
+    L.chronik.push({ zeit: welt.zeit, id: 'vorhaben:' + v.id, titel, art: 'vorhaben', wahl: 'Regierungsvorhaben', hist: null, ergebnis: texte.join(' ') });
   } else {
     texte.push('Die Regierung beschränkt sich in diesem Halbjahr auf die laufenden Geschäfte.');
   }
-  s.ergebnis = { titel, texte, historisch, hist: null, aenderungen: differenz(sz, vorher, s), vorhaben: true };
-  s.ergebnisVorhaben = true;
-  sz.modell.nachEntscheidung?.(s);
-  s.phase = 'ergebnis';
-  return s.ergebnis;
+  welt.ergebnis = { titel, texte, historisch, hist: null, aenderungen: differenz(M, vorher, s), vorhaben: true };
+  welt.ergebnisLand = land;
+  welt.ergebnisVorhaben = true;
+  M.modell?.nachEntscheidung?.(s);
+  welt.phase = 'ergebnis';
+  return welt.ergebnis;
 }
 
-/** Nach einer Ergebnisanzeige weiter */
-export function weiter(sz, s) {
-  if (s.ende) return;
-  if (s.phase === 'wahl') {
-    s.phase = 'spiel';
-    return;
-  }
-  if (s.phase === 'ergebnis') {
-    s.phase = 'spiel';
-    s.pos++;
-    if (!s.ergebnisVorhaben) aktualisiereQueue(sz, s, s.letzteOrdnung ?? 0);
-    // Kriseneffekte können neue Ereignisse direkt einschieben
-    if (s.einschub?.length) {
-      s.queue.splice(s.pos, 0, ...s.einschub);
-      s.einschub = [];
+/** Krisenereignisse, die Länder in `einschub` angemeldet haben, einsammeln */
+function einschuebe(welt) {
+  const out = [];
+  for (const [land, L] of Object.entries(welt.laender)) {
+    if (L.einschub?.length) {
+      out.push(...L.einschub.map(id => ({ land, id })));
+      L.einschub = [];
     }
   }
-  if (s.queue[s.pos] === undefined) {
-    if (!s.modellGelaufen) rundenende(sz, s);
-    else abschliessen(sz, s);
-  }
+  return out;
 }
 
-function rundenende(sz, s) {
-  const vorher = schnappschuss(sz, s);
-  sz.modell.rundenende(s, api(sz, s));
-  s.modellGelaufen = true;
-  s.verlauf.push({ zeit: s.zeit, ...schnappschuss(sz, s) });
-  s.letzteAenderung = differenz(sz, vorher, s);
+function naechsterVorgang(W, welt, nachVorhaben) {
+  welt.pos++;
+  if (!nachVorhaben) aktualisiereQueue(W, welt, welt.letzteOrdnung ?? 0);
+  // Kriseneffekte können neue Ereignisse direkt einschieben
+  const neu = einschuebe(welt);
+  if (neu.length) welt.queue.splice(welt.pos, 0, ...neu);
+}
 
-  // Wahl?
-  const wahl = (s.wahlplan || sz.wahlen || []).find(z => zeitIndex(z) === zeitIndex(s.zeit));
-  if (wahl !== undefined && !s.f['wahl_' + s.zeit] && !s.ende) {
-    s.f['wahl_' + s.zeit] = true;
-    const erg = sz.modell.wahl(s, api(sz, s));
-    s.wahlen.push(erg);
-    s.phase = 'wahl';
+/** Nach einer Ergebnisanzeige oder dem Wahlabend weiter */
+export function weiter(W, welt) {
+  if (welt.ende) return;
+  if (welt.phase === 'wahl') {
+    welt.phase = 'spiel';
+  } else if (welt.phase === 'ergebnis') {
+    welt.phase = 'spiel';
+    naechsterVorgang(W, welt, welt.ergebnisVorhaben);
+  } else if (welt.phase === 'lage') {
+    welt.phase = 'spiel';
+  }
+  vorruecken(W, welt);
+}
+
+function rundenende(W, welt) {
+  for (const land of Object.keys(W.laender)) {
+    const M = W.laender[land];
+    if (!M.modell?.rundenende) continue;
+    const L = welt.laender[land];
+    const s = sicht(W, welt, land);
+    const vorher = schnappschuss(M, s);
+    M.modell.rundenende(s, api(W, welt, land));
+    L.verlauf.push({ zeit: welt.zeit, ...schnappschuss(M, s) });
+    L.letzteAenderung = differenz(M, vorher, s);
+  }
+  welt.modellGelaufen = true;
+
+  // Wahlen
+  for (const land of Object.keys(W.laender)) {
+    const M = W.laender[land];
+    const L = welt.laender[land];
+    const wahl = (L.wahlplan || []).find(z => zeitIndex(z) === zeitIndex(welt.zeit));
+    if (wahl === undefined || L.f['wahl_' + welt.zeit] || welt.ende || !M.modell?.wahl) continue;
+    L.f['wahl_' + welt.zeit] = true;
+    L.wahlen.push(M.modell.wahl(sicht(W, welt, land), api(W, welt, land)));
     // Regierungsbildung als dynamisches Ereignis vor der nächsten Runde
-    s.queue.push('dyn:regierungsbildung');
-    return;
+    welt.queue.push({ land, id: 'dyn:regierungsbildung' });
+    if (istMensch(welt, land)) {
+      welt.phase = 'wahl';
+      welt.wahlLand = land;
+      return;
+    }
   }
-  abschliessen(sz, s);
+  abschliessen(W, welt);
 }
 
-function abschliessen(sz, s) {
-  sz.modell.pruefeEnde?.(s, api(sz, s));
-  if (s.ende) return;
+function abschliessen(W, welt) {
+  for (const land of Object.keys(W.laender)) {
+    W.laender[land].modell?.pruefeEnde?.(sicht(W, welt, land), api(W, welt, land));
+    if (welt.ende) return;
+  }
   // Krisenereignisse zum Rundenende (z. B. Koalitionsbruch)
-  if (s.einschub?.length) {
-    s.queue.push(...s.einschub);
-    s.einschub = [];
-    s.phase = 'spiel';
+  const neu = einschuebe(welt);
+  if (neu.length) {
+    welt.queue.push(...neu);
+    welt.phase = 'spiel';
     return;
   }
-  naechsteRunde(sz, s);
+  naechsteRunde(W, welt);
 }
 
-function naechsteRunde(sz, s) {
-  if (zeitIndex(s.zeit) >= zeitIndex(sz.ende)) {
-    s.ende = { id: 'abschluss', zeit: s.zeit };
+function naechsteRunde(W, welt) {
+  if (zeitIndex(welt.zeit) >= zeitIndex(W.ende)) {
+    welt.ende = { id: 'abschluss', zeit: welt.zeit, land: welt.spieler[0] };
     return;
   }
-  s.zeit = zeitPlus(s.zeit, 1);
-  s.runde++;
-  starteRunde(sz, s);
+  welt.zeit = zeitPlus(welt.zeit, 1);
+  welt.runde++;
+  starteRunde(W, welt);
 }
 
 /**
  * Nach jeder Entscheidung: Ereignisse, die durch die Entscheidung erst möglich wurden
- * (gleiches Halbjahr, späterer Zeitpunkt), einreihen und hinfällige entfernen.
+ * (gleiches Halbjahr, späterer Zeitpunkt), einreihen und hinfällige entfernen – für alle Länder.
  */
-function aktualisiereQueue(sz, s, abOrdnung) {
-  const rest = s.queue.slice(s.pos);
-  const bleibt = rest.filter(id => {
-    if (id.startsWith('@') || id.startsWith('dyn:')) return true;
-    if (s.erledigt[id] !== undefined) return false;
-    const ev = findeEreignis(sz, s, id);
-    return ev && (!ev.wenn || ev.wenn(s));
+function aktualisiereQueue(W, welt, abOrdnung) {
+  const rest = welt.queue.slice(welt.pos);
+  const bleibt = rest.filter(item => {
+    if (istVorhaben(item) || item.id.startsWith('dyn:')) return true;
+    const L = welt.laender[item.land];
+    if (L.erledigt[item.id] !== undefined && !findeEreignis(W, welt, item.land, item.id)?.wiederholbar) return false;
+    const ev = findeEreignis(W, welt, item.land, item.id);
+    return ev && (!ev.wenn || ev.wenn(sicht(W, welt, item.land)));
   });
-  for (const ev of sz.ereignisse) {
-    if (ev.art === 'akte' || ev.nurGeplant || s.erledigt[ev.id] !== undefined) continue;
-    if (s.queue.includes(ev.id) || !imFenster(ev, s.zeit)) continue;
-    if ((ev.ordnung ?? 6) < abOrdnung) continue;
-    if (ev.wenn && !ev.wenn(s)) continue;
-    bleibt.push(ev.id);
+  const drin = (land, id) => welt.queue.some(q => q.land === land && q.id === id) || bleibt.some(q => q.land === land && q.id === id);
+  for (const land of Object.keys(W.laender)) {
+    const M = W.laender[land];
+    if (!M.ereignisse?.length) continue;
+    const s = sicht(W, welt, land);
+    for (const ev of M.ereignisse) {
+      if (!istHauptereignis(ev) || drin(land, ev.id)) continue;
+      if (ordnungVon(ev) < abOrdnung) continue;
+      if (!moeglich(W, welt, land, ev, s)) continue;
+      bleibt.push({ land, id: ev.id });
+    }
   }
   // Fällige geplante Ereignisse (z. B. aus einer Entscheidung in diesem Halbjahr mit in: 0)
-  const faellig = s.geplant.filter(g => zeitIndex(g.zeit) <= zeitIndex(s.zeit));
-  if (faellig.length) {
-    s.geplant = s.geplant.filter(g => zeitIndex(g.zeit) > zeitIndex(s.zeit));
-    for (const g of faellig) if (!bleibt.includes(g.id) && s.erledigt[g.id] === undefined) bleibt.push(g.id);
+  for (const land of Object.keys(W.laender)) {
+    const L = welt.laender[land];
+    const faellig = L.geplant.filter(g => zeitIndex(g.zeit) <= zeitIndex(welt.zeit));
+    if (!faellig.length) continue;
+    L.geplant = L.geplant.filter(g => zeitIndex(g.zeit) > zeitIndex(welt.zeit));
+    for (const g of faellig) {
+      if (!bleibt.some(q => q.land === land && q.id === g.id) && L.erledigt[g.id] === undefined) bleibt.push({ land, id: g.id });
+    }
   }
-  const ord = id => {
-    if (id === '@vorhaben') return 1e9;
-    if (id.startsWith('dyn:')) return -1;
-    return findeEreignis(sz, s, id)?.ordnung ?? 6;
+  const ord = item => {
+    if (istVorhaben(item)) return 1e9;
+    if (item.id.startsWith('dyn:')) return -1;
+    return ordnungVon(findeEreignis(W, welt, item.land, item.id));
   };
   bleibt.sort((a, b) => ord(a) - ord(b));
-  s.queue = s.queue.slice(0, s.pos).concat(bleibt);
+  welt.queue = welt.queue.slice(0, welt.pos).concat(bleibt);
 }
 
-/** Szenario vorbereiten: Index der Ereignisse anlegen und Daten prüfen */
-export function bereiteVor(sz) {
-  sz.ereignisIndex = {};
-  for (const ev of sz.ereignisse) {
-    if (sz.ereignisIndex[ev.id]) throw new Error('Doppelte Ereignis-ID: ' + ev.id);
-    sz.ereignisIndex[ev.id] = ev;
+/** Szenario vorbereiten: Indizes anlegen und Daten prüfen */
+export function bereiteVor(W) {
+  for (const [id, M] of Object.entries(W.laender)) {
+    M.id ??= id;
+    M.werte ??= {};
+    M.ereignisse ??= [];
+    M.vorhaben ??= [];
+    M.ereignisIndex = {};
+    for (const ev of M.ereignisse) {
+      if (M.ereignisIndex[ev.id]) throw new Error(`Doppelte Ereignis-ID in ${id}: ${ev.id}`);
+      M.ereignisIndex[ev.id] = ev;
+    }
+    const ids = new Set(M.vorhaben.map(v => v.id));
+    if (ids.size !== M.vorhaben.length) throw new Error('Doppelte Vorhaben-ID in ' + id);
+    for (const [k, d] of Object.entries(M.werte)) {
+      if (d.beziehung && !W.laender[d.beziehung]) throw new Error(`Wert ${id}.${k} verweist auf unbekanntes Land ${d.beziehung}`);
+    }
   }
-  const ids = new Set(sz.vorhaben.map(v => v.id));
-  if (ids.size !== sz.vorhaben.length) throw new Error('Doppelte Vorhaben-ID');
-  return sz;
+  for (const land of W.spielbar) if (!W.laender[land]) throw new Error('Spielbares Land fehlt: ' + land);
+  return W;
 }
 
-/** Wahrscheinlichkeitsangabe für die Oberfläche */
-export function hinweisPfeile(sz, o) {
+/** Richtung der Auswirkungen für die Oberfläche */
+export function hinweisPfeile(M, o) {
   const w = typeof o.w === 'function' ? null : o.w;
   const out = [];
   if (w) {
     for (const [k, d] of Object.entries(w)) {
-      const def = sz.werte[k];
+      const def = M.werte[k];
       if (!def || def.versteckt || def.keinHinweis || Math.abs(d) < 1) continue;
       const stufe = Math.abs(d) >= 10 ? 3 : Math.abs(d) >= 5 ? 2 : 1;
       const hoch = d > 0;
@@ -461,7 +726,5 @@ export function hinweisPfeile(sz, o) {
       out.push({ key: k, name: def.kurz || def.name, hoch, stufe, gut });
     }
   }
-  if (o.kosten || (w && w.haushalt < 0)) { /* schon enthalten */ }
-  const ungewiss = !!o.zufall;
-  return { pfeile: out, ungewiss };
+  return { pfeile: out, ungewiss: !!o.zufall };
 }

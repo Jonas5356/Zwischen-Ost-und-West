@@ -1,4 +1,4 @@
-// Szenario: Bundesrepublik Deutschland 1949–1964
+// Land: Bundesrepublik Deutschland (spielbar)
 import * as modell from './modell.js';
 import teil1 from './ereignisse_1949_1953.js';
 import teil2 from './ereignisse_1954_1958.js';
@@ -8,7 +8,7 @@ import akten from './akten.js';
 import vorhaben from './vorhaben.js';
 import zeitgeschehen from './zeitgeschehen.js';
 import { ENDEN } from './enden.js';
-import { zeitIndex } from '../../engine.js';
+import { zeitIndex } from '../../../engine.js';
 
 function lagebericht(s) {
   const meldungen = zeitgeschehen
@@ -18,13 +18,12 @@ function lagebericht(s) {
 }
 
 export default {
-  id: 'brd1949',
+  id: 'brd',
+  name: 'Bundesrepublik Deutschland',
   titel: 'Bundesrepublik Deutschland',
   untertitel: '1949–1964',
   rolle: 'Bundeskanzler der CDU/CSU',
   beschreibung: 'Herbst 1949. Konrad Adenauer ist mit einer Stimme Mehrheit zum ersten Bundeskanzler gewählt worden. Das Land ist besetzt, geteilt und zerstört; zwölf Millionen Vertriebene suchen ein Zuhause. Zwischen Washington, Paris, London und Moskau muss die junge Republik ihren Weg finden – und die Union muss Wahlen gewinnen.',
-  start: 1949.2,
-  ende: 1964.1,
   wahlen: [1953.2, 1957.2, 1961.2],
   werte: modell.WERTE,
   parteien: modell.PARTEIEN,
@@ -46,7 +45,7 @@ export default {
   enden: ENDEN,
   // Anzeigegruppen im Lagebild
   anzeige: [
-    { titel: 'Außenpolitik', werte: ['usa', 'frankreich', 'grossbritannien', 'sowjet', 'souveraenitaet', 'einheit', 'europa'] },
+    { titel: 'Außenpolitik', werte: ['usa', 'frankreich', 'grossbritannien', 'moskau', 'souveraenitaet', 'einheit', 'europa'] },
     { titel: 'Innenpolitik', werte: ['zustimmung', 'ansehen', 'koalition'] },
     { titel: 'Wirtschaft', werte: ['wachstum', 'arbeitslosigkeit', 'haushalt', 'flucht'] },
   ],

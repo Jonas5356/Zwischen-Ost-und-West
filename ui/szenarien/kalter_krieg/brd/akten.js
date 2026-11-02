@@ -19,7 +19,7 @@ export default [
     absender: 'Zentralverband der vertriebenen Deutschen',
     text: 'Die Vertriebenenverbände haben in Stuttgart eine Charta verkündet. Sie verzichten auf „Rache und Vergeltung“, fordern aber das „Recht auf Heimat“ und eine gerechte Verteilung der Kriegslasten. Sie bitten die Bundesregierung um öffentliche Unterstützung.',
     optionen: [
-      { text: 'Die Charta ausdrücklich würdigen.', hist: true, ergebnis: 'Die Vertriebenen fühlen sich ernst genommen. In Warschau und Prag wird das „Recht auf Heimat“ mit Sorge gelesen.', w: { ansehen: 2, sowjet: 2, koalition: 2 } },
+      { text: 'Die Charta ausdrücklich würdigen.', hist: true, ergebnis: 'Die Vertriebenen fühlen sich ernst genommen. In Warschau und Prag wird das „Recht auf Heimat“ mit Sorge gelesen.', w: { ansehen: 2, moskau: -2, koalition: 2 } },
       { text: 'Zurückhaltend reagieren.', ergebnis: 'Die Verbände sind enttäuscht.', w: { ansehen: -1, koalition: -2 } },
     ],
   }),
@@ -50,7 +50,7 @@ export default [
     absender: 'Robert Lehr, Bundesminister des Innern',
     text: 'Das Innenministerium will beim neuen Bundesverfassungsgericht das Verbot der rechtsextremen Sozialistischen Reichspartei und der KPD beantragen. Die SRP gewinnt in Niedersachsen Wähler unter früheren Nationalsozialisten, die KPD ist der verlängerte Arm der SED.',
     optionen: [
-      { text: 'Beide Verbote beantragen.', hist: true, ergebnis: 'Die Anträge gehen nach Karlsruhe. Die SRP wird 1952 verboten, über die KPD wird noch lange verhandelt.', w: { sowjet: 2, usa: 1 }, setze: ['kpd_antrag'] },
+      { text: 'Beide Verbote beantragen.', hist: true, ergebnis: 'Die Anträge gehen nach Karlsruhe. Die SRP wird 1952 verboten, über die KPD wird noch lange verhandelt.', w: { moskau: -2, usa: 1 }, setze: ['kpd_antrag'] },
       { text: 'Nur die SRP verbieten lassen.', ergebnis: 'Ein Zeichen gegen die Rechten. Die KPD bleibt eine legale Splitterpartei.', w: { usa: 1 } },
     ],
     historisch: 'Die Anträge wurden im November 1951 gestellt. Die SRP wurde am 23. Oktober 1952 verboten, die KPD erst am 17. August 1956.',
@@ -167,8 +167,8 @@ export default [
     absender: 'Eugen Gerstenmaier, Präsident des Bundestages',
     text: 'Gerstenmaier möchte, dass der Bundestag eine Sitzungswoche in West-Berlin abhält, um die Zugehörigkeit der Stadt zum Bund zu demonstrieren. Moskau hat für diesen Fall „Konsequenzen“ angekündigt.',
     optionen: [
-      { text: 'Zustimmen.', hist: true, ergebnis: 'Der Bundestag tagt in West-Berlin. Moskau und Ost-Berlin protestieren scharf gegen die „Provokation“.', w: { sowjet: 5, einheit: 1, ansehen: 1 } },
-      { text: 'Abraten.', ergebnis: 'Die Berliner fühlen sich im Stich gelassen.', w: { sowjet: -2, ansehen: -2 } },
+      { text: 'Zustimmen.', hist: true, ergebnis: 'Der Bundestag tagt in West-Berlin. Moskau und Ost-Berlin protestieren scharf gegen die „Provokation“.', w: { moskau: -5, einheit: 1, ansehen: 1 } },
+      { text: 'Abraten.', ergebnis: 'Die Berliner fühlen sich im Stich gelassen.', w: { moskau: 2, ansehen: -2 } },
     ],
   }),
   akte({
@@ -207,7 +207,7 @@ export default [
     absender: 'Treuhandstelle für den Interzonenhandel',
     text: 'Die DDR verlangt von Westdeutschen für Besuche in Ost-Berlin neuerdings eine Aufenthaltsgenehmigung. Als Gegenmaßnahme schlägt das Wirtschaftsministerium vor, das Abkommen über den Interzonenhandel zu kündigen. Die DDR ist auf Stahl und Maschinen aus dem Westen angewiesen.',
     optionen: [
-      { text: 'Das Abkommen kündigen.', hist: true, ergebnis: 'Ost-Berlin lenkt teilweise ein; das Abkommen wird zum Jahresende neu in Kraft gesetzt.', w: { sowjet: 4, ansehen: 1 } },
+      { text: 'Das Abkommen kündigen.', hist: true, ergebnis: 'Ost-Berlin lenkt teilweise ein; das Abkommen wird zum Jahresende neu in Kraft gesetzt.', w: { moskau: -4, ansehen: 1 } },
       { text: 'Den Handel unberührt lassen.', ergebnis: 'Die DDR testet weiter, wie weit sie gehen kann.', w: { ansehen: -1 } },
     ],
   }),
@@ -264,7 +264,7 @@ export default [
     absender: 'Verband der Heimkehrer',
     text: 'Über das Rote Kreuz kommen Postkarten aus sowjetischen Lagern: Workuta, Karaganda, Swerdlowsk. Zehntausende Deutsche sind noch in Gefangenschaft. Der Heimkehrerverband bittet, die Frage vor die Vereinten Nationen zu bringen.',
     optionen: [
-      { text: 'Die Frage international zur Sprache bringen.', ergebnis: 'Die Vereinten Nationen setzen eine Kommission ein. Moskau ist verärgert.', w: { ansehen: 2, sowjet: 3 } },
+      { text: 'Die Frage international zur Sprache bringen.', ergebnis: 'Die Vereinten Nationen setzen eine Kommission ein. Moskau ist verärgert.', w: { ansehen: 2, moskau: -3 } },
       { text: 'Auf stille Diplomatie setzen.', ergebnis: 'Die Verbände sind enttäuscht.', w: { ansehen: -1 } },
     ],
   }),
@@ -274,7 +274,7 @@ export default [
     absender: 'Jakob Kaiser, Bundesminister für gesamtdeutsche Fragen',
     text: 'Kaiser warnt: Die SED bereitet mit sowjetischem Geld einen großen Wahlkampf vor. Er schlägt vor, über diskrete Kanäle die demokratischen Parteien im Osten zu unterstützen – mit Geld aus dem Kanzleramt.',
     optionen: [
-      { text: 'Diskret unterstützen.', ergebnis: 'Das Geld fließt. Die Gefahr, dass es auffliegt, fließt mit.', w: { ansehen: 2, sowjet: 4 } },
+      { text: 'Diskret unterstützen.', ergebnis: 'Das Geld fließt. Die Gefahr, dass es auffliegt, fließt mit.', w: { ansehen: 2, moskau: -4 } },
       { text: 'Ablehnen – faire Wahlen sind faire Wahlen.', ergebnis: 'Kaiser respektiert es.', w: {} },
     ],
   }),

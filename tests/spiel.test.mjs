@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { spiele, sz } from './spieler.mjs';
+import { spiele, sz, W } from './spieler.mjs';
 import * as E from '../ui/engine.js';
 
 test('Zeitrechnung in Halbjahren', () => {
@@ -30,14 +30,15 @@ test('Zufallsspiele laufen fehlerfrei durch', () => {
 });
 
 test('Spielstand ist als JSON speicherbar und lässt sich fortsetzen', () => {
-  const s = E.neuesSpiel(sz, 42);
-  E.lageGesehen(sz, s);
-  const a = E.aktuelles(sz, s);
-  E.waehle(sz, s, 0);
-  const kopie = JSON.parse(JSON.stringify(s));
-  E.weiter(sz, kopie);
-  E.weiter(sz, s);
-  assert.deepEqual(kopie, s);
+  const welt = E.neueWelt(W, { spieler: ['brd'], seed: 42 });
+  E.lageGesehen(W, welt);
+  E.aktuelles(W, welt);
+  E.waehle(W, welt, 0);
+  const kopie = JSON.parse(JSON.stringify(welt));
+  E.weiter(W, kopie);
+  E.weiter(W, welt);
+  assert.deepEqual(kopie, welt);
+  assert.equal(welt.version, 2);
 });
 
 test('Historischer Durchlauf liegt nahe an der Geschichte', () => {
@@ -64,13 +65,17 @@ test('Jedes Ereignis kommt in irgendeinem Spiel vor', () => {
 });
 
 test('Kostenlose Vorhaben sind auch bei leerem Haushalt wählbar', () => {
-  const s = E.neuesSpiel(sz, 3);
+  const welt = E.neueWelt(W, { spieler: ['brd'], seed: 3 });
+  const s = E.sicht(W, welt, 'brd');
   s.w.haushalt = -0.4;
-  const liste = E.verfuegbareVorhaben(sz, s);
+  const liste = E.verfuegbareVorhaben(W, welt, 'brd');
   const frei = liste.filter(v => !v.kosten);
   assert.ok(frei.length > 0);
   assert.ok(frei.every(v => v.leistbar));
   assert.ok(liste.filter(v => v.kosten).every(v => !v.leistbar));
-  E.waehleVorhaben(sz, s, frei.find(v => v.id === 'konsolidierung').id);
+  welt.queue = [{ land: 'brd', id: '@vorhaben' }];
+  welt.pos = 0;
+  welt.phase = 'spiel';
+  E.waehleVorhaben(W, welt, frei.find(v => v.id === 'konsolidierung').id);
   assert.ok(s.w.haushalt > 0);
 });

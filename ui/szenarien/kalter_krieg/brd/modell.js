@@ -2,13 +2,13 @@
 // Alle Größen sind bewusst einfach gehalten und so kalibriert, dass ein Spiel mit
 // den historischen Entscheidungen ungefähr die historischen Werte ergibt.
 
-import { jahrVon, zeitIndex, zeitText, runde1 } from '../../engine.js';
+import { jahrVon, zeitIndex, zeitText, runde1 } from '../../../engine.js';
 
 export const WERTE = {
-  usa:             { name: 'Vertrauen der USA', kurz: 'Washington', min: 0, max: 100, gruppe: 'aussen' },
-  frankreich:      { name: 'Vertrauen Frankreichs', kurz: 'Paris', min: 0, max: 100, gruppe: 'aussen' },
-  grossbritannien: { name: 'Vertrauen Großbritanniens', kurz: 'London', min: 0, max: 100, gruppe: 'aussen' },
-  sowjet:          { name: 'Spannung mit Moskau', kurz: 'Spannung Moskau', min: 0, max: 100, invertiert: true, gruppe: 'aussen' },
+  usa:             { name: 'Beziehung zu den USA', kurz: 'Washington', min: 0, max: 100, gruppe: 'aussen', beziehung: 'usa' },
+  frankreich:      { name: 'Beziehung zu Frankreich', kurz: 'Paris', min: 0, max: 100, gruppe: 'aussen', beziehung: 'frankreich' },
+  grossbritannien: { name: 'Beziehung zu Großbritannien', kurz: 'London', min: 0, max: 100, gruppe: 'aussen', beziehung: 'grossbritannien' },
+  moskau:          { name: 'Beziehung zu Moskau', kurz: 'Moskau', min: 0, max: 100, gruppe: 'aussen', beziehung: 'su' },
   souveraenitaet:  { name: 'Souveränität', kurz: 'Souveränität', min: 0, max: 100, gruppe: 'aussen' },
   einheit:         { name: 'Aussicht auf Einheit', kurz: 'Einheit', min: 0, max: 100, gruppe: 'aussen' },
   europa:          { name: 'Europäische Integration', kurz: 'Europa', min: 0, max: 100, gruppe: 'aussen' },
@@ -71,7 +71,7 @@ export function berechneUmfrage(s) {
 export function startzustand() {
   return {
     w: {
-      usa: 55, frankreich: 30, grossbritannien: 40, sowjet: 50, souveraenitaet: 10, einheit: 15, europa: 5,
+      souveraenitaet: 10, einheit: 15, europa: 5,
       ansehen: 0, koalition: 60, haushalt: 40, wachstum: 9.0, arbeitslosigkeit: 9.5, impuls: 0,
       flucht: 30, kanzlerbonus: 0, bundeswehr: 0, zustimmung: 31, klima: 9,
     },
@@ -104,7 +104,7 @@ export function rundenende(s, a) {
   g += 0.03 * (w.europa - 30) + 0.015 * (w.usa - 55);
   if (s.f.demontage && w.souveraenitaet < 30) g -= 1.2;
   if (w.haushalt < 20) g -= (20 - w.haushalt) * 0.06;
-  if (w.sowjet > 70) g -= (w.sowjet - 70) * 0.06;
+  if (w.moskau < 30) g -= (30 - w.moskau) * 0.06;
   if (w.arbeitslosigkeit < 1.5 && !s.f.gastarbeiter) g -= 0.8;
   if (s.f.kartellgesetz) g += 0.2;
   if (s.f.vorrang_ruestung) g -= 0.3;
@@ -130,7 +130,7 @@ export function rundenende(s, a) {
   w.haushalt = runde1(w.haushalt + 0.6 * (w.wachstum - 4) + 1.0 - lasten);
 
   // --- Langsame Rückkehr zu Normalwerten
-  w.sowjet += (50 - w.sowjet) * 0.12;
+  w.moskau += (50 - w.moskau) * 0.12;
   w.koalition += (55 - w.koalition) * 0.08;
   w.ansehen *= 0.78;
   // Vertrauen will gepflegt werden
@@ -140,7 +140,7 @@ export function rundenende(s, a) {
   const fluchtBasis = s.f.mauer ? 3 : s.f.vereinigt ? 0 : s.f.neutral ? 15 : 25;
   w.flucht += (fluchtBasis - w.flucht) * 0.15;
   if (s.f.nato || s.f.evg) w.einheit = Math.max(0, w.einheit - 0.6);
-  for (const k of ['sowjet', 'koalition', 'ansehen', 'flucht', 'einheit', 'usa', 'frankreich', 'grossbritannien']) w[k] = runde1(w[k]);
+  for (const k of ['moskau', 'koalition', 'ansehen', 'flucht', 'einheit', 'usa', 'frankreich', 'grossbritannien']) w[k] = runde1(w[k]);
 
   w.zustimmung = berechneUmfrage(s);
 }
@@ -339,16 +339,16 @@ export const dynamisch = {
       optionen: [
         { text: 'Einlenken: öffentliche Zugeständnisse an Moskau.',
           ergebnis: 'Die Krise flaut ab. In Washington und in der eigenen Partei wird dir Schwäche vorgeworfen.',
-          w: { sowjet: -35, usa: -8, ansehen: -6, souveraenitaet: -4 } },
+          w: { moskau: 35, usa: -8, ansehen: -6, souveraenitaet: -4 } },
         { text: 'Die Supermächte zur Vermittlung drängen und selbst schweigen.',
           ergebnis: 'Hinter verschlossenen Türen verhandeln Washington und Moskau – über deinen Kopf hinweg.',
-          w: { sowjet: -22, ansehen: -3, einheit: -3, usa: -2 } },
+          w: { moskau: 22, ansehen: -3, einheit: -3, usa: -2 } },
         { text: 'Standhalten.',
           zufall: [
-            { p: s2 => 0.25 + Math.max(0, s2.w.sowjet - 100) / 100, ergebnis: s2 => (s2.f.vereinigt ? 'Ein Zwischenfall an der Oder gerät außer Kontrolle.' : 'Ein Zwischenfall an der Zonengrenze gerät außer Kontrolle.'),
+            { p: s2 => 0.25, ergebnis: s2 => (s2.f.vereinigt ? 'Ein Zwischenfall an der Oder gerät außer Kontrolle.' : 'Ein Zwischenfall an der Zonengrenze gerät außer Kontrolle.'),
               aktion: (st, a) => a.ende('krieg') },
             { ergebnis: 'Moskau zieht die Panzer zurück. Du hast gepokert – und gewonnen.',
-              w: { sowjet: -20, ansehen: 5, usa: 3 } },
+              w: { moskau: 20, ansehen: 5, usa: 3 } },
           ] },
       ],
       nachher: st => { delete st.f.kriegsgefahr_offen; },
@@ -405,7 +405,7 @@ export function pruefeKrise(s) {
     s.einschub.push(id);
   };
   if (s.w.koalition <= 0 && s.regierung.length > 1) neu('koalitionskrise_offen', 'dyn:koalitionskrise');
-  if (s.w.sowjet >= 100) neu('kriegsgefahr_offen', 'dyn:kriegsgefahr');
+  if (s.w.moskau <= 0) neu('kriegsgefahr_offen', 'dyn:kriegsgefahr');
   if (s.w.ansehen <= -25) neu('revolte_offen', 'dyn:fraktionsrevolte');
 }
 

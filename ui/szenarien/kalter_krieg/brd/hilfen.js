@@ -10,7 +10,7 @@ export const regiertMit = p => s => s.regierung.includes(p);
 export const land = s => (s.f.vereinigt ? 'Deutschland' : 'die Bundesrepublik');
 export const Land = s => (s.f.vereinigt ? 'Deutschland' : 'Die Bundesrepublik');
 export const kanzler = s => s.kanzler;
-import { zeitIndex } from '../../engine.js';
+import { zeitIndex } from '../../../engine.js';
 /** Steht zum Zeitpunkt z eine Bundestagswahl an? */
 export const wahlIn = (s, z) => (s.wahlplan || []).some(x => zeitIndex(x) === zeitIndex(z));
 export const hauptstadt = s => (s.f.hauptstadt_berlin ? 'Berlin' : 'Bonn');

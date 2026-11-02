@@ -1,5 +1,5 @@
 // Enden des Spiels und der Abschlussbericht
-import { jahrVon, zeitText } from '../../engine.js';
+import { jahrVon, zeitText } from '../../../engine.js';
 
 const pct = x => `${x.toFixed(1).replace('.', ',')}\u00a0%`;
 

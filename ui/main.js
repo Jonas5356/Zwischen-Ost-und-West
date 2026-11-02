@@ -1,12 +1,22 @@
 // Oberfläche: zeichnet den Spielstand und leitet Eingaben an die Engine weiter
 import * as E from './engine.js';
-import szenario from './szenarien/brd1949/index.js';
+import weltSzenario from './szenarien/kalter_krieg/index.js';
 import { spieleSzene, SZENEN } from './ascii.js';
 import * as Sp from './speicher.js';
 import * as Ton from './ton.js';
 
-const sz = E.bereiteVor(szenario);
-let s = null;
+const W = E.bereiteVor(weltSzenario);
+let welt = null;               // der Spielstand: die ganze Welt
+let s = null;                  // Sicht des gespielten Landes darauf
+let sz = W.laender[W.spielbar[0]]; // Inhalte des gespielten Landes
+
+function uebernehme(w) {
+  welt = w;
+  const land = welt.spieler[0];
+  sz = W.laender[land];
+  s = E.sicht(W, welt, land);
+}
+const ladbar = st => st && st.version === E.VERSION && st.szenario === W.id;
 let einst = Sp.einstellungen();
 let stoppSzene = () => {};
 let tippAbbruch = null;
@@ -41,12 +51,12 @@ async function zeigeTitel() {
   $('titel-text').textContent = sz.beschreibung;
   stoppSzene = spieleSzene($('titel-ascii'), 'bundeshaus', { bewegung: bewegung() });
   const auto = await Sp.lade('auto');
-  $('k-fortsetzen').hidden = !(auto && auto.szenario === sz.id && !auto.ende);
+  $('k-fortsetzen').hidden = !(ladbar(auto) && !auto.ende);
   $('k-neu').focus();
 }
 
 function starteNeu() {
-  s = E.neuesSpiel(sz);
+  uebernehme(E.neueWelt(W, { spieler: [W.spielbar[0]] }));
   zeigeSpiel();
 }
 
@@ -63,7 +73,7 @@ function zeichne() {
   tippAbbruch = null;
   zeichneKopf();
   zeichneLage();
-  const a = E.aktuelles(sz, s);
+  const a = E.aktuelles(W, welt);
   const blatt = $('blatt');
   blatt.className = 'blatt';
   blatt.scrollTop = 0;
@@ -71,19 +81,19 @@ function zeichne() {
   if (['lage', 'ereignis', 'vorhaben', 'ende'].includes(a.typ)) Ton.blatt();
   switch (a.typ) {
     case 'lage': zeichneLagebericht(blatt); break;
-    case 'ereignis': zeichneEreignis(blatt, a.ev); break;
+    case 'ereignis': zeichneEreignis(blatt, a.ev, a.land); break;
     case 'ergebnis': zeichneErgebnis(blatt, a.ergebnis); break;
     case 'vorhaben': zeichneVorhaben(blatt, a.liste); break;
     case 'wahl': zeichneWahl(blatt, a.ergebnis); break;
     case 'ende': zeichneEnde(blatt); break;
-    default: E.weiter(sz, s); return zeichne();
+    default: E.weiter(W, welt); return zeichne();
   }
-  Sp.speichere('auto', { ...s, gespeichert: Date.now() });
+  Sp.speichere('auto', { ...welt, gespeichert: Date.now() });
   blatt.focus({ preventScroll: true });
 }
 
 function zeichneKopf() {
-  $('eingang').innerHTML = `<span class="stempel">${esc(E.zeitLang(s.zeit))}<small>Runde ${s.runde} von ${E.zeitIndex(sz.ende) - E.zeitIndex(sz.start) + 1}</small></span>`;
+  $('eingang').innerHTML = `<span class="stempel">${esc(E.zeitLang(s.zeit))}<small>Runde ${s.runde} von ${E.zeitIndex(W.ende) - E.zeitIndex(W.start) + 1}</small></span>`;
   $('kopf-regierung').innerHTML = `<strong>Bundeskanzler ${esc(s.kanzler)}</strong>, Regierung aus ${esc(regierungText(s))}`;
 }
 
@@ -117,7 +127,7 @@ function zeichneLage() {
           trend = `<span class="trend ${gut === null ? '' : gut ? 'gut' : 'schlecht'}" title="seit Ende des letzten Halbjahrs: ${delta > 0 ? '+' : ''}${zahl(delta, 1)}">${hoch ? '▲' : '▼'}</span>`;
         }
       }
-      const warn = (k === 'sowjet' && v >= 85) || (k === 'haushalt' && v <= 10) || (k === 'koalition' && v <= 15 && s.regierung.length > 1)
+      const warn = (k === 'moskau' && v <= 15) || (k === 'haushalt' && v <= 10) || (k === 'koalition' && v <= 15 && s.regierung.length > 1)
         || (['usa', 'frankreich', 'grossbritannien'].includes(k) && v < 20 && !s.f.vereinigt && s.w.souveraenitaet < 50);
       html += `<div class="zeile${warn ? ' warnung' : ''}" title="${esc(d.name)}"><span>${esc(d.kurz)}</span><span class="balken" aria-hidden="true">${balken}</span><span class="wert">${wert}</span>${trend || '<span></span>'}</div>`;
     }
@@ -213,21 +223,21 @@ function zeichneLagebericht(blatt) {
   }
   const wahl = (s.wahlplan || []).some(z => E.zeitIndex(z) === E.zeitIndex(s.zeit));
   if (wahl) html += `<p><strong>In diesem Halbjahr wird ein neuer Bundestag gewählt.</strong></p>`;
-  const anzahl = s.queue.filter(id => id !== '@vorhaben').length;
+  const anzahl = welt.queue.filter(q => q.land === s.land && q.id !== '@vorhaben').length;
   html += `<p>Auf dem Schreibtisch liegen ${anzahl === 1 ? 'ein Vorgang' : `${anzahl} Vorgänge`} zur Entscheidung.</p>`;
   html += `</div><div class="weiter-zeile"><button class="knopf haupt" data-primaer id="k-weiter">Zum ersten Vorgang</button><span class="tastenhinweis">Eingabetaste</span></div>`;
   blatt.innerHTML = html;
   szene(blatt, s.runde === 1 ? 'bundeshaus' : null);
-  $('k-weiter').onclick = () => { E.lageGesehen(sz, s); zeichne(); };
+  $('k-weiter').onclick = () => { E.lageGesehen(W, welt); zeichne(); };
   tippe(blatt.querySelector('.text'));
 }
 
 // ---------------------------------------------------------------- Ereignis
 
-function zeichneEreignis(blatt, ev) {
+function zeichneEreignis(blatt, ev, land) {
   const akte = ev.art === 'akte';
   blatt.classList.toggle('akte', akte);
-  const opts = E.optionen(sz, s, ev);
+  const opts = E.optionen(W, welt, land, ev);
   let html = briefkopf(akte ? 'Schreiben' : ev.dynamisch ? 'Eilvorlage' : 'Vorlage', E.txt(ev.absender, s));
   html += `<pre class="ascii" aria-hidden="true"></pre>`;
   html += `<h2>${esc(E.txt(ev.titel, s))}</h2><p class="datum">${esc(E.txt(ev.datum, s) || E.zeitText(s.zeit))}</p>`;
@@ -249,7 +259,7 @@ function zeichneEreignis(blatt, ev) {
     b.onclick = () => {
       b.querySelector('.kaestchen').textContent = '☒';
       Ton.stempel();
-      E.waehle(sz, s, Number(b.dataset.index));
+      E.waehle(W, welt, Number(b.dataset.index));
       setTimeout(zeichne, wenigBewegung ? 0 : 180);
     };
   });
@@ -286,7 +296,7 @@ function zeichneErgebnis(blatt, erg) {
   html += `<div class="weiter-zeile"><button class="knopf haupt" data-primaer id="k-weiter">Weiter</button><span class="tastenhinweis">Eingabetaste</span></div>`;
   blatt.innerHTML = html;
   szene(blatt, erg.ascii);
-  $('k-weiter').onclick = () => { E.weiter(sz, s); zeichne(); };
+  $('k-weiter').onclick = () => { E.weiter(W, welt); zeichne(); };
 }
 
 // ---------------------------------------------------------------- Regierungsvorhaben
@@ -306,9 +316,9 @@ function zeichneVorhaben(blatt, liste) {
   html += `</ul><div class="weiter-zeile"><button class="knopf" id="k-keins">Kein neues Vorhaben</button></div>`;
   blatt.innerHTML = html;
   blatt.querySelectorAll('[data-id]').forEach(b => {
-    b.onclick = () => { Ton.stempel(); E.waehleVorhaben(sz, s, b.dataset.id); zeichne(); };
+    b.onclick = () => { Ton.stempel(); E.waehleVorhaben(W, welt, b.dataset.id); zeichne(); };
   });
-  $('k-keins').onclick = () => { E.waehleVorhaben(sz, s, null); zeichne(); };
+  $('k-keins').onclick = () => { E.waehleVorhaben(W, welt, null); zeichne(); };
 }
 
 // ---------------------------------------------------------------- Wahlabend
@@ -350,7 +360,7 @@ function zeichneWahl(blatt, e) {
       sitze.appendChild(d);
     }
   }
-  $('k-weiter').onclick = () => { stoppSzene(); E.weiter(sz, s); zeichne(); };
+  $('k-weiter').onclick = () => { stoppSzene(); E.weiter(W, welt); zeichne(); };
 }
 
 // ---------------------------------------------------------------- Ende
@@ -358,8 +368,8 @@ function zeichneWahl(blatt, e) {
 function diagramm() {
   const v = s.verlauf;
   if (v.length < 2) return '';
-  const W = 640, H = 200, L = 34, R = 10, T = 12, B = 26;
-  const x = i => L + (W - L - R) * i / (v.length - 1);
+  const B_ = 640, H = 200, L = 34, R = 10, T = 12, B = 26;
+  const x = i => L + (B_ - L - R) * i / (v.length - 1);
   const reihen = [
     { key: 'zustimmung', farbe: 'var(--farbband)', name: 'Union in Umfragen' },
     { key: 'wachstum', farbe: 'var(--gruen)', name: 'Wachstum' },
@@ -367,8 +377,8 @@ function diagramm() {
   ];
   const max = 60;
   const y = val => T + (H - T - B) * (1 - Math.max(0, val) / max);
-  let svg = `<svg class="diagramm" viewBox="0 0 ${W} ${H}" role="img" aria-label="Verlauf von Umfragewerten, Wachstum und Arbeitslosigkeit">`;
-  for (const g of [0, 20, 40, 60]) svg += `<line x1="${L}" x2="${W - R}" y1="${y(g)}" y2="${y(g)}" stroke="var(--linie)" stroke-width="1"/><text x="${L - 6}" y="${y(g) + 4}" text-anchor="end">${g}</text>`;
+  let svg = `<svg class="diagramm" viewBox="0 0 ${B_} ${H}" role="img" aria-label="Verlauf von Umfragewerten, Wachstum und Arbeitslosigkeit">`;
+  for (const g of [0, 20, 40, 60]) svg += `<line x1="${L}" x2="${B_ - R}" y1="${y(g)}" y2="${y(g)}" stroke="var(--linie)" stroke-width="1"/><text x="${L - 6}" y="${y(g) + 4}" text-anchor="end">${g}</text>`;
   v.forEach((p, i) => { if (E.halbVon(p.zeit) === 2 && E.jahrVon(p.zeit) % 2 === 1) svg += `<text x="${x(i)}" y="${H - 6}" text-anchor="middle">${E.jahrVon(p.zeit)}</text>`; });
   for (const r of reihen) {
     svg += `<polyline fill="none" stroke="${r.farbe}" stroke-width="2" points="${v.map((p, i) => `${x(i).toFixed(1)},${y(p[r.key]).toFixed(1)}`).join(' ')}"/>`;
@@ -410,22 +420,25 @@ async function zeigePlaetze(modus) {
   ul.innerHTML = plaetze.map(p => {
     const st = p.stand;
     const titel = p.name === 'auto' ? 'Automatisch gespeichert' : `Platz ${p.name.slice(-1)}`;
-    const info = st ? `${E.zeitText(st.zeit)}, Kanzler ${esc(st.kanzler)}${st.ende ? ' (beendet)' : ''}<small>${st.gespeichert ? new Date(st.gespeichert).toLocaleString('de-DE') : ''}</small>` : '<small>leer</small>';
+    const kanzler = st?.laender?.[st.spieler?.[0]]?.kanzler;
+    const info = !st ? '<small>leer</small>'
+      : !ladbar(st) ? '<small>Spielstand aus einer älteren Version, kann nicht mehr geladen werden</small>'
+      : `${E.zeitText(st.zeit)}${kanzler ? `, Kanzler ${esc(kanzler)}` : ''}${st.ende ? ' (beendet)' : ''}<small>${st.gespeichert ? new Date(st.gespeichert).toLocaleString('de-DE') : ''}</small>`;
     const knopf = modus === 'speichern'
       ? `<button class="knopf klein" data-name="${p.name}">Hier speichern</button>`
-      : `<button class="knopf klein" data-name="${p.name}" ${st && st.szenario === sz.id ? '' : 'disabled'}>Laden</button>`;
+      : `<button class="knopf klein" data-name="${p.name}" ${ladbar(st) ? '' : 'disabled'}>Laden</button>`;
     return `<li><span class="info"><b>${titel}</b><br>${info}</span>${knopf}</li>`;
   }).join('');
   ul.querySelectorAll('[data-name]').forEach(b => {
     b.onclick = async () => {
       if (modus === 'speichern') {
-        await Sp.speichere(b.dataset.name, { ...s, gespeichert: Date.now() });
+        await Sp.speichere(b.dataset.name, { ...welt, gespeichert: Date.now() });
         $('d-plaetze').close();
         meldung('Gespeichert.');
       } else {
         const st = await Sp.lade(b.dataset.name);
-        if (!st) return;
-        s = st;
+        if (!ladbar(st)) return;
+        uebernehme(st);
         $('d-plaetze').close();
         $('d-menue').close();
         zeigeSpiel();
@@ -461,7 +474,7 @@ function einstellungenVerbinden() {
 
 document.addEventListener('DOMContentLoaded', () => {
   $('k-neu').onclick = starteNeu;
-  $('k-fortsetzen').onclick = async () => { const st = await Sp.lade('auto'); if (st) { s = st; zeigeSpiel(); } };
+  $('k-fortsetzen').onclick = async () => { const st = await Sp.lade('auto'); if (ladbar(st)) { uebernehme(st); zeigeSpiel(); } };
   $('k-laden').onclick = () => zeigePlaetze('laden');
   $('k-chronik').onclick = zeigeChronik;
   $('k-speichern').onclick = () => zeigePlaetze('speichern');

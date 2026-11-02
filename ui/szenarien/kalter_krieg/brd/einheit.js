@@ -1,7 +1,7 @@
 // Der alternative Strang: ein neutrales, wiedervereinigtes Deutschland.
 // Er öffnet sich über die Stalin-Note 1952 oder die Berliner Konferenz 1954.
 import { vereinigt, Land, land, hauptstadt } from './hilfen.js';
-import { zeitPlus, zeitIndex, jahrVon, zeitText } from '../../engine.js';
+import { zeitPlus, zeitIndex, jahrVon, zeitText } from '../../../engine.js';
 
 const folgeEreignisse = [
   ['n_friedensvertrag', 1], ['n_waehrung', 1], ['n_hauptstadt', 2], ['n_bodenreform', 2],
@@ -47,18 +47,18 @@ Der Kern des Streits ist die Reihenfolge. Der Westen verlangt zuerst freie, inte
     optionen: [
       { text: 'Freie Wahlen unter internationaler Aufsicht zur Bedingung machen.',
         zufall: [
-          { p: s => 0.2 + (s.f.stalin_angenommen ? 0.15 : 0) + (s.w.einheit - 30) / 200 + (50 - s.w.sowjet) / 200,
+          { p: s => 0.2 + (s.f.stalin_angenommen ? 0.15 : 0) + (s.w.einheit - 30) / 200 + (s.w.moskau - 50) / 200,
             ergebnis: 'Nach wochenlangem Ringen gibt Molotow nach: Eine Viermächtekommission soll die Wahlen überwachen. Ein Vertrag über die Einheit wird ausgehandelt.',
-            w: { einheit: 15, usa: 3, sowjet: -5 }, setze: ['neutral'], plane: [{ id: 'n_abkommen', in: 1 }] },
+            w: { einheit: 15, usa: 3, moskau: 5 }, setze: ['neutral'], plane: [{ id: 'n_abkommen', in: 1 }] },
           { ergebnis: 'Molotow bleibt hart, die Konferenz scheitert. Die Westmächte drängen Bonn, die Westverträge nun doch zu unterzeichnen.',
-            w: { einheit: -8, sowjet: 3 }, aktion: s => scheitern(s) },
+            w: { einheit: -8, moskau: -3 }, aktion: s => scheitern(s) },
         ] },
       { text: 'Den sowjetischen Weg akzeptieren: einen paritätischen Gesamtdeutschen Rat.', richtung: 'ost',
         w: { usa: -10, koalition: -14, ansehen: -3 },
         zufall: [
           { p: 0.65,
             ergebnis: 'Der Gesamtdeutsche Rat tritt zusammen. Ost-CDU, LDPD und SED sitzen neben Union, SPD und FDP. Ein Vertrag über die Einheit wird ausgehandelt.',
-            w: { einheit: 18, sowjet: -10 }, setze: ['neutral', 'paritaet'], plane: [{ id: 'n_abkommen', in: 1 }] },
+            w: { einheit: 18, moskau: 10 }, setze: ['neutral', 'paritaet'], plane: [{ id: 'n_abkommen', in: 1 }] },
           { ergebnis: 'Trotz deines Entgegenkommens zieht Moskau die Verhandlungen in die Länge. Der Westen verliert die Geduld; die Konferenz zerfällt.',
             w: { einheit: -5 }, aktion: s => scheitern(s) },
         ] },
@@ -81,7 +81,7 @@ Offen ist ein Punkt, der alles entscheidet: die Grenze im Osten. Moskau verlangt
       { text: 'Die Oder-Neiße-Grenze anerkennen. Die Einheit hat ihren Preis.',
         w: { ansehen: -8, koalition: -15, einheit: 15 },
         zufall: [
-          { p: s => 0.8 - Math.max(0, s.w.sowjet - 50) / 100,
+          { p: s => 0.8 - Math.max(0, 50 - s.w.moskau) / 100,
             ergebnis: 'Der Vertrag wird unterzeichnet. In Vertriebenenversammlungen werden Bilder von dir verbrannt. Aber Deutschland wird eins sein.',
             setze: ['grenze_anerkannt'], plane: [{ id: 'n_wahlkampf', in: 1 }] },
           { ergebnis: 'Selbst dieses Zugeständnis reicht nicht. Im Kreml hat sich die Linie geändert, die DDR soll bleiben. Die Verhandlungen brechen ab.',
@@ -89,11 +89,11 @@ Offen ist ein Punkt, der alles entscheidet: die Grenze im Osten. Moskau verlangt
         ] },
       { text: 'Die Grenzfrage einem späteren Friedensvertrag vorbehalten.',
         zufall: [
-          { p: s => 0.3 + (s.w.einheit - 40) / 200 - Math.max(0, s.w.sowjet - 50) / 150,
+          { p: s => 0.3 + (s.w.einheit - 40) / 200 - Math.max(0, 50 - s.w.moskau) / 150,
             ergebnis: 'Molotow willigt nach langem Zögern ein: Die Grenze bleibt bis zum Friedensvertrag offen. Ein diplomatisches Meisterstück.',
             w: { ansehen: 4, einheit: 15 }, plane: [{ id: 'n_wahlkampf', in: 1 }] },
           { ergebnis: 'Moskau lässt die Verhandlungen platzen. Die Chance ist vertan.',
-            w: { einheit: -15, sowjet: 4 }, aktion: s => scheitern(s) },
+            w: { einheit: -15, moskau: -4 }, aktion: s => scheitern(s) },
         ] },
       { text: 'Abbrechen. Der Preis ist zu hoch.', richtung: 'west',
         ergebnis: 'Die Westmächte sind erleichtert. Die Teilung bleibt.',
@@ -120,7 +120,7 @@ Die Union steht in Umfragen bei ${String(s.w.zustimmung).replace('.', ',')} Proz
         w: s => ({ ansehen: Math.max(1, Math.round(s.w.wachstum - 4)) }) },
       { text: 'Ein Wahlkampf gegen die SED und gegen jeden, der mit ihr gemeinsame Sache macht.',
         ergebnis: 'Polarisierend, aber mobilisierend. Moskau beschwert sich über „Hetze“.',
-        w: { ansehen: 3, sowjet: 6 } },
+        w: { ansehen: 3, moskau: -6 } },
     ].map(o => ({ ...o, aktion: s => vereinigen(s) })),
     historisch: 'Fiktion. Die erste freie gesamtdeutsche Wahl seit 1932 fand am 2. Dezember 1990 statt.',
   },
@@ -138,14 +138,14 @@ Umstritten ist die Formulierung der Neutralität. Moskau will ein Verbot jeder �
     optionen: [
       { text: 'Die Formulierung akzeptieren – Hauptsache, die Truppen gehen.',
         ergebnis: 'Der Vertrag wird in Wien unterzeichnet. In Friedland treffen die ersten Heimkehrer ein.',
-        w: { souveraenitaet: 80, sowjet: -10, usa: -3, ansehen: 6 }, setze: ['friedensvertrag', 'heimkehrer', 'saar_zurueck', 'neutralitaet_streng'] },
+        w: { souveraenitaet: 80, moskau: 10, usa: -3, ansehen: 6 }, setze: ['friedensvertrag', 'heimkehrer', 'saar_zurueck', 'neutralitaet_streng'] },
       { text: 'Auf einer engen, nur militärischen Neutralität bestehen.',
         zufall: [
           { p: s => 0.55 + (s.w.usa - 40) / 200,
             ergebnis: 'Mit Rückendeckung aus Washington setzt sich Bonn durch. Die Neutralität ist militärisch, nicht wirtschaftlich.',
-            w: { souveraenitaet: 80, sowjet: -4, usa: 3, ansehen: 6 }, setze: ['friedensvertrag', 'heimkehrer', 'saar_zurueck'] },
+            w: { souveraenitaet: 80, moskau: 4, usa: 3, ansehen: 6 }, setze: ['friedensvertrag', 'heimkehrer', 'saar_zurueck'] },
           { ergebnis: 'Moskau gibt nicht nach. Der Vertrag kommt mit einem halben Jahr Verspätung zustande, zu Moskaus Bedingungen.',
-            w: { souveraenitaet: 70, sowjet: -6, ansehen: 3 }, setze: ['friedensvertrag', 'heimkehrer', 'saar_zurueck', 'neutralitaet_streng'] },
+            w: { souveraenitaet: 70, moskau: 6, ansehen: 3 }, setze: ['friedensvertrag', 'heimkehrer', 'saar_zurueck', 'neutralitaet_streng'] },
         ] },
     ],
     historisch: 'Fiktion. Einen Friedensvertrag mit Deutschland hat es nie gegeben; der Zwei-plus-Vier-Vertrag von 1990 trat an seine Stelle.',
@@ -222,13 +222,13 @@ Umstritten ist die Formulierung der Neutralität. Moskau will ein Verbot jeder �
     optionen: [
       { text: 'Strafverfolgung der Verantwortlichen und Öffnung der Akten.',
         ergebnis: 'Die Prozesse erschüttern das Land. Moskau protestiert scharf.',
-        w: { ansehen: 3, sowjet: 10 } },
+        w: { ansehen: 3, moskau: -10 } },
       { text: 'Eine Amnestie für alle außer den schwersten Verbrechen.',
         ergebnis: 'Ein Schlussstrich, der vielen Opfern bitter aufstößt.',
-        w: { ansehen: -3, sowjet: -5 } },
+        w: { ansehen: -3, moskau: 5 } },
       { text: 'Belastete aus dem öffentlichen Dienst entfernen, ohne Prozesse.',
         ergebnis: 'Ein Mittelweg, wie man ihn schon nach 1945 versucht hat.',
-        w: { ansehen: 1, sowjet: 2 } },
+        w: { ansehen: 1, moskau: -2 } },
     ],
   },
   {
@@ -242,13 +242,13 @@ Umstritten ist die Formulierung der Neutralität. Moskau will ein Verbot jeder �
     optionen: [
       { text: 'Mitglied bleiben.',
         ergebnis: 'Moskau protestiert, Paris dankt.',
-        w: s => ({ sowjet: s.f.neutralitaet_streng ? 15 : 8, frankreich: 6, europa: 3 }) },
+        w: s => ({ moskau: s.f.neutralitaet_streng ? -15 : -8, frankreich: 6, europa: 3 }) },
       { text: 'Austreten.',
         ergebnis: 'Die Montanunion besteht nur noch aus fünf Staaten. Schuman spricht von einem schwarzen Tag.',
-        w: { sowjet: -6, frankreich: -14, europa: -12, impuls: -0.6 }, loesche: ['montanunion'] },
+        w: { moskau: 6, frankreich: -14, europa: -12, impuls: -0.6 }, loesche: ['montanunion'] },
       { text: 'Ein Sonderstatus als assoziiertes Mitglied.',
         ergebnis: 'Ein kompliziertes Gebilde, das niemanden ganz zufriedenstellt.',
-        w: { sowjet: 3, frankreich: -3, europa: -4 } },
+        w: { moskau: -3, frankreich: -3, europa: -4 } },
     ],
   },
   {
@@ -262,13 +262,13 @@ Umstritten ist die Formulierung der Neutralität. Moskau will ein Verbot jeder �
     optionen: [
       { text: 'Ein kleines Verteidigungsheer nach Schweizer Vorbild.',
         ergebnis: 'Ein Milizsystem mit kurzer Wehrpflicht. Die Nachbarn sind beruhigt.',
-        w: { haushalt: -3, sowjet: 2, bundeswehr: 1, ansehen: 1 } },
+        w: { haushalt: -3, moskau: -2, bundeswehr: 1, ansehen: 1 } },
       { text: 'Keine Armee – nur ein Bundesgrenzschutz.',
         ergebnis: 'Deutschland verlässt sich auf die Garantie der vier Mächte.',
-        w: { sowjet: -4, usa: -2, ansehen: 1 } },
+        w: { moskau: 4, usa: -2, ansehen: 1 } },
       { text: 'Ein starkes Heer mit allgemeiner Wehrpflicht.',
         ergebnis: 'In Paris, Warschau und Moskau werden alte Erinnerungen wach.',
-        w: { haushalt: -6, sowjet: 14, frankreich: -8, grossbritannien: -4, bundeswehr: 2 } },
+        w: { haushalt: -6, moskau: -14, frankreich: -8, grossbritannien: -4, bundeswehr: 2 } },
     ],
   },
   {
@@ -285,13 +285,13 @@ Für viele Ungarn war das neutrale Deutschland ein Versprechen. Nun richten sich
     optionen: [
       { text: 'Flüchtlinge aufnehmen und bei den Vereinten Nationen protestieren.',
         ergebnis: 'Deutschland nimmt Zehntausende auf. Moskau warnt vor „Einmischung“.',
-        w: { ansehen: 3, sowjet: 5, haushalt: -1 } },
+        w: { ansehen: 3, moskau: -5, haushalt: -1 } },
       { text: 'Als Neutraler eine Vermittlung anbieten.',
         ergebnis: 'Chruschtschow lehnt ab. Aber man hat bemerkt, dass Deutschland eine eigene Rolle sucht.',
-        w: { sowjet: -2, usa: -2, ansehen: -1 } },
+        w: { moskau: 2, usa: -2, ansehen: -1 } },
       { text: 'Den Grenzschutz an der tschechoslowakischen Grenze verstärken.',
         ergebnis: 'Ein Signal, das in Moskau als Provokation verstanden wird.',
-        w: { sowjet: 14, ansehen: 1 } },
+        w: { moskau: -14, ansehen: 1 } },
     ],
   },
   {
@@ -305,13 +305,13 @@ Für viele Ungarn war das neutrale Deutschland ein Versprechen. Nun richten sich
     optionen: [
       { text: 'Beitreten.',
         ergebnis: 'Deutschland ist Gründungsmitglied der EWG. Moskau spricht von Vertragsbruch.',
-        w: s => ({ europa: 15, frankreich: 8, usa: 3, sowjet: s.f.neutralitaet_streng ? 18 : 10, impuls: 0.6 }), setze: ['ewg'] },
+        w: s => ({ europa: 15, frankreich: 8, usa: 3, moskau: s.f.neutralitaet_streng ? -18 : -10, impuls: 0.6 }), setze: ['ewg'] },
       { text: 'Ein Freihandelsabkommen mit der EWG schließen.',
         ergebnis: 'Ein Weg, wie ihn auch Österreich gehen wird.',
-        w: { europa: 6, frankreich: -2, sowjet: 3, impuls: 0.2 } },
+        w: { europa: 6, frankreich: -2, moskau: -3, impuls: 0.2 } },
       { text: 'Draußen bleiben.',
         ergebnis: 'Die Sechs werden fünf. Die deutsche Industrie fürchtet um ihre Märkte.',
-        w: { europa: -6, frankreich: -6, sowjet: -4, impuls: -0.6 } },
+        w: { europa: -6, frankreich: -6, moskau: 4, impuls: -0.6 } },
     ],
   },
   {
@@ -325,13 +325,13 @@ Für viele Ungarn war das neutrale Deutschland ein Versprechen. Nun richten sich
     optionen: [
       { text: 'Feierlich auf Kernwaffen verzichten.',
         ergebnis: 'Ein Akt, der in der ganzen Welt Beachtung findet.',
-        w: { sowjet: -6, usa: 2, frankreich: 2, ansehen: 2 }, setze: ['abc_verzicht'] },
+        w: { moskau: 6, usa: 2, frankreich: 2, ansehen: 2 }, setze: ['abc_verzicht'] },
       { text: 'Nur zivile Forschung – aber keine Festlegung.',
         ergebnis: 'Die Unklarheit beunruhigt die Nachbarn.',
-        w: { sowjet: 4, frankreich: -2 } },
+        w: { moskau: -4, frankreich: -2 } },
       { text: 'Die Option offenhalten und eine Anreicherungsanlage bauen.',
         ergebnis: 'Ein Sturm der Entrüstung in Ost und West.',
-        w: { sowjet: 22, usa: -10, frankreich: -8, haushalt: -4 }, setze: ['nationale_atomoption'] },
+        w: { moskau: -22, usa: -10, frankreich: -8, haushalt: -4 }, setze: ['nationale_atomoption'] },
     ],
   },
   {
@@ -346,13 +346,13 @@ Für viele Ungarn war das neutrale Deutschland ein Versprechen. Nun richten sich
     optionen: [
       { text: 'Einen großen Handelsvertrag schließen.',
         ergebnis: 'Die Schwerindustrie an der Ruhr jubelt. Washington ist besorgt.',
-        w: { sowjet: -8, usa: -4, impuls: 0.6 } },
+        w: { moskau: 8, usa: -4, impuls: 0.6 } },
       { text: 'Einen Freundschaftsvertrag unterzeichnen.',
         ergebnis: 'Ein Rapallo der fünfziger Jahre, schreiben die westlichen Zeitungen.',
-        w: { sowjet: -15, usa: -12, frankreich: -6, grossbritannien: -6 } },
+        w: { moskau: 15, usa: -12, frankreich: -6, grossbritannien: -6 } },
       { text: 'Höflich bleiben und nichts unterschreiben.',
         ergebnis: 'Chruschtschow reist verstimmt ab.',
-        w: { sowjet: 4 } },
+        w: { moskau: -4 } },
     ],
   },
   {
@@ -366,11 +366,11 @@ Für viele Ungarn war das neutrale Deutschland ein Versprechen. Nun richten sich
       ? 'Die Vertriebenenverbände fordern, die Anerkennung der Oder-Neiße-Grenze rückgängig zu machen. Auf dem Schlesiertreffen in Hannover sprechen Redner von „Verrat“. Warschau beobachtet jedes Wort aus Bonn.'
       : 'Polen verlangt, dass Deutschland die Oder-Neiße-Grenze endlich anerkennt. Moskau unterstützt die Forderung mit Nachdruck. Die Vertriebenenverbände drohen mit Massenprotesten.'),
     optionen: s => (s.f.grenze_anerkannt ? [
-      { text: 'Klarstellen: Die Grenze ist endgültig.', ergebnis: 'Die Verbände toben, die Nachbarn sind beruhigt.', w: { ansehen: -3, sowjet: -4 } },
-      { text: 'Verständnis für die Vertriebenen zeigen.', ergebnis: 'Warschau und Moskau horchen auf.', w: { ansehen: 2, sowjet: 8 } },
+      { text: 'Klarstellen: Die Grenze ist endgültig.', ergebnis: 'Die Verbände toben, die Nachbarn sind beruhigt.', w: { ansehen: -3, moskau: 4 } },
+      { text: 'Verständnis für die Vertriebenen zeigen.', ergebnis: 'Warschau und Moskau horchen auf.', w: { ansehen: 2, moskau: -8 } },
     ] : [
-      { text: 'Die Grenze jetzt anerkennen.', ergebnis: 'Ein schmerzhafter Schritt, den viele dir nie verzeihen werden.', w: { ansehen: -5, sowjet: -10, koalition: -6 }, setze: ['grenze_anerkannt'] },
-      { text: 'Am Rechtsstandpunkt festhalten.', ergebnis: 'Moskau erhöht den Druck.', w: { ansehen: 2, sowjet: 8 } },
+      { text: 'Die Grenze jetzt anerkennen.', ergebnis: 'Ein schmerzhafter Schritt, den viele dir nie verzeihen werden.', w: { ansehen: -5, moskau: 10, koalition: -6 }, setze: ['grenze_anerkannt'] },
+      { text: 'Am Rechtsstandpunkt festhalten.', ergebnis: 'Moskau erhöht den Druck.', w: { ansehen: 2, moskau: -8 } },
     ]),
   },
   {
@@ -384,8 +384,8 @@ Für viele Ungarn war das neutrale Deutschland ein Versprechen. Nun richten sich
     optionen: [
       { text: 'Zustimmen.',
         zufall: [
-          { p: 0.3, ergebnis: 'Die Absprachen fliegen auf. Moskau spricht vom Bruch des Friedensvertrags.', w: { usa: 6, sowjet: 25 } },
-          { ergebnis: 'Die Generalstäbe sprechen miteinander. Niemand erfährt davon.', w: { usa: 8, sowjet: 2 } },
+          { p: 0.3, ergebnis: 'Die Absprachen fliegen auf. Moskau spricht vom Bruch des Friedensvertrags.', w: { usa: 6, moskau: -25 } },
+          { ergebnis: 'Die Generalstäbe sprechen miteinander. Niemand erfährt davon.', w: { usa: 8, moskau: -2 } },
         ] },
       { text: 'Ablehnen.', ergebnis: 'Die Neutralität bleibt rein. Washington ist enttäuscht.', w: { usa: -4 } },
     ],
@@ -403,7 +403,7 @@ Für viele Ungarn war das neutrale Deutschland ein Versprechen. Nun richten sich
     optionen: s => [
       { text: 'Auf den Kanzler setzen.', ergebnis: 'Ein Wahlkampf, ganz auf die Person zugeschnitten.', w: { ansehen: 3 } },
       { text: 'Auf die Wirtschaft setzen.', ergebnis: 'Erhard zieht durchs Land.', w: { ansehen: Math.max(1, Math.round(s.w.wachstum - 3)) } },
-      { text: 'Auf Sicherheit setzen.', ergebnis: 'Die Angst vor Moskau ist ein verlässlicher Wahlhelfer.', w: { ansehen: s.w.sowjet >= 55 ? 5 : 2, sowjet: 2 } },
+      { text: 'Auf Sicherheit setzen.', ergebnis: 'Die Angst vor Moskau ist ein verlässlicher Wahlhelfer.', w: { ansehen: s.w.moskau <= 45 ? 5 : 2, moskau: -2 } },
     ].map(o => ({ ...o, setze: ['wk_' + s.zeit] })),
   },
 ];
