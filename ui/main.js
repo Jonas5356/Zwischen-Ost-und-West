@@ -3,6 +3,7 @@ import * as E from './engine.js';
 import szenario from './szenarien/brd1949/index.js';
 import { spieleSzene, SZENEN } from './ascii.js';
 import * as Sp from './speicher.js';
+import * as Ton from './ton.js';
 
 const sz = E.bereiteVor(szenario);
 let s = null;
@@ -67,6 +68,7 @@ function zeichne() {
   blatt.className = 'blatt';
   blatt.scrollTop = 0;
   blatt.closest('.mappe').scrollTop = 0;
+  if (['lage', 'ereignis', 'vorhaben', 'ende'].includes(a.typ)) Ton.blatt();
   switch (a.typ) {
     case 'lage': zeichneLagebericht(blatt); break;
     case 'ereignis': zeichneEreignis(blatt, a.ev); break;
@@ -145,9 +147,15 @@ function tippe(el, fertig) {
   while (w.nextNode()) knoten.push({ n: w.currentNode, t: w.currentNode.data });
   knoten.forEach(k => { k.n.data = ''; });
   let i = 0, pos = 0, aktiv = true;
-  const schritt = () => {
+  let naechsterAnschlag = 0;
+  const schritt = jetzt => {
     if (!aktiv) return;
-    let budget = 7;
+    // Anschläge im Rhythmus einer flotten Schreibkraft, nicht pro Zeichen
+    if (jetzt >= naechsterAnschlag) {
+      if (Math.random() < 0.12) Ton.leertaste(); else Ton.taste();
+      naechsterAnschlag = jetzt + 55 + Math.random() * 60;
+    }
+    let budget = 6;
     while (budget > 0 && i < knoten.length) {
       const k = knoten[i];
       const rest = k.t.length - pos;
@@ -157,7 +165,7 @@ function tippe(el, fertig) {
       if (pos >= k.t.length) { i++; pos = 0; }
     }
     if (i < knoten.length) requestAnimationFrame(schritt);
-    else { aktiv = false; tippAbbruch = null; fertig?.(); }
+    else { aktiv = false; tippAbbruch = null; Ton.glocke(); fertig?.(); }
   };
   tippAbbruch = () => {
     aktiv = false;
@@ -240,6 +248,7 @@ function zeichneEreignis(blatt, ev) {
   blatt.querySelectorAll('.vorschlag').forEach(b => {
     b.onclick = () => {
       b.querySelector('.kaestchen').textContent = '☒';
+      Ton.stempel();
       E.waehle(sz, s, Number(b.dataset.index));
       setTimeout(zeichne, wenigBewegung ? 0 : 180);
     };
@@ -297,7 +306,7 @@ function zeichneVorhaben(blatt, liste) {
   html += `</ul><div class="weiter-zeile"><button class="knopf" id="k-keins">Kein neues Vorhaben</button></div>`;
   blatt.innerHTML = html;
   blatt.querySelectorAll('[data-id]').forEach(b => {
-    b.onclick = () => { E.waehleVorhaben(sz, s, b.dataset.id); zeichne(); };
+    b.onclick = () => { Ton.stempel(); E.waehleVorhaben(sz, s, b.dataset.id); zeichne(); };
   });
   $('k-keins').onclick = () => { E.waehleVorhaben(sz, s, null); zeichne(); };
 }
@@ -326,6 +335,7 @@ function zeichneWahl(blatt, e) {
   const male = () => { pre.textContent = reihen.map(([k, v]) => zeile(k, v, f)).join('\n'); };
   male();
   if (f < 1) {
+    Ton.fernschreiber(0.9);
     const iv = setInterval(() => { f = Math.min(1, f + 0.05); male(); if (f >= 1) clearInterval(iv); }, 40);
     stoppSzene = () => { clearInterval(iv); f = 1; male(); };
   }
@@ -432,6 +442,19 @@ function einstellungenVerbinden() {
     el.checked = !!einst[k];
     el.onchange = () => { einst[k] = el.checked; Sp.speichereEinstellungen(einst); if (s && !$('spiel').hidden) zeichne(); };
   }
+  Ton.einstellen({ ton: einst.ton, laut: einst.laut });
+  const ton = $('e-ton');
+  const laut = $('e-laut');
+  ton.checked = !!einst.ton;
+  laut.value = Math.round(einst.laut * 100);
+  laut.disabled = !einst.ton;
+  ton.onchange = () => {
+    einst.ton = ton.checked; laut.disabled = !ton.checked;
+    Ton.einstellen({ ton: einst.ton }); Sp.speichereEinstellungen(einst);
+    if (einst.ton) Ton.taste();
+  };
+  laut.oninput = () => { einst.laut = laut.value / 100; Ton.einstellen({ laut: einst.laut }); };
+  laut.onchange = () => { Sp.speichereEinstellungen(einst); Ton.glocke(); };
 }
 
 // ---------------------------------------------------------------- Start

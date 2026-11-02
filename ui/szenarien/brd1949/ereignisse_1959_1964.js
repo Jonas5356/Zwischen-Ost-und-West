@@ -213,7 +213,7 @@ Für die Union ist die Lage neu: Die SPD wird für bürgerliche Wähler wählbar
     datum: 'März 1961',
     ab: 1961.1, ordnung: 3,
     absender: 'Ludwig Erhard und Karl Blessing, Präsident der Bundesbank',
-    text: `Die Bundesrepublik exportiert so viel, dass Devisen in Strömen hereinfließen. Die Bundesbank kann die Geldmenge kaum noch kontrollieren, die Preise steigen. Erhard und Bundesbankpräsident Blessing wollen die D-Mark gegenüber dem Dollar aufwerten. Die Exportindustrie und der BDI unter Fritz Berg laufen Sturm. Die Amerikaner würden eine Aufwertung begrüßen, weil sie ihre Zahlungsbilanz entlastet.`,
+    text: s => `${Land(s)} exportiert so viel, dass Devisen in Strömen hereinfließen. Die Bundesbank kann die Geldmenge kaum noch kontrollieren, die Preise steigen. Erhard und Bundesbankpräsident Blessing wollen die D-Mark gegenüber dem Dollar aufwerten. Die Exportindustrie und der BDI unter Fritz Berg laufen Sturm. Die Amerikaner würden eine Aufwertung begrüßen, weil sie ihre Zahlungsbilanz entlastet.`,
     optionen: [
       { text: 'Um fünf Prozent aufwerten.', hist: true,
         ergebnis: 'Die Preise beruhigen sich, die Industrie klagt. Washington ist erfreut.',
@@ -305,7 +305,7 @@ Ost-Berlin sucht nun wirtschaftliche Hilfe. Über die Treuhandstelle für den In
     ascii: 'plakat',
     text: s => `Am 17. September wird gewählt. ${s.f.godesberg ? 'Die SPD tritt nach Godesberg erstmals als Volkspartei an, mit dem jungen Willy Brandt als Kanzlerkandidaten.' : 'Die SPD tritt mit Willy Brandt an.'} Die FDP wirbt mit dem Slogan „Mit der CDU – aber ohne Adenauer“.${s.kanzler === 'Adenauer' ? ' Du bist 85 Jahre alt.' : ''} Die Union steht bei ${String(s.w.zustimmung).replace('.', ',')} Prozent.`,
     optionen: [
-      { text: 'Auf Erfahrung setzen: der Kanzler, der die Bundesrepublik aufgebaut hat.', hist: true,
+      { text: s => `Auf Erfahrung setzen: der Kanzler, der ${s.f.vereinigt ? 'die Einheit erreicht' : 'die Bundesrepublik aufgebaut'} hat.`, hist: true,
         ergebnis: 'Für die einen ein Garant der Stabilität, für die anderen ein Mann von gestern.',
         w: s => ({ ansehen: s.kanzler === 'Adenauer' ? 2 : 4 }) },
       { text: 'Erhard in den Vordergrund stellen und den Wechsel andeuten.',
@@ -344,7 +344,7 @@ Ost-Berlin sucht nun wirtschaftliche Hilfe. Über die Treuhandstelle für den In
     ab: 1962.1, ordnung: 2,
     absender: 'Polizeisenator Helmut Schmidt, Hamburg',
     ascii: 'flut',
-    text: `In der Nacht hat eine Sturmflut die Deiche an der Elbe durchbrochen. Hamburg-Wilhelmsburg steht unter Wasser, über 300 Menschen sind ertrunken, Zehntausende obdachlos. Polizeisenator Helmut Schmidt hat ohne klare Rechtsgrundlage Bundeswehr und NATO-Truppen angefordert – Hubschrauber, Pioniere, Boote. Er bittet den Bund um schnelle Hilfe.`,
+    text: s => `In der Nacht hat eine Sturmflut die Deiche an der Elbe durchbrochen. Hamburg-Wilhelmsburg steht unter Wasser, über 300 Menschen sind ertrunken, Zehntausende obdachlos. Polizeisenator Helmut Schmidt hat ohne klare Rechtsgrundlage ${s.f.vereinigt ? 'Soldaten, Grenzschutz und Hilfe aus Dänemark und den Niederlanden' : 'Bundeswehr und NATO-Truppen'} angefordert – Hubschrauber, Pioniere, Boote. Er bittet den Bund um schnelle Hilfe.`,
     optionen: [
       { text: 'Alle verfügbaren Kräfte schicken und Soforthilfe des Bundes zusagen.', hist: true,
         ergebnis: 'Die Hubschrauber retten Hunderte. Schmidt wird zum Helden. Die Frage, ob die Bundeswehr im Innern eingesetzt werden darf, bleibt für später.',
@@ -451,7 +451,7 @@ Die Justizministerin der FDP war nicht eingeweiht. Studenten demonstrieren für 
 
 In Washington sieht man darin den Versuch, Europa von Amerika zu lösen. In der Union wächst die Zahl der „Atlantiker“, die einen klaren Vorbehalt verlangen.`,
     optionen: [
-      { text: 'Unterzeichnen – der Bundestag soll eine Präambel voranstellen, die die NATO bekräftigt.', hist: true,
+      { text: s => (s.f.vereinigt ? 'Unterzeichnen – mit einer Präambel, die Deutschlands Neutralität und die Freundschaft zu den USA bekräftigt.' : 'Unterzeichnen – der Bundestag soll eine Präambel voranstellen, die die NATO bekräftigt.'), hist: true,
         ergebnis: 'Der Vertrag wird unterzeichnet, de Gaulle umarmt dich. Im Mai stellt der Bundestag eine atlantische Präambel voran. Der General ist enttäuscht: „Verträge sind wie junge Mädchen und Rosen – sie halten, solange sie halten.“',
         w: { frankreich: 6, usa: 1, grossbritannien: -2, europa: 2 }, setze: ['elysee'] },
       { text: 'Unterzeichnen und gegen jede Präambel verteidigen.',
@@ -492,11 +492,11 @@ In Washington sieht man darin den Versuch, Europa von Amerika zu lösen. In der 
     absender: 'Auswärtiges Amt',
     text: s => `Die USA, Großbritannien und die Sowjetunion haben in Moskau einen Vertrag über das Verbot von Kernwaffenversuchen in der Atmosphäre, im Weltraum und unter Wasser unterzeichnet. Alle Staaten sind zum Beitritt eingeladen.${geteilt(s) ? ' Auch die DDR will beitreten – und so als Vertragspartner neben der Bundesrepublik stehen.' : ''}`,
     optionen: [
-      { text: 'Beitreten, nachdem Washington versichert, das bedeute keine Anerkennung der DDR.', hist: true,
-        ergebnis: 'Der Beitritt erfolgt in Washington und London, nicht in Moskau. Die Entspannung hat begonnen.',
+      { text: s => (s.f.vereinigt ? 'Beitreten.' : 'Beitreten, nachdem Washington versichert, das bedeute keine Anerkennung der DDR.'), hist: true,
+        ergebnis: s => (s.f.vereinigt ? 'Deutschland tritt dem Vertrag in allen drei Hauptstädten bei. Die Entspannung hat begonnen.' : 'Der Beitritt erfolgt in Washington und London, nicht in Moskau. Die Entspannung hat begonnen.'),
         w: { usa: 4, sowjet: -4 } },
       { text: 'Nicht beitreten.',
-        ergebnis: 'Die Bundesrepublik steht mit Frankreich und China abseits.',
+        ergebnis: s => `${Land(s)} steht mit Frankreich und China abseits.`,
         w: { usa: -8, frankreich: 2, sowjet: 4 } },
     ],
     historisch: 'Die Bundesrepublik trat dem Vertrag am 19. August 1963 bei, nach amerikanischen Zusicherungen zur Nichtanerkennung der DDR.',

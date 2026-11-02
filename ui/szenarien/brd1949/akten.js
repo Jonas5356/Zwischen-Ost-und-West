@@ -144,7 +144,7 @@ export default [
     historisch: 'Das Anwerbeabkommen mit Italien wurde am 20. Dezember 1955 geschlossen. Es folgten Spanien und Griechenland (1960), die Türkei (1961), Marokko (1963), Portugal (1964).',
   }),
   akte({
-    id: 'a_atomforschung', titel: 'Reaktoren für die Bundesrepublik', ab: 1955.2, bis: 1956.2, ordnung: 9,
+    id: 'a_atomforschung', titel: s => `Reaktoren für ${s.f.vereinigt ? 'Deutschland' : 'die Bundesrepublik'}`, ab: 1955.2, bis: 1956.2, ordnung: 9,
     absender: 'Werner Heisenberg, Max-Planck-Institut für Physik',
     text: 'Seit der Souveränität darf in Deutschland wieder Kernforschung betrieben werden. Heisenberg will einen Forschungsreaktor in München, die Industrie ein Kernforschungszentrum in Karlsruhe. Der neue Atomminister möchte beides.',
     optionen: [
@@ -224,7 +224,7 @@ export default [
   akte({
     id: 'a_tuerkei', titel: 'Ein Abkommen mit der Türkei', ab: 1961.2, bis: 1961.2, ordnung: 10,
     absender: 'Auswärtiges Amt',
-    text: 'Die Türkei, NATO-Partner mit hoher Arbeitslosigkeit, bittet um ein Anwerbeabkommen wie mit Italien, Spanien und Griechenland. Nach dem Mauerbau kommen keine Arbeitskräfte mehr aus der DDR.',
+    text: s => `Die Türkei, NATO-Partner mit hoher Arbeitslosigkeit, bittet um ein Anwerbeabkommen wie mit Italien, Spanien und Griechenland. ${s.f.mauer ? 'Nach dem Mauerbau kommen keine Arbeitskräfte mehr aus der DDR.' : s.f.vereinigt ? 'Auch in den neuen Ländern sind die Fachkräfte inzwischen knapp.' : 'Die Industrie sucht händeringend Arbeitskräfte.'}`,
     optionen: [
       { text: 'Das Abkommen schließen.', hist: true, ergebnis: 'Die ersten Züge aus Istanbul kommen in München an.', w: { impuls: 0.4, usa: 1 }, setze: ['gastarbeiter'] },
       { text: 'Ablehnen.', ergebnis: 'Ankara ist gekränkt, die Industrie verärgert.', w: { impuls: -0.2, usa: -1 } },

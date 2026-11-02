@@ -13,7 +13,7 @@ import { zeitIndex } from '../../engine.js';
 function lagebericht(s) {
   const meldungen = zeitgeschehen
     .filter(m => zeitIndex(m.zeit) === zeitIndex(s.zeit) && (!m.wenn || m.wenn(s)))
-    .map(m => m.text);
+    .map(m => (typeof m.text === 'function' ? m.text(s) : m.text));
   return { meldungen };
 }
 

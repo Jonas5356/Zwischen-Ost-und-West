@@ -1,5 +1,5 @@
 // Hauptereignisse 1954 bis 1958
-import { west, geteilt, vereinigt, imBuendnis, adenauer, regiertMit, land, Land, wahlIn } from './hilfen.js';
+import { west, geteilt, vereinigt, imBuendnis, adenauer, regiertMit, land, Land, wahlIn, hauptstadt } from './hilfen.js';
 import { hatMehrheit } from './modell.js';
 
 export default [
@@ -385,7 +385,7 @@ Die SPD will eine kleinere Freiwilligenarmee. Die NATO-Planer halten 18 Monate D
 Mit Moskau bestehen inzwischen diplomatische Beziehungen. Ein Verbot wäre ein Signal – nach innen wie nach außen.`,
     optionen: [
       { text: 'Am Antrag festhalten.', hist: true,
-        ergebnis: 'Die KPD wird verboten, ihr Vermögen eingezogen. Funktionäre gehen in den Untergrund oder in die DDR.',
+        ergebnis: s => `Die KPD wird verboten, ihr Vermögen eingezogen. Funktionäre gehen in den Untergrund ${s.f.vereinigt ? 'oder nach Moskau' : 'oder in die DDR'}.`,
         w: { sowjet: 4, ansehen: 1 }, setze: ['kpd_verboten'] },
       { text: 'Den Antrag zurückziehen.',
         ergebnis: 'Die Richter sind erleichtert. Die Vertriebenenverbände und die CSU sprechen von Schwäche.',
@@ -541,7 +541,7 @@ Die Werbeagentur schlägt einen Slogan vor, der ganz auf die Person des Kanzlers
       { text: '„Wohlstand für alle“ – Erhard in den Mittelpunkt.',
         ergebnis: 'Erhard zieht die Massen an. Mancher fragt, wer hier eigentlich Kanzler ist.',
         w: s => ({ ansehen: Math.max(1, Math.round(s.w.wachstum - 2)), kanzlerbonus: -1 }) },
-      { text: 'Die Sicherheitspolitik: „Gegen den Atomtod der SPD – für die Sicherheit im Bündnis.“',
+      { text: s => (s.f.vereinigt ? 'Die Sicherheitspolitik: „Ein freies Deutschland braucht Schutz – die SPD würde es wehrlos machen.“' : 'Die Sicherheitspolitik: „Gegen den Atomtod der SPD – für die Sicherheit im Bündnis.“'),
         ergebnis: 'Ein polarisierender Wahlkampf, der die eigene Anhängerschaft mobilisiert.',
         w: s => ({ ansehen: s.w.sowjet >= 55 ? 5 : 2, sowjet: 2 }) },
     ],
@@ -572,17 +572,17 @@ Die Werbeagentur schlägt einen Slogan vor, der ganz auf die Person des Kanzlers
     ab: 1957.2, ordnung: 10.2,
     absender: 'Bundesministerium für Atomfragen',
     ascii: 'sputnik',
-    text: `Ein Funksignal aus dem All: Die Sowjetunion hat den ersten künstlichen Satelliten in eine Erdumlaufbahn gebracht. Was eine Kugel mit vier Antennen in den Orbit tragen kann, kann auch einen Atomsprengkopf nach Amerika tragen. Im Westen geht der „Sputnik-Schock“ um.
+    text: s => `Ein Funksignal aus dem All: Die Sowjetunion hat den ersten künstlichen Satelliten in eine Erdumlaufbahn gebracht. Was eine Kugel mit vier Antennen in den Orbit tragen kann, kann auch einen Atomsprengkopf nach Amerika tragen. Im Westen geht der „Sputnik-Schock“ um.
 
-In Bonn fragen Forschungspolitiker und Industrie, ob die Bundesrepublik nicht zu lange auf Hilfe aus Washington gesetzt hat.`,
+In ${hauptstadt(s)} fragen Forschungspolitiker und Industrie, ob ${land(s)} nicht zu lange auf ${s.f.vereinigt ? 'die eigene Neutralität vertraut' : 'Hilfe aus Washington gesetzt'} hat.`,
     optionen: [
       { text: 'Ein Programm zur Förderung der Wissenschaften auflegen.',
         ergebnis: 'Universitäten und Forschungsinstitute erhalten deutlich mehr Geld. Ein Wissenschaftsrat soll den Ausbau planen.',
         w: { haushalt: -3, impuls: 0.5, ansehen: 1 }, setze: ['wissenschaftsoffensive'] },
-      { text: 'Auf amerikanische Rückversicherung drängen – auch atomar.', richtung: 'west',
+      { text: 'Auf amerikanische Rückversicherung drängen – auch atomar.', richtung: 'west', nurWenn: s => !s.f.vereinigt,
         ergebnis: 'Die Amerikaner versprechen mehr Mitsprache in der nuklearen Planung der NATO.',
         w: { usa: 2, sowjet: 3 }, setze: ['nukleare_teilhabe_wunsch'] },
-      { text: 'Gelassen bleiben – die Bundesrepublik baut keine Raketen.',
+      { text: s => `Gelassen bleiben – ${s.f.vereinigt ? 'Deutschland' : 'die Bundesrepublik'} baut keine Raketen.`,
         ergebnis: 'Die Aufregung legt sich.', w: {} },
     ],
     historisch: 'Der Sputnik-Schock verstärkte in der Bundesrepublik die Debatte über Bildung und Forschung. 1957 wurde der Wissenschaftsrat gegründet.',

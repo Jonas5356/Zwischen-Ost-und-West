@@ -62,3 +62,15 @@ test('Jedes Ereignis kommt in irgendeinem Spiel vor', () => {
   const nie = sz.ereignisse.filter(e => !gesehen.has(e.id)).map(e => e.id);
   assert.deepEqual(nie, []);
 });
+
+test('Kostenlose Vorhaben sind auch bei leerem Haushalt wählbar', () => {
+  const s = E.neuesSpiel(sz, 3);
+  s.w.haushalt = -0.4;
+  const liste = E.verfuegbareVorhaben(sz, s);
+  const frei = liste.filter(v => !v.kosten);
+  assert.ok(frei.length > 0);
+  assert.ok(frei.every(v => v.leistbar));
+  assert.ok(liste.filter(v => v.kosten).every(v => !v.leistbar));
+  E.waehleVorhaben(sz, s, frei.find(v => v.id === 'konsolidierung').id);
+  assert.ok(s.w.haushalt > 0);
+});

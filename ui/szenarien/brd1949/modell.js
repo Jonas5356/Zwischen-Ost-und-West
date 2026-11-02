@@ -333,7 +333,9 @@ export const dynamisch = {
       art: 'haupt',
       ascii: 'alarm',
       absender: 'Führungsstab / Auswärtiges Amt',
-      text: 'Sowjetische Panzerverbände sind in der DDR in Bereitschaft versetzt worden, die Zugangswege nach Berlin sind gesperrt. Moskau macht die Bundesregierung persönlich für die Lage verantwortlich. Die Westmächte fragen, wie weit Bonn zu gehen bereit ist.',
+      text: s.f.vereinigt
+        ? 'Sowjetische Panzerverbände sind in Polen und der Tschechoslowakei an der deutschen Grenze aufmarschiert. Moskau wirft der Bundesregierung vor, die Neutralität gebrochen zu haben, und droht, die Garantien des Friedensvertrags „selbst durchzusetzen“. Washington und Paris fragen, wie weit Deutschland zu gehen bereit ist.'
+        : 'Sowjetische Panzerverbände sind in der DDR in Bereitschaft versetzt worden, die Zugangswege nach Berlin sind gesperrt. Moskau macht die Bundesregierung persönlich für die Lage verantwortlich. Die Westmächte fragen, wie weit Bonn zu gehen bereit ist.',
       optionen: [
         { text: 'Einlenken: öffentliche Zugeständnisse an Moskau.',
           ergebnis: 'Die Krise flaut ab. In Washington und in der eigenen Partei wird dir Schwäche vorgeworfen.',
@@ -343,7 +345,7 @@ export const dynamisch = {
           w: { sowjet: -22, ansehen: -3, einheit: -3, usa: -2 } },
         { text: 'Standhalten.',
           zufall: [
-            { p: s2 => 0.25 + Math.max(0, s2.w.sowjet - 100) / 100, ergebnis: 'Ein Zwischenfall an der Zonengrenze gerät außer Kontrolle.',
+            { p: s2 => 0.25 + Math.max(0, s2.w.sowjet - 100) / 100, ergebnis: s2 => (s2.f.vereinigt ? 'Ein Zwischenfall an der Oder gerät außer Kontrolle.' : 'Ein Zwischenfall an der Zonengrenze gerät außer Kontrolle.'),
               aktion: (st, a) => a.ende('krieg') },
             { ergebnis: 'Moskau zieht die Panzer zurück. Du hast gepokert – und gewonnen.',
               w: { sowjet: -20, ansehen: 5, usa: 3 } },

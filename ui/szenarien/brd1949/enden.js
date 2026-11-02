@@ -31,7 +31,7 @@ Die Ära der Union endet ${zeitText(s.zeit)} – früher als in der Geschichte.`
   krieg: {
     titel: 'Der Krieg',
     ascii: 'pilz',
-    text: s => `Es beginnt mit einem Zwischenfall an der Zonengrenze, einem Missverständnis, einem Befehl, der zu spät widerrufen wird. Binnen Stunden rollen Panzer durch die Fulda-Lücke. Am zweiten Tag setzt die NATO taktische Atomwaffen ein, um den Vormarsch aufzuhalten – auf deutschem Boden.
+    text: s => `${s.f.vereinigt ? 'Es beginnt mit einem Zwischenfall an der Oder, einem Missverständnis, einem Befehl, der zu spät widerrufen wird. Binnen Stunden stoßen sowjetische Panzer auf Berlin vor; das neutrale Deutschland hat ihnen wenig entgegenzusetzen. Am dritten Tag greifen die Amerikaner ein – mit taktischen Atomwaffen, auf deutschem Boden.' : 'Es beginnt mit einem Zwischenfall an der Zonengrenze, einem Missverständnis, einem Befehl, der zu spät widerrufen wird. Binnen Stunden rollen Panzer durch die Fulda-Lücke. Am zweiten Tag setzt die NATO taktische Atomwaffen ein, um den Vormarsch aufzuhalten – auf deutschem Boden.'}
 
 Was die Göttinger Achtzehn vorhergesagt haben, tritt ein. Zwischen Elbe und Rhein bleibt wenig, was man noch verteidigen könnte.
 

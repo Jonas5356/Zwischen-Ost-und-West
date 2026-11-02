@@ -36,7 +36,7 @@ export async function plaetze(namen) {
 }
 
 export function einstellungen() {
-  const std = { hinweise: true, schreibmaschine: true, randvermerke: true };
+  const std = { hinweise: true, schreibmaschine: true, randvermerke: true, ton: true, laut: 0.6 };
   try { return { ...std, ...JSON.parse(localStorage.getItem('zow:einstellungen') || '{}') }; } catch { return std; }
 }
 export function speichereEinstellungen(e) {

@@ -16,6 +16,7 @@ Selbst bauen: `build_windows.bat` doppelklicken (braucht Rust und Node.js, das S
 - **Vorlagen:** In jedem Halbjahr landen die historischen Ereignisse als Entscheidungsvorlagen auf dem Schreibtisch, dazu Briefe von Ministern, Verbänden und Zeitgenossen (Böckler, Heuss, Heisenberg, Fritz Bauer …). Am Ende des Halbjahrs bringst du ein Regierungsvorhaben ein – Lastenausgleich, Kindergeld, Kartellgesetz, Autobahnbau.
 - **Lagebild:** Vertrauen in Washington, Paris und London, Spannung mit Moskau, Souveränität, Aussicht auf Einheit, europäische Integration, Umfragewerte, Ansehen des Kanzlers, Koalitionsklima, Wachstum, Arbeitslosigkeit, Haushalt, Fluchtbewegung aus der DDR.
 - **An der Macht bleiben:** 1953, 1957 und 1961 wird gewählt. Verliert die Union die Mehrheit oder findet sie keinen Partner, ist das Spiel vorbei. Koalitionsbruch, Staatsbankrott, eine Eskalation mit Moskau oder der Bruch mit den Westmächten können es ebenfalls beenden. Ein Kanzlerwechsel innerhalb der Union (Erhard, Schröder …) beendet es nicht.
+- **Geräusche:** Schreibmaschine beim Erscheinen der Texte, Stempel bei Entscheidungen, Papier beim Umblättern, Fernschreiber am Wahlabend. Alles wird im Programm erzeugt, Lautstärke und Abschalten im Menü.
 - **Randvermerke:** Nach jeder Entscheidung steht in violetter Schrift, was tatsächlich geschah. Am Ende zeigt der Abschlussbericht, wie oft du wie die historische Regierung entschieden hast.
 
 ## Die Geschichte kann anders verlaufen
@@ -36,6 +37,7 @@ Tauri-2-Programm: die Oberfläche ist HTML/JavaScript ohne Build-Schritt (`ui/`)
 - `ui/engine.js` – Spielablauf, unabhängig vom Land (Halbjahre, Ereigniswarteschlange, Wirkungen, Zufall, Speicherbarkeit)
 - `ui/szenarien/brd1949/` – das Szenario: `modell.js` (Wirtschafts-, Umfrage- und Wahlmodell, Koalitionsbildung, Krisen), Ereignisse nach Zeitabschnitten, `einheit.js` (alternativer Strang), `akten.js`, `vorhaben.js`, `enden.js`, `zeitgeschehen.js`
 - `ui/main.js`, `ui/style.css`, `ui/ascii.js` – Oberfläche und ASCII-Szenen
+- `ui/ton.js` – Geräusche, synthetisch mit Web Audio (keine Tondateien)
 
 Ein weiteres Land kommt als neuer Ordner unter `ui/szenarien/` hinzu, mit eigenem Modell und eigenen Ereignissen.
 

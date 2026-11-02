@@ -1,5 +1,5 @@
 // Meldungen aus dem Zeitgeschehen für den Lagebericht (ohne Entscheidung)
-import { geteilt, vereinigt } from './hilfen.js';
+import { geteilt, vereinigt, land, Land } from './hilfen.js';
 
 export default [
   { zeit: 1949.2, text: 'Theodor Heuss ist zum ersten Bundespräsidenten gewählt worden.' },
@@ -17,8 +17,8 @@ export default [
   { zeit: 1954.2, text: 'Deutschland ist Fußballweltmeister! Das „Wunder von Bern“ am 4. Juli lässt ein ganzes Land jubeln.' },
   { zeit: 1955.2, text: 'Der millionste Volkswagen Käfer läuft in Wolfsburg vom Band.' },
   { zeit: 1955.2, text: 'In Kassel findet die erste documenta statt.' },
-  { zeit: 1956.1, text: 'In Cortina d’Ampezzo gewinnt eine gesamtdeutsche Mannschaft olympisches Gold.' },
-  { zeit: 1956.2, text: 'Bertolt Brecht ist in Ost-Berlin gestorben.' },
+  { zeit: 1956.1, text: s => `In Cortina d’Ampezzo gewinnt eine ${s.f.vereinigt ? 'deutsche' : 'gesamtdeutsche'} Mannschaft olympisches Gold.` },
+  { zeit: 1956.2, text: s => `Bertolt Brecht ist in ${s.f.vereinigt ? 'Berlin' : 'Ost-Berlin'} gestorben.` },
   { zeit: 1957.1, text: 'Das Saarland ist am 1. Januar zehntes Land der Bundesrepublik geworden.', wenn: s => !!s.f.saar_zurueck && geteilt(s) },
   { zeit: 1957.2, text: 'In Frankfurt wird die Prostituierte Rosemarie Nitribitt ermordet aufgefunden – ein Skandal, der die feine Gesellschaft erschüttert.' },
   { zeit: 1958.1, text: 'Die Europäische Wirtschaftsgemeinschaft nimmt in Brüssel ihre Arbeit auf.', wenn: s => !!s.f.ewg },
@@ -26,7 +26,7 @@ export default [
   { zeit: 1959.2, text: 'Günter Grass veröffentlicht „Die Blechtrommel“.' },
   { zeit: 1959.1, text: 'Die Bundesrepublik ist zu einer der größten Exportnationen der Welt aufgestiegen.', wenn: geteilt },
   { zeit: 1960.1, text: 'Armin Hary läuft in Zürich die 100 Meter in 10,0 Sekunden – Weltrekord.' },
-  { zeit: 1960.2, text: 'In Rom gewinnt Armin Hary olympisches Gold – für eine gesamtdeutsche Mannschaft.' },
+  { zeit: 1960.2, text: s => `In Rom gewinnt Armin Hary olympisches Gold${s.f.vereinigt ? '.' : ' – für eine gesamtdeutsche Mannschaft.'}` },
   { zeit: 1961.1, text: 'Juri Gagarin umrundet als erster Mensch die Erde.' },
   { zeit: 1961.2, text: 'Die Arbeitslosigkeit ist auf rund ein Prozent gefallen – Vollbeschäftigung.', wenn: s => s.w.arbeitslosigkeit < 1.5 },
   { zeit: 1962.1, text: 'Junge Filmemacher erklären im „Oberhausener Manifest“: „Papas Kino ist tot.“' },
@@ -35,6 +35,6 @@ export default [
   { zeit: 1963.1, text: 'Das Zweite Deutsche Fernsehen nimmt in Mainz den Sendebetrieb auf.' },
   { zeit: 1963.2, text: 'Am 22. November ist John F. Kennedy in Dallas ermordet worden.' },
   { zeit: 1963.2, text: 'Die Bundesliga hat ihre erste Saison begonnen.' },
-  { zeit: 1964.1, text: 'Die Bundesrepublik zählt rund 900.000 ausländische Arbeitnehmer.', wenn: s => !!s.f.gastarbeiter },
+  { zeit: 1964.1, text: s => `${Land(s)} zählt rund 900.000 ausländische Arbeitnehmer.`, wenn: s => !!s.f.gastarbeiter },
   { zeit: 1955.1, text: 'In Wien wird die Republik Österreich wieder frei; der Staatsvertrag ist unterzeichnet.', wenn: vereinigt },
 ];

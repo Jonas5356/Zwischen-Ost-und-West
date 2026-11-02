@@ -1,6 +1,6 @@
 # Zwischen Ost und West – Hinweise für die Entwicklung
 
-Tauri-2-Programm. Oberfläche und Spiellogik in `ui/` (ES-Module, kein Build-Schritt), Rust in `src-tauri/` nur für Spielstände (`spielstand_speichern/laden/loeschen`, Dateien unter dem App-Datenordner). Alles auf Deutsch: Texte, Bezeichner, Kommentare.
+Tauri-2-Programm. Oberfläche und Spiellogik in `ui/` (ES-Module, kein Build-Schritt), Geräusche in `ui/ton.js` (Web Audio, synthetisch). Rust in `src-tauri/` nur für Spielstände (`spielstand_speichern/laden/loeschen`, Dateien unter dem App-Datenordner). Alles auf Deutsch: Texte, Bezeichner, Kommentare.
 
 ## Aufbau
 
@@ -15,4 +15,6 @@ Tauri-2-Programm. Oberfläche und Spiellogik in `ui/` (ES-Module, kein Build-Sch
 
 - `npm test` muss grün sein; nach Änderungen an Zahlen `npm run sim` ansehen (alle Strategien, Enden, Wahlergebnisse, nie gesehene Ereignisse).
 - Neue Ereignisse brauchen einen Weg, auf dem sie erreichbar sind (Test „Jedes Ereignis kommt vor“).
+- Ereignisse, die auch im vereinigten Deutschland vorkommen, dürfen dort nicht von DDR, Mauer, Zonengrenze oder „Bundesrepublik“ sprechen: Texte als Funktion schreiben (`land(s)`, `hauptstadt(s)`) oder das Ereignis mit `geteilt` einschränken. `tests/einheit.test.mjs` prüft das.
+- Vorhaben ohne Kosten sind immer wählbar, auch bei leerem Haushalt.
 - Historische Angaben in `historisch` und `zeitgeschehen.js` sorgfältig prüfen; erfundene Ereignisse im Alternativstrang als Fiktion kennzeichnen.

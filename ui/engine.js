@@ -290,6 +290,9 @@ export function waehle(sz, s, index) {
   return s.ergebnis;
 }
 
+/** Kostenlose Vorhaben gehen immer, auch bei leerer Kasse; sonst muss der Haushalt reichen */
+const istLeistbar = (s, v) => !v.kosten || s.w.haushalt - v.kosten >= 0;
+
 export function verfuegbareVorhaben(sz, s) {
   return sz.vorhaben
     .filter(v => imFenster(v, s.zeit) && (!v.wenn || v.wenn(s)))
@@ -300,7 +303,7 @@ export function verfuegbareVorhaben(sz, s) {
       const zuletzt = s.vorhabenZuletzt?.[v.id];
       return zuletzt === undefined || zeitIndex(s.zeit) - zeitIndex(zuletzt) >= (v.abstand ?? 2);
     })
-    .map(v => ({ ...v, leistbar: s.w.haushalt - (v.kosten || 0) >= 0 }));
+    .map(v => ({ ...v, leistbar: istLeistbar(s, v) }));
 }
 
 export function waehleVorhaben(sz, s, id) {
@@ -311,7 +314,7 @@ export function waehleVorhaben(sz, s, id) {
   if (id) {
     const v = sz.vorhaben.find(x => x.id === id);
     if (!v) throw new Error('Unbekanntes Vorhaben');
-    if (s.w.haushalt - (v.kosten || 0) < 0) throw new Error('Nicht finanzierbar');
+    if (!istLeistbar(s, v)) throw new Error('Nicht finanzierbar');
     s.w.haushalt -= v.kosten || 0;
     wende(sz, s, v);
     s.vorhabenErledigt[v.id] = (s.vorhabenErledigt[v.id] || 0) + 1;
