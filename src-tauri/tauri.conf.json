@@ -1,0 +1,48 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Zwischen Ost und West",
+  "mainBinaryName": "zwischen-ost-und-west",
+  "version": "0.1.0",
+  "identifier": "io.github.jonas5356.zwischenostundwest",
+  "build": {
+    "frontendDist": "../ui"
+  },
+  "app": {
+    "withGlobalTauri": true,
+    "windows": [
+      {
+        "title": "Zwischen Ost und West",
+        "width": 1360,
+        "height": 880,
+        "minWidth": 1040,
+        "minHeight": 680,
+        "center": true,
+        "backgroundColor": "#2b3530"
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["nsis"],
+    "publisher": "Jonas Reitbauer",
+    "shortDescription": "Die Bundesrepublik zwischen Ost und West, 1949–1964",
+    "copyright": "MIT",
+    "category": "StrategyGame",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "windows": {
+      "nsis": {
+        "installMode": "currentUser",
+        "languages": ["German"]
+      }
+    }
+  }
+}
