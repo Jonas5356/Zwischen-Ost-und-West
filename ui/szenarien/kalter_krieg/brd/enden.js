@@ -1,27 +1,9 @@
 // Enden des Spiels und der Abschlussbericht
 import { jahrVon, zeitText } from '../../../engine.js';
 import { vollerName } from './modell.js';
-import { REGIERUNGEN as USA } from '../usa.js';
-import { REGIERUNGEN as SU } from '../su.js';
+import { aufloesung as aufloesungAlle } from '../aufloesung.js';
 
-/** Was Washington und Moskau wirklich wollten – und was Bonn zuletzt vermutet hat */
-function aufloesung(s) {
-  const teile = [];
-  for (const [land, R, ort] of [['usa', USA, 'Washington'], ['su', SU, 'Moskau']]) {
-    const L = s.welt.laender[land];
-    const E = s.einschaetzung?.[land];
-    if (!L?.regierungen) continue;
-    const schaetzungen = [...(E?.frueher || []), ...(E ? [{ regime: E.regime, p: E.p }] : [])];
-    L.regierungen.forEach((r, i) => {
-      if (!r.typ) return;
-      const T = R[r.regime].typen[r.typ];
-      const p = schaetzungen[i]?.regime === r.regime ? schaetzungen[i].p?.[r.typ] : undefined;
-      const geschaetzt = p === undefined ? '' : ` Bonn hielt das zuletzt für ${p >= 0.85 ? 'sehr wahrscheinlich' : p >= 0.65 ? 'wahrscheinlich' : p >= 0.35 ? 'möglich' : 'unwahrscheinlich'} (${Math.round(100 * p)} %).`;
-      teile.push(`${ort}, ${R[r.regime].titel.replace(/ \(Fiktion\)/, '')}: ${T.name}. ${T.beschreibung}${geschaetzt}`);
-    });
-  }
-  return teile.length ? 'Was Washington und Moskau wirklich wollten:\n' + teile.join('\n') : '';
-}
+const aufloesung = s => aufloesungAlle(s, 'Bonn');
 
 const pct = x => `${x.toFixed(1).replace('.', ',')}\u00a0%`;
 

@@ -1,4 +1,5 @@
 // Hauptereignisse 1954 bis 1958
+import { pariserChef, pariserSpitze, pariserAussen, deGaulleRegiert } from '../frankreich/hilfen.js';
 import { west, geteilt, vereinigt, imBuendnis, adenauer, regiertMit, land, Land, wahlIn, hauptstadt, unionRegiert, spdRegiert, SPD_WAHLKAMPF, praesident, usaAussen, suChef, suRegime } from './hilfen.js';
 import { hatMehrheit } from './modell.js';
 
@@ -19,7 +20,7 @@ Die Delegationen sind festgefahren. Ein Signal aus Bonn könnte die Gewichte ver
         ergebnis: 'Die Konferenz endet nach vier Wochen ohne Ergebnis. Die Teilung wirkt endgültiger als zuvor.',
         w: { usa: 3, grossbritannien: 3, einheit: -3, moskau: -2 } },
       { text: 'Einen Kompromiss signalisieren: Neutralität eines vereinten Deutschlands, wenn freie Wahlen garantiert sind.', richtung: 'ost',
-        ergebnis: s => `${usaAussen(s) || 'Washington'} ist außer sich, Bidault kühl, Eden nachdenklich. Molotow lässt eine Pause einlegen.`,
+        ergebnis: s => `${usaAussen(s) || 'Washington'} ist außer sich, ${pariserAussen(s)} kühl, Eden nachdenklich. Molotow lässt eine Pause einlegen.`,
         w: { usa: -12, frankreich: -3, grossbritannien: -4, einheit: 8, koalition: -6 },
         rueckfrage: { land: 'su', id: 'su_berliner_konferenz' },
         antworten: {
@@ -38,41 +39,36 @@ Die Delegationen sind festgefahren. Ein Signal aus Bonn könnte die Gewichte ver
   // ------------------------------------------------------------------ 1954/II
   {
     id: 'evg_frankreich',
-    titel: 'Die EVG vor der französischen Nationalversammlung',
-    datum: '30. August 1954',
-    ab: 1954.2, bis: 1955.1, ordnung: 8,
+    titel: 'Die Brüsseler Konferenz',
+    datum: 'August 1954',
+    ab: 1954.2, bis: 1955.1, ordnung: 7.8,
+    ausloeser: 'evg_protokolle', ausloeserVon: 'frankreich',
     wenn: s => west(s) && !!s.f.westvertraege && !s.f.evg && !s.f.evg_gescheitert,
     absender: 'Botschaft Paris',
-    text: `Zwei Jahre nach der Unterzeichnung hat Frankreich den EVG-Vertrag noch immer nicht ratifiziert. Gaullisten und Kommunisten lehnen ihn ab, die Sozialisten sind gespalten. Ministerpräsident Pierre Mendès France will ihn ohne Vertrauensfrage zur Abstimmung stellen und verlangt vorher Zusatzprotokolle, die die Bundesrepublik schlechter stellen würden.
+    text: s => `Zwei Jahre nach der Unterzeichnung hat Frankreich den EVG-Vertrag noch immer nicht ratifiziert. Gaullisten und Kommunisten lehnen ihn ab, die Sozialisten sind gespalten. ${pariserSpitze(s)} verlangt auf einer Konferenz in Brüssel Zusatzprotokolle: ein Vetorecht für acht Jahre und Sonderrechte für die französischen Truppen – Regeln, die die Bundesrepublik schlechter stellen würden.
 
-Auf der Konferenz in Brüssel liegt es an dir, ob du ihm entgegenkommst.`,
+Ob die Nationalversammlung danach zustimmt, ist offen. Kommst du ihm entgegen?`,
     optionen: [
       { text: 'Hart bleiben – keine weiteren Diskriminierungen.', hist: true,
-        zufall: [
-          { p: s => 0.08 + Math.max(0, s.w.frankreich - 55) / 200 + (s.weltflags.evg_druck ? 0.04 : 0),
-            ergebnis: 'Überraschend stimmt die Nationalversammlung zu. Die Europäische Verteidigungsgemeinschaft kann entstehen.',
-            w: { europa: 12, frankreich: 4, souveraenitaet: 10, usa: 6, moskau: -8 }, setze: ['evg'] },
-          { ergebnis: 'Die Nationalversammlung lehnt mit einem Verfahrensantrag ab, ohne Aussprache. Die Abgeordneten singen die Marseillaise. Das Herzstück der Bonner Politik liegt in Trümmern.',
-            w: { europa: -6, ansehen: -3, frankreich: -4 }, setze: ['evg_gescheitert'] },
-        ] },
-      { text: 'Mendès France entgegenkommen: Zusatzprotokolle und Bewegung in der Saarfrage.', richtung: 'west',
-        w: { ansehen: -2, koalition: -4 },
-        zufall: [
-          { p: s => 0.25 + Math.max(0, s.w.frankreich - 45) / 150 + (s.weltflags.evg_druck ? 0.04 : 0),
-            ergebnis: 'Mit knapper Mehrheit ratifiziert Paris die EVG. Europa hat eine gemeinsame Armee.',
-            w: { europa: 14, frankreich: 8, souveraenitaet: 8, usa: 6, moskau: -8 }, setze: ['evg', 'saar_zugestaendnis'] },
-          { ergebnis: 'Die Zugeständnisse reichen nicht. Die Nationalversammlung lehnt die EVG ab.',
-            w: { europa: -4, frankreich: 2 }, setze: ['evg_gescheitert', 'saar_zugestaendnis'] },
-        ] },
+        ergebnis: 'Die fünf Partner lehnen die französischen Forderungen in Brüssel ab. Nun muss die Nationalversammlung über den Vertrag entscheiden, wie er ist.',
+        aktion: (s, a) => a.weltflag('evg_bruessel', 'hart'),
+        bei: { frankreich: { titel: 'Brüssel: keine Zusatzprotokolle', w: { brd: -3 }, ergebnis: 'Bonn und die anderen Partner lehnen die Zusatzprotokolle ab.' } },
+        dient: { westbindung: 0.6, wiederbewaffnung: 0.8 } },
+      { text: 'Paris entgegenkommen: Zusatzprotokolle und Bewegung in der Saarfrage.', richtung: 'west',
+        ergebnis: 'Bonn kommt Paris weit entgegen – auch in der Saarfrage. Die Fraktion murrt.',
+        w: { ansehen: -2, koalition: -4, frankreich: 4 }, setze: ['saar_zugestaendnis'],
+        aktion: (s, a) => a.weltflag('evg_bruessel', 'entgegen'),
+        bei: { frankreich: { titel: 'Bonn kommt entgegen', w: { brd: 3 }, ergebnis: 'Der Kanzler kommt Paris in Brüssel weit entgegen, auch in der Saarfrage.' } },
+        dient: { aussoehnung: 0.6, europa: 0.3, wiederbewaffnung: -0.6 } },
     ],
-    historisch: 'Am 30. August 1954 lehnte die französische Nationalversammlung es ab, über den EVG-Vertrag zu beraten. Adenauer sprach von einem „schwarzen Tag für Europa“. Innerhalb weniger Wochen fanden die Westmächte mit dem NATO-Beitritt der Bundesrepublik eine Ersatzlösung.',
+    historisch: 'Auf der Brüsseler Konferenz vom 19. bis 22. August 1954 lehnten die fünf Partner die Forderungen von Mendès France ab. Am 30. August lehnte es die französische Nationalversammlung ab, über den EVG-Vertrag zu beraten. Adenauer sprach von einem „schwarzen Tag für Europa“.',
   },
   {
     id: 'londoner_konferenz',
     titel: 'Die Londoner Neunmächtekonferenz',
     datum: 'September/Oktober 1954',
     ab: 1954.2, bis: 1955.2, ordnung: 9,
-    wenn: s => west(s) && !s.f.evg && (s.f.evg_gescheitert || s.f.westvertraege_abgelehnt),
+    wenn: s => west(s) && !s.f.evg && (s.f.evg_gescheitert || s.f.westvertraege_abgelehnt) && !s.weltflags.nato_veto && !s.f.westintegration_gescheitert,
     absender: 'Anthony Eden, britischer Außenminister',
     text: s => `${s.f.westvertraege_abgelehnt ? 'Nachdem Bonn die Westverträge 1952 nicht unterzeichnet hat, unternehmen die Westmächte einen letzten Anlauf.' : 'Nach dem Scheitern der EVG hat Eden in einer Rundreise durch die Hauptstädte eine Ersatzlösung zusammengezimmert.'} Die Bundesrepublik soll souverän werden und direkt der NATO beitreten; die Brüsseler Pakt-Staaten werden zur Westeuropäischen Union erweitert, die die deutsche Rüstung kontrolliert.
 
@@ -83,7 +79,7 @@ Frankreichs Preis: Die Bundesrepublik soll freiwillig auf die Herstellung atomar
         w: { usa: 8, grossbritannien: 8, frankreich: 4, souveraenitaet: 6, moskau: -6, einheit: -6, europa: 2 },
         setze: ['pariser_vertraege', 'abc_verzicht'] },
       { text: 'Beitreten, aber keinen einseitigen Verzicht erklären.',
-        ergebnis: 'Mendès France droht, die Konferenz platzen zu lassen. Erst nach Tagen findet sich eine weichere Formel.',
+        ergebnis: s => `${pariserSpitze(s)} droht, die Konferenz platzen zu lassen. Erst nach Tagen findet sich eine weichere Formel.`,
         w: { usa: 2, grossbritannien: 2, frankreich: -8, souveraenitaet: 6, moskau: -10, einheit: -6 },
         setze: ['pariser_vertraege'] },
       { text: 'Ablehnen: kein NATO-Beitritt, solange die Einheit nicht verhandelt ist.', richtung: 'ost',
@@ -97,18 +93,23 @@ Frankreichs Preis: Die Bundesrepublik soll freiwillig auf die Herstellung atomar
     titel: 'Das Saarstatut',
     datum: '23. Oktober 1954',
     ab: 1954.2, bis: 1955.2, ordnung: 10,
+    ausloeser: 'saarstatut', ausloeserVon: 'frankreich',
     wenn: s => west(s) && (s.f.pariser_vertraege || s.f.evg),
-    absender: 'Pierre Mendès France, Ministerpräsident der Französischen Republik',
-    text: s => `Paris macht die Ratifizierung ${s.f.evg ? 'der letzten EVG-Durchführungsabkommen' : 'der Pariser Verträge'} von einer Lösung der Saarfrage abhängig. Mendès France schlägt ein „europäisches Statut“ vor: Die Saar erhält einen Kommissar der Westeuropäischen Union, bleibt wirtschaftlich mit Frankreich verbunden, und die Saarländer sollen in einer Volksabstimmung zustimmen.
+    absender: s => (deGaulleRegiert(s) ? 'Charles de Gaulle' : `${pariserChef(s)}, Ministerpräsident der Französischen Republik`),
+    text: s => `Paris macht die Ratifizierung ${s.f.evg ? 'der letzten EVG-Durchführungsabkommen' : 'der Pariser Verträge'} von einer Lösung der Saarfrage abhängig. ${pariserChef(s)} schlägt ein „europäisches Statut“ vor: Die Saar erhält einen Kommissar der Westeuropäischen Union, bleibt wirtschaftlich mit Frankreich verbunden, und die Saarländer sollen in einer Volksabstimmung zustimmen.
 
 ${spdRegiert(s) ? 'FDP, BHE und Teile deiner eigenen Partei' : 'FDP, BHE und die SPD'} werfen dir vor, deutsches Land preiszugeben. Du hoffst, dass die Saarländer bei der Abstimmung selbst entscheiden werden.`,
     optionen: [
       { text: 'Dem Statut zustimmen und auf die Abstimmung vertrauen.', hist: true, richtung: 'west',
         ergebnis: 'Die Koalitionspartner murren laut. Paris ist zufrieden.',
-        w: { frankreich: 8, europa: 3, ansehen: -2, koalition: -8 }, setze: ['saarstatut'] },
+        w: { frankreich: 8, europa: 3, ansehen: -2, koalition: -8 }, setze: ['saarstatut'],
+        bei: { frankreich: { titel: 'Bonn stimmt dem Saarstatut zu', w: { brd: 2 }, ergebnis: 'Bonn stimmt dem europäischen Statut für die Saar zu. Die Saarländer sollen abstimmen.' } },
+        dient: { aussoehnung: 1, europa: 0.4 } },
       { text: 'Ablehnen – die Saar ist deutsch.',
         ergebnis: 'In Paris wird die Ratifizierung der Verträge zur Zitterpartie.',
-        w: { frankreich: -14, ansehen: 3, koalition: 4 }, setze: ['saar_abgelehnt'] },
+        w: { frankreich: -14, ansehen: 3, koalition: 4 }, setze: ['saar_abgelehnt'],
+        bei: { frankreich: { titel: 'Bonn lehnt das Saarstatut ab', w: { brd: -4 }, ergebnis: 'Bonn lehnt das Saarstatut ab: Die Saar sei deutsch.' } },
+        dient: { aussoehnung: -1 } },
     ],
     historisch: 'Das Saarstatut wurde zusammen mit den Pariser Verträgen unterzeichnet. Adenauer setzte darauf, dass die Saarländer es ablehnen würden – was am 23. Oktober 1955 auch geschah.',
   },
@@ -139,12 +140,12 @@ Hunderttausende unterschreiben. Die Ratifizierungsdebatte im Bundestag steht in 
     titel: s => (s.f.evg ? 'Die Verträge treten in Kraft' : 'Souveränität und NATO-Beitritt'),
     datum: '5. Mai 1955',
     ab: 1955.1, bis: 1956.2, ordnung: 5,
-    wenn: s => west(s) && (s.f.pariser_vertraege || s.f.evg) && !s.f.souveraen && !s.f.ratifizierung_haengt,
+    // erst, wenn Paris die Verträge ratifiziert hat (oder die EVG gilt)
+    wenn: s => west(s) && (s.f.pariser_vertraege || s.f.evg) && !s.f.souveraen && !s.f.westintegration_gescheitert && (s.f.evg || !!s.weltflags.pariser_ratifiziert),
     absender: 'Auswärtiges Amt',
     ascii: 'flagge',
     text: s => {
-      const saar = s.f.saar_abgelehnt && !s.f.saarstatut;
-      return `${s.f.evg ? 'Der Deutschlandvertrag und der Vertrag über die Europäische Verteidigungsgemeinschaft' : 'Die Pariser Verträge'} sollen am 5. Mai in Kraft treten. Das Besatzungsstatut endet, die Hohen Kommissare werden Botschafter. ${s.f.evg ? 'Die Bundesrepublik stellt Kontingente für die europäische Armee.' : 'Vier Tage später würde die Bundesrepublik Mitglied der NATO.'}${saar ? '\n\nDoch die französische Nationalversammlung zögert. Ohne Einigung über die Saar fehlen im Rat der Republik die Stimmen.' : ''}
+      return `${s.f.evg ? 'Der Deutschlandvertrag und der Vertrag über die Europäische Verteidigungsgemeinschaft' : 'Die Pariser Verträge'} sollen am 5. Mai in Kraft treten. Das Besatzungsstatut endet, die Hohen Kommissare werden Botschafter. ${s.f.evg ? 'Die Bundesrepublik stellt Kontingente für die europäische Armee.' : 'Vier Tage später würde die Bundesrepublik Mitglied der NATO.'}
 
 Wie soll der Tag begangen werden?`;
     },
@@ -158,12 +159,6 @@ Wie soll der Tag begangen werden?`;
     ].map(o => ({
       ...o,
       aktion: (st, a) => {
-        const saarOffen = st.f.saar_abgelehnt && !st.f.saarstatut;
-        if (saarOffen && a.zufall() > st.w.frankreich / 100) {
-          st.f.ratifizierung_haengt = true;
-          a.plane('saar_nachverhandlung', 1);
-          return;
-        }
         st.f.souveraen = true;
         st.w.souveraenitaet = Math.max(st.w.souveraenitaet + 25, 70);
         if (!st.f.evg) st.f.nato = true;
@@ -171,27 +166,33 @@ Wie soll der Tag begangen werden?`;
         st.w.einheit = Math.max(0, st.w.einheit - 8);
         st.w.usa = Math.min(100, st.w.usa + 4);
       },
-      ergebnis: st => (st.f.ratifizierung_haengt && !st.f.souveraen
-        ? 'Der Tag verstreicht ohne Souveränität: Frankreich hat nicht ratifiziert. Paris verlangt eine Lösung der Saarfrage.'
-        : `${o.ergebnis} ${st.f.evg ? '' : 'Am 9. Mai wird die Bundesrepublik in die NATO aufgenommen. Fünf Tage später gründen die Ostblockstaaten den Warschauer Pakt; die DDR ist dabei.'}`),
+      ergebnis: st => `${o.ergebnis} ${st.f.evg ? '' : 'Am 9. Mai wird die Bundesrepublik in die NATO aufgenommen. Fünf Tage später gründen die Ostblockstaaten den Warschauer Pakt; die DDR ist dabei.'}`,
     })),
     historisch: 'Die Pariser Verträge traten am 5. Mai 1955 in Kraft, am 9. Mai trat die Bundesrepublik der NATO bei. Am 14. Mai wurde der Warschauer Pakt gegründet. Adenauer verzichtete auf eine Feier.',
   },
   {
     id: 'saar_nachverhandlung',
     titel: 'Paris verlangt die Saar',
-    datum: 'Herbst 1955',
-    nurGeplant: true, ordnung: 2,
+    datum: 'Winter 1954/55',
+    ab: 1954.2, bis: 1956.2, ordnung: 12,
+    ausloeser: 'saar_forderung', ausloeserVon: 'frankreich',
+    wenn: s => !s.f.saarstatut && !s.f.westintegration_gescheitert,
     absender: 'Botschaft Paris',
-    text: 'Die französische Regierung lässt keinen Zweifel: Ohne ein Saarstatut wird der Rat der Republik die Verträge nicht ratifizieren. Washington und London drängen Bonn zum Einlenken.',
+    text: s => `Die französische Regierung lässt keinen Zweifel: Ohne ein Saarstatut wird die Nationalversammlung die Pariser Verträge nicht ratifizieren. ${pariserSpitze(s)} hat die Abstimmung ausgesetzt. Washington und London drängen Bonn zum Einlenken.`,
     optionen: [
       { text: 'Einlenken und dem Saarstatut doch zustimmen.', richtung: 'west',
-        ergebnis: 'Paris ratifiziert. Mit einem halben Jahr Verspätung wird die Bundesrepublik souverän und Mitglied der NATO.',
-        w: { frankreich: 8, ansehen: -4, koalition: -6, souveraenitaet: 25, usa: 4, moskau: -6, einheit: -8 },
-        setze: ['saarstatut', 'souveraen', 'nato'], loesche: ['saar_abgelehnt', 'ratifizierung_haengt'] },
+        ergebnis: 'Bonn stimmt dem Saarstatut zu. Paris ratifiziert die Pariser Verträge; der Weg zu Souveränität und NATO-Beitritt ist frei.',
+        w: { frankreich: 8, ansehen: -4, koalition: -6 },
+        setze: ['saarstatut'], loesche: ['saar_abgelehnt'],
+        aktion: (s, a) => { a.weltflag('ratifizierung_haengt', false); a.weltflag('pariser_ratifiziert'); },
+        bei: { frankreich: { titel: 'Bonn lenkt ein', w: { brd: -2, usa: 3 }, ergebnis: 'Bonn stimmt dem Saarstatut zu. Die Nationalversammlung ratifiziert die Pariser Verträge.' } },
+        dient: { westbindung: 1, aussoehnung: 0.6 } },
       { text: 'Hart bleiben.',
         ergebnis: 'Die Westintegration ist gescheitert. Die Bundesrepublik bleibt ein Staat unter Besatzungsvorbehalt.',
-        w: { usa: -12, frankreich: -10, grossbritannien: -8, ansehen: 2 }, setze: ['westintegration_gescheitert'] },
+        w: { usa: -12, frankreich: -10, grossbritannien: -8, ansehen: 2 }, setze: ['westintegration_gescheitert'],
+        aktion: (s, a) => a.weltflag('nato_veto'),
+        bei: { frankreich: { titel: 'Bonn bleibt hart', w: { brd: -8 }, ergebnis: 'Bonn lehnt das Saarstatut endgültig ab. Die Pariser Verträge sind gescheitert.' } },
+        dient: { westbindung: -1, einheit: 0.3 } },
     ],
   },
   {
@@ -223,7 +224,7 @@ In der Bundesrepublik fragen sich viele: Warum nicht auch für uns? ${spdRegiert
     ab: 1955.2, ordnung: 7,
     wenn: geteilt,
     absender: 'Beobachterdelegation in Genf',
-    text: s => `${praesident(s)}, Eden, Faure und ${suRegime(s) === 'chruschtschow' ? 'Bulganin mit Chruschtschow' : suChef(s)} treffen sich in Genf – der erste Gipfel der Großmächte seit Potsdam. Die Stimmung ist freundlich, man spricht vom „Geist von Genf“. Über Deutschland gibt es keine Einigung: Moskau spricht jetzt von „zwei deutschen Staaten“.
+    text: s => `${praesident(s)}, Eden, ${pariserChef(s)} und ${suRegime(s) === 'chruschtschow' ? 'Bulganin mit Chruschtschow' : suChef(s)} treffen sich in Genf – der erste Gipfel der Großmächte seit Potsdam. Die Stimmung ist freundlich, man spricht vom „Geist von Genf“. Über Deutschland gibt es keine Einigung: Moskau spricht jetzt von „zwei deutschen Staaten“.
 
 Bonn ist nur Beobachter. Was soll die Delegation den westlichen Regierungschefs mit auf den Weg geben?`,
     optionen: [
@@ -249,7 +250,7 @@ Bonn ist nur Beobachter. Was soll die Delegation den westlichen Regierungschefs 
 
 Moskau will Beziehungen, ohne über die Gefangenen zu reden. Diplomatische Beziehungen würden bedeuten, dass in Moskau zwei deutsche Botschafter sitzen – einer aus Bonn, einer aus Ost-Berlin. Eine Botschaft in Moskau würde aber auch zeigen, was dort wirklich gedacht wird.`,
     optionen: [
-      { text: 'Reisen und hart verhandeln: Beziehungen nur gegen die Freilassung der Gefangenen.', hist: true,
+      { text: 'Reisen und hart verhandeln: Beziehungen nur gegen die Freilassung der Gefangenen.', hist: true, dient: { sozial: 1, frieden: 0.4, einheit: 0.2 },
         rueckfrage: { land: 'su', id: 'su_gefangene' },
         antworten: {
           ja: { ergebnis: s => `Nach zermürbenden Tagen – mit Wodka, Wutausbrüchen und einem demonstrativ bestellten Flugzeug für die Abreise – gibt ${suRegime(s) === 'chruschtschow' ? 'Bulganin' : suChef(s)} beim Abschiedsempfang sein Wort. Als die ersten Heimkehrer im Lager Friedland ankommen, wird der Name des Kanzlers zur Legende.`,
@@ -283,14 +284,14 @@ Moskau will Beziehungen, ohne über die Gefangenen zu reden. Diplomatische Bezie
 
 Deine Parteifreunde an der Saar bitten um diskrete Hilfe.`,
     optionen: [
-      { text: 'Offiziell für das Statut werben, inoffiziell nichts tun.', hist: true,
+      { text: 'Offiziell für das Statut werben, inoffiziell nichts tun.', hist: true, dient: { aussoehnung: 0.4 },
         zufall: [
-          { p: 0.75, ergebnis: '67,7 Prozent der Saarländer stimmen mit Nein. Hoffmann tritt zurück. Paris erklärt sich zu Verhandlungen über die Rückgliederung bereit.',
+          { p: 0.75, ergebnis: '67,7 Prozent der Saarländer stimmen mit Nein. Hoffmann tritt zurück. Die Saar will zu Deutschland.',
             w: { ansehen: 3, frankreich: -2 }, setze: ['saar_nein', 'saar_entschieden'] },
           { ergebnis: 'Knapp siegt das Ja. Die Saar wird ein europäisches Territorium unter der WEU.',
             w: { europa: 5, frankreich: 6, ansehen: -4 }, setze: ['saar_europaeisch', 'saar_entschieden'] },
         ] },
-      { text: 'Dem Heimatbund heimlich Geld aus dem Kanzleramt zukommen lassen.',
+      { text: 'Dem Heimatbund heimlich Geld aus dem Kanzleramt zukommen lassen.', dient: { aussoehnung: -0.6 },
         zufall: [
           { p: 0.3, ergebnis: 'Die Zahlungen fliegen auf. In Paris ist von Wortbruch die Rede. Das Nein ist trotzdem deutlich.',
             w: { frankreich: -10, ansehen: -2 }, setze: ['saar_nein', 'saar_entschieden'] },
@@ -305,6 +306,7 @@ Deine Parteifreunde an der Saar bitten um diskrete Hilfe.`,
             w: { frankreich: 4, ansehen: -2 }, setze: ['saar_nein', 'saar_entschieden'] },
         ] },
     ],
+    nachher: (s, a) => { if (s.f.saar_nein) a.sende('frankreich', 'saar_nein'); else a.weltflag('saar_europaeisch'); },
     historisch: 'Am 23. Oktober 1955 lehnten 67,7 Prozent der Saarländer das Statut ab. Frankreich akzeptierte das Ergebnis; am 1. Januar 1957 trat das Saarland der Bundesrepublik bei.',
   },
   {
@@ -433,16 +435,21 @@ Für ${land(s)} wäre das ein Albtraum: Ohne amerikanische Soldaten würde jede 
     titel: 'Die Suezkrise',
     datum: 'November 1956',
     ab: 1956.2, ordnung: 10.5,
+    wenn: s => !!s.weltflags.suez_angriff,
     absender: 'Botschaft Paris',
     text: s => `Großbritannien und Frankreich haben zusammen mit Israel Ägypten angegriffen, um den von Nasser verstaatlichten Suezkanal zurückzugewinnen. ${s.weltflags.suez_gewaehren ? `${praesident(s)} lässt die Verbündeten gewähren; britische und französische Truppen besetzen die Kanalzone. Moskau droht London und Paris mit Raketen.` : `${praesident(s)} ist empört und zwingt London und Paris mit finanziellem Druck zum Rückzug; Moskau droht mit Raketen. Für Paris und London ist es eine Demütigung.`}
 
-Für den 6. November ist ${s.kanzler} zu einem lange geplanten Besuch bei Ministerpräsident Guy Mollet in Paris angekündigt. ${s.weltflags.suez_gewaehren ? 'Das Auswärtige Amt rät zur Absage – man dürfe nicht in den Konflikt hineingezogen werden.' : 'Das Auswärtige Amt rät zur Absage – man dürfe sich nicht an die Seite der Verlierer stellen.'}`,
+Für den 6. November ist ${s.kanzler} zu einem lange geplanten Besuch bei ${pariserSpitze(s)} in Paris angekündigt. ${s.weltflags.suez_gewaehren ? 'Das Auswärtige Amt rät zur Absage – man dürfe nicht in den Konflikt hineingezogen werden.' : 'Das Auswärtige Amt rät zur Absage – man dürfe sich nicht an die Seite der Verlierer stellen.'}`,
     optionen: [
       { text: 'Trotzdem nach Paris fahren – gerade jetzt.', hist: true, richtung: 'west',
-        ergebnis: 'Während des Besuchs akzeptiert Paris die Waffenruhe. Mollet wird die Geste nicht vergessen. „Europa wird eure Rache sein“, sagt der Kanzler ihm.',
+        ergebnis: s => `Während des Besuchs akzeptiert Paris die Waffenruhe. ${pariserChef(s)} wird die Geste nicht vergessen. „Europa wird eure Rache sein“, sagt der Kanzler.`,
+        bei: { frankreich: { titel: 'Der Kanzler kommt trotzdem', w: { brd: 8, europa: 2 }, ergebnis: 'Der Kanzler kommt mitten in der Krise nach Paris. „Europa wird eure Rache sein“, sagt er.' } },
+        dient: { aussoehnung: 1.2, europa: 0.5 },
         w: s => ({ frankreich: 12, europa: 4, usa: s.weltflags.suez_gewaehren ? -1 : -4, moskau: s.weltflags.suez_gewaehren ? -4 : 0 }), setze: ['paris_suez'] },
       { text: 'Die Reise absagen und sich hinter Washington stellen.',
-        ergebnis: s => `${praesident(s)} ist zufrieden, Mollet verbittert.`,
+        ergebnis: s => `${praesident(s)} ist zufrieden, ${pariserChef(s)} verbittert.`,
+        bei: { frankreich: { titel: 'Der Kanzler sagt ab', w: { brd: -6 }, ergebnis: 'Der Kanzler hat seinen Besuch in Paris abgesagt und sich hinter Washington gestellt.' } },
+        dient: { westbindung: 0.6, aussoehnung: -0.8 },
         w: { usa: 5, frankreich: -7, grossbritannien: -2 } },
       { text: 'Neutral bleiben.',
         ergebnis: 'Niemand dankt es Bonn, aber niemand ist verärgert.',
@@ -487,8 +494,8 @@ Zehntausende Flüchtlinge strömen nach Österreich.`),
     id: 'saarvertrag',
     titel: 'Der Saarvertrag',
     datum: '27. Oktober 1956',
-    ab: 1956.2, bis: 1957.1, ordnung: 10,
-    wenn: s => !!s.f.saar_nein && !s.f.saar_zurueck,
+    ab: 1956.1, bis: 1958.2, ordnung: 10,
+    wenn: s => !!s.f.saar_nein && !s.f.saar_zurueck && !!s.weltflags.saar_akzeptiert,
     absender: s => (unionRegiert(s) ? 'Heinrich von Brentano, Bundesminister des Auswärtigen' : 'Bundesminister des Auswärtigen'),
     text: `Nach dem Nein der Saarländer verhandeln Bonn und Paris über die Rückgliederung. Frankreich verlangt Gegenleistungen: die Kanalisierung der Mosel für die lothringische Stahlindustrie, Kohlelieferungen aus dem Warndt und eine Übergangszeit, in der die Saar wirtschaftlich zu Frankreich gehört.`,
     optionen: [
@@ -529,19 +536,23 @@ ${unionRegiert(s) ? 'Finanzminister Schäffer und Wirtschaftsminister Erhard hal
     id: 'roemische_vertraege',
     titel: 'Die Römischen Verträge',
     datum: '25. März 1957',
-    ab: 1957.1, ordnung: 3,
-    wenn: s => geteilt(s) && !s.f.neutral,
+    ab: 1957.1, bis: 1957.2, ordnung: 3,
+    wenn: s => geteilt(s) && !s.f.neutral && !!s.weltflags.rom_angebot,
     absender: 'Walter Hallstein, Auswärtiges Amt',
-    text: s => `Auf der Konferenz von Messina 1955 wurde ein neuer Anlauf beschlossen. Jetzt liegen zwei Verträge vor: eine Europäische Wirtschaftsgemeinschaft mit gemeinsamem Markt und gemeinsamem Außenzoll und eine Atomgemeinschaft.${s.f.paris_suez ? ' Seit deinem Besuch in Paris während der Suezkrise ist Mollet zu Zugeständnissen bereit.' : ''}
+    text: s => `Auf der Konferenz von Messina 1955 wurde ein neuer Anlauf beschlossen. Jetzt liegen zwei Verträge vor: eine Europäische Wirtschaftsgemeinschaft mit gemeinsamem Markt und gemeinsamem Außenzoll und eine Atomgemeinschaft.${s.f.paris_suez ? ` Seit deinem Besuch in Paris während der Suezkrise ist ${pariserChef(s)} zu Zugeständnissen bereit.` : ''}
 
 ${unionRegiert(s) ? 'Wirtschaftsminister Erhard ist dagegen: Er will' : 'Ludwig Erhard und die Wirtschaftsliberalen in Union und FDP sind dagegen: Sie wollen'} keine Zollmauer um sechs Länder, sondern eine große Freihandelszone mit Großbritannien. Frankreich verlangt, dass seine Überseegebiete und seine Landwirtschaft einbezogen werden.`,
     optionen: [
       { text: s => (unionRegiert(s) ? 'Unterzeichnen – gegen Erhards Bedenken.' : 'Unterzeichnen – gegen die Bedenken der Freihändler.'), hist: true, richtung: 'west',
         ergebnis: 'Im Kapitol in Rom setzen sechs Regierungen ihre Unterschrift unter die Verträge. Hallstein wird erster Präsident der Kommission.',
-        w: { europa: 15, frankreich: 8, usa: 3, grossbritannien: -4, impuls: 0.5 }, setze: ['ewg'] },
+        w: { europa: 15, frankreich: 8, usa: 3, grossbritannien: -4, impuls: 0.5 }, setze: ['ewg'],
+        bei: { frankreich: { titel: 'Die Römischen Verträge', w: { brd: 4 }, ergebnis: 'Bonn unterzeichnet die Römischen Verträge. Nun muss die Nationalversammlung zustimmen.' } },
+        dient: { europa: 1.2, aussoehnung: 0.6 } },
       { text: s => (unionRegiert(s) ? 'Erhard folgen: lieber eine große Freihandelszone mit London.' : 'Den Freihändlern folgen: lieber eine große Freihandelszone mit London.'),
         ergebnis: 'Die Verhandlungen über die Freihandelszone ziehen sich hin. Die Sechsergemeinschaft entsteht ohne die Bundesrepublik nicht.',
-        w: { europa: 3, grossbritannien: 8, frankreich: -12 }, setze: ['freihandel'] },
+        w: { europa: 3, grossbritannien: 8, frankreich: -12 }, setze: ['freihandel'],
+        bei: { frankreich: { titel: 'Bonn will eine Freihandelszone', w: { brd: -6, europa: -4 }, ergebnis: 'Bonn unterzeichnet die Römischen Verträge nicht und setzt auf eine große Freihandelszone mit London.' } },
+        dient: { westbindung: 0.3, europa: -0.6 } },
     ],
     historisch: 'Die Römischen Verträge wurden am 25. März 1957 unterzeichnet und traten am 1. Januar 1958 in Kraft. Adenauer setzte sich gegen Erhard durch, der den Gemeinsamen Markt als „volkswirtschaftlichen Unsinn“ bezeichnet hatte.',
   },
@@ -684,7 +695,8 @@ ${unionRegiert(s) ? 'Die SPD, die Gewerkschaften und die Kirchen rufen zur Kampa
     id: 'fig',
     titel: 'Geheimgespräche mit Paris und Rom',
     datum: 'April 1958',
-    ab: 1958.1, ordnung: 4,
+    ab: 1957.2, bis: 1958.2, ordnung: 4,
+    ausloeser: 'fig', ausloeserVon: 'frankreich',
     wenn: s => imBuendnis(s) && !s.f.atomverzicht_bundeswehr && unionRegiert(s),
     absender: 'Franz Josef Strauß, streng geheim',
     text: `Seit Ende 1957 verhandeln die Verteidigungsminister Frankreichs, Italiens und der Bundesrepublik im Geheimen über eine Zusammenarbeit in der Rüstung – auch bei Kernwaffen. Frankreich steht kurz vor seinem ersten Atomtest. Strauß will das Protokoll unterzeichnen: Die Bundesrepublik würde sich an der Finanzierung einer Isotopentrennanlage beteiligen.
@@ -692,6 +704,8 @@ ${unionRegiert(s) ? 'Die SPD, die Gewerkschaften und die Kirchen rufen zur Kampa
 Würde das bekannt, wäre der ABC-Verzicht von 1954 in den Augen der Welt Makulatur.`,
     optionen: [
       { text: 'Strauß gewähren lassen.',
+        bei: { frankreich: { titel: 'Bonn macht mit', w: { brd: 4 }, ergebnis: 'Bonn beteiligt sich an der geheimen Rüstungszusammenarbeit.' } },
+        dient: { wiederbewaffnung: 0.6, aussoehnung: 0.5 },
         zufall: [
           { p: 0.35, ergebnis: 'Details sickern in die amerikanische Presse. Washington stellt peinliche Fragen.',
             w: { usa: -8, frankreich: 4, moskau: -8 }, setze: ['fig'] },
@@ -700,6 +714,8 @@ Würde das bekannt, wäre der ABC-Verzicht von 1954 in den Augen der Welt Makula
         ] },
       { text: 'Die Gespräche stoppen.',
         ergebnis: 'Strauß ist verärgert, aber im Kanzleramt schläft man ruhiger.',
+        bei: { frankreich: { titel: 'Bonn lehnt ab', w: { brd: -2 }, ergebnis: 'Bonn lehnt die atomare Zusammenarbeit ab.' } },
+        dient: { westbindung: 0.5 },
         w: { usa: 1, frankreich: -2 } },
     ],
     historisch: 'Das sogenannte FIG-Abkommen (Frankreich–Italien–Deutschland) wurde im April 1958 unterzeichnet. Nach seiner Rückkehr an die Macht beendete de Gaulle im Juni 1958 die nukleare Zusammenarbeit; Frankreich baute die Bombe allein.',
@@ -710,21 +726,28 @@ Würde das bekannt, wäre der ABC-Verzicht von 1954 in den Augen der Welt Makula
     id: 'colombey',
     titel: 'Besuch in Colombey-les-Deux-Églises',
     datum: '14. September 1958',
-    ab: 1958.2, ordnung: 9,
-    absender: 'Charles de Gaulle, Président du Conseil',
-    text: s => `Im Mai hat die Algerienkrise die Vierte Republik zum Einsturz gebracht. General de Gaulle ist an die Macht zurückgekehrt. In Bonn ist man besorgt: Der General war gegen die EVG, gegen Europa und gegen alles, was Frankreich Souveränität kostet.
+    ab: 1958.2, bis: 1963.2, ordnung: 9,
+    ausloeser: 'colombey', ausloeserVon: 'frankreich',
+    absender: s => (s.welt.laender.frankreich?.republik === 5 ? 'Charles de Gaulle, Präsident der Republik' : 'Charles de Gaulle, Président du Conseil'),
+    text: s => `${s.zeit === 1958.2 ? 'Im Mai hat die Algerienkrise die Vierte Republik zum Einsturz gebracht. General de Gaulle ist an die Macht zurückgekehrt.' : 'General de Gaulle regiert in Paris.'} In Bonn ist man besorgt: Der General war gegen die EVG, gegen Europa und gegen alles, was Frankreich Souveränität kostet.
 
 Nun lädt er ${s.kanzler === 'Adenauer' ? 'dich' : 'den Kanzler'} in sein Landhaus in Colombey ein – kein Staatsbesuch, ein privates Treffen. Kein ausländischer Regierungschef war je dort.${s.f.fig ? '\n\nDe Gaulle wird die geheime Nuklearkooperation beenden wollen.' : ''}`,
     optionen: [
       { text: 'Hinfahren und eine persönliche Freundschaft suchen.', hist: true,
         ergebnis: 'Zwei alte Männer sprechen bis in die Nacht über Geschichte, Europa und die Russen. Am Ende sind sie Freunde.',
-        w: { frankreich: 12, europa: 3, usa: -2 }, setze: ['colombey'], loesche: ['fig'] },
+        w: { frankreich: 12, europa: 3, usa: -2 }, setze: ['colombey'], loesche: ['fig'],
+        bei: { frankreich: { titel: 'Der Kanzler in Colombey', w: { brd: 10 }, ergebnis: 'Zwei alte Männer sprechen bis in die Nacht über Geschichte, Europa und die Russen. Am Ende sind sie Freunde.' } },
+        dient: { aussoehnung: 1.4 } },
       { text: 'Hinfahren, aber kühl bleiben – Washington hat Vorrang.',
         ergebnis: 'Ein höfliches Treffen. De Gaulle merkt sich die Distanz.',
-        w: { frankreich: 3, usa: 2 }, loesche: ['fig'] },
+        w: { frankreich: 3, usa: 2 }, loesche: ['fig'],
+        bei: { frankreich: { titel: 'Ein kühler Gast', w: { brd: 2 }, ergebnis: 'Der Kanzler kommt nach Colombey, bleibt aber kühl. Washington habe Vorrang, lässt er durchblicken.' } },
+        dient: { westbindung: 0.6, aussoehnung: 0.3 } },
       { text: 'Absagen.',
         ergebnis: 'Ein Affront, den de Gaulle nicht vergessen wird.',
-        w: { frankreich: -10 } },
+        w: { frankreich: -10 },
+        bei: { frankreich: { titel: 'Der Kanzler sagt ab', w: { brd: -8 }, ergebnis: 'Der Kanzler hat die Einladung nach Colombey abgesagt.' } },
+        dient: { aussoehnung: -1 } },
     ],
     historisch: 'Das Treffen in Colombey am 14. September 1958 begründete die enge Freundschaft zwischen Adenauer und de Gaulle; Adenauer war der einzige ausländische Staatsmann, den de Gaulle in seinem Privathaus empfing.',
   },

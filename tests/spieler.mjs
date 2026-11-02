@@ -6,10 +6,14 @@ export const W = E.bereiteVor(W0);
 /** Das gespielte Land (Inhalte der BRD) */
 export const sz = W.laender.brd;
 
-/** strategie: 'zufall' | 'historisch' | 'ost' | 'west' */
-export function spiele(seed, strategie = 'zufall', log = null, { geschichtstreue = 1 } = {}) {
-  const welt = E.neueWelt(W, { spieler: ['brd'], seed, geschichtstreue });
-  const s = E.sicht(W, welt, 'brd');
+const richtungen = o => (Array.isArray(o.richtung) ? o.richtung : o.richtung ? [o.richtung] : []);
+const istWest = o => richtungen(o).some(r => ['west', 'europa', 'atlantisch'].includes(r));
+const istOst = o => richtungen(o).some(r => ['ost', 'national', 'dekolonisation'].includes(r));
+
+/** strategie: 'zufall' | 'historisch' | 'ost' | 'west' | 'einheit'; land: das gespielte Land */
+export function spiele(seed, strategie = 'zufall', log = null, { geschichtstreue = 1, land = 'brd' } = {}) {
+  const welt = E.neueWelt(W, { spieler: [land], seed, geschichtstreue });
+  const s = E.sicht(W, welt, land);
   let schritte = 0;
   const gesehen = [];
   const eigenerZufall = { rng: seed * 7 + 1 };
@@ -18,14 +22,15 @@ export function spiele(seed, strategie = 'zufall', log = null, { geschichtstreue
     schritte++;
     const a = E.aktuelles(W, welt);
     if (a.typ === 'lage') { E.lageGesehen(W, welt); continue; }
-    if (a.typ === 'ergebnis') {
-      for (const x of a.ergebnis.texte) {
+    if (a.typ === 'ergebnis' || a.typ === 'telegramm') {
+      for (const x of (a.ergebnis || a.telegramm).texte) {
         if (typeof x !== 'string' || x.includes('undefined')) throw new Error('Ergebnistext fehlerhaft: ' + a.ergebnis.titel);
         // Ergebnisse stehen in Vermerk und Zeitung, daher in der dritten Person
-        if (/\b(du|dich|dir|dein\w*|Du|Dein\w*)\b/.test(x)) throw new Error('Ergebnistext in der zweiten Person: ' + x);
+        if (/\b(du(?! [A-ZÉ])|dich|dir|dein\w*|Du(?! [A-ZÉ])|Dein\w*)\b/.test(x)) throw new Error('Ergebnistext in der zweiten Person: ' + x);
+        if (x.includes('undefined') || x.includes('NaN')) throw new Error('Ergebnistext fehlerhaft: ' + x);
       }
     }
-    if (a.typ === 'ergebnis' || a.typ === 'wahl') { E.weiter(W, welt); continue; }
+    if (a.typ === 'ergebnis' || a.typ === 'wahl' || a.typ === 'telegramm') { E.weiter(W, welt); continue; }
     if (a.typ === 'rundenende') { E.weiter(W, welt); continue; }
     if (a.typ === 'vorhaben') {
       const l = a.liste.filter(v => v.leistbar);
@@ -51,8 +56,8 @@ export function spiele(seed, strategie = 'zufall', log = null, { geschichtstreue
         if (einheitsfrage) o = (a.ev.id === 'stalin_note' ? opts[2] : a.ev.id === 'n_abkommen' ? opts[0] : opts.find(x => x.richtung === 'ost')) || opts[0];
         else o = opts.find(x => x.hist) || [...opts].sort((x, y) => ((typeof y.w === 'object' && y.w?.ansehen) || 0) - ((typeof x.w === 'object' && x.w?.ansehen) || 0))[0];
       }
-      else if (strategie === 'ost') o = opts.find(x => x.richtung === 'ost') || opts[Math.floor(r() * opts.length)];
-      else if (strategie === 'west') o = opts.find(x => x.richtung === 'west') || opts.find(x => x.hist) || opts[0];
+      else if (strategie === 'ost') o = opts.find(istOst) || opts[Math.floor(r() * opts.length)];
+      else if (strategie === 'west') o = opts.find(istWest) || opts.find(x => x.hist) || opts[0];
       else o = opts[Math.floor(r() * opts.length)];
       if (log) log(`${E.zeitText(s.zeit)} ${E.txt(a.ev.titel, s)} → ${E.txt(o.text, s)}`);
       E.waehle(W, welt, o.index);

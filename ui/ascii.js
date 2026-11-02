@@ -239,8 +239,32 @@ const pilz = {
   ],
 };
 
+
+// Dschungel und Reisfelder (Indochina)
+const dschungel = String.raw`
+        \|/      __        \ | /        \|/
+      --(_)--  _/  \_    --  O  --    --(_)--
+        /|\   /  ||  \      / | \       /|\
+       /\ /\     ||      ,/\/\  /\/\,
+  ~~~~~~~~~~~~~~~||~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   ,,  ,,  ,,    ||   ,,  ,,  ,,   ,,  ,,  ,,
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`;
+
+// Der Eiffelturm
+const eiffel = String.raw`
+                     |
+                    /^\
+                   /___\
+                   |   |
+                  /|___|\
+                 / |   | \
+                /__|___|__\
+               /   /   \   \
+              /   /     \   \
+         ____/___/_______\___\____`;
+
 export const SZENEN = {
-  bundeshaus, note, kreml, plakat, urne, flagge, sputnik, mauer, berlin, korea, schiff,
+  dschungel, eiffel, bundeshaus, note, kreml, plakat, urne, flagge, sputnik, mauer, berlin, korea, schiff,
   aufstand, presse, flut, rakete, alarm, pilz,
 };
 

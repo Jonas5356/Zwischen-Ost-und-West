@@ -1,21 +1,27 @@
 // Weltsimulation: Was tun die vom Spiel gesteuerten Länder, und wie gut schätzt Bonn sie ein?
-//   node tests/welt_simulation.mjs [Partien] [Geschichtstreue 0…1] [BRD-Strategie]
+//   node tests/welt_simulation.mjs [Partien] [Geschichtstreue 0…1] [Strategie] [gespieltes Land: brd|frankreich]
 import { spiele, W } from './spieler.mjs';
 
 const n = Number(process.argv[2] || 300);
 const g = Number(process.argv[3] ?? 1);
 const strategie = process.argv[4] || (g >= 0.99 ? 'historisch' : 'zufall');
+const gespielt = process.argv[5] || 'brd';
+const gesteuert = ['usa', 'su', 'frankreich', 'brd'].filter(l => l !== gespielt);
 
 const wahl = {}, regierungen = {}, flags = {}, enden = {};
 let treffer = 0, faelle = 0, brier = 0, priorBrier = 0, vereinigt = 0;
 const zaehle = (o, k) => { o[k] = (o[k] || 0) + 1; };
 for (let seed = 1; seed <= n; seed++) {
-  const { welt } = spiele(seed, strategie, null, { geschichtstreue: g });
-  zaehle(enden, welt.ende.id);
+  const { welt } = spiele(seed, strategie, null, { geschichtstreue: g, land: gespielt });
+  zaehle(enden, welt.ende.id + (welt.ende.ausgeloest && welt.ende.ausgeloest !== gespielt ? ' (' + welt.ende.ausgeloest + ')' : ''));
   if (welt.laender.brd.f.vereinigt) vereinigt++;
-  for (const f of ['juni17_panzer', 'juni17_zugestaendnisse', 'ungarn_einmarsch', 'ungarn_neutral', 'mauer_genehmigt', 'mauer_abgelehnt', 'raketen_kuba', 'radford', 'atomkrieg']) if (welt.weltflags[f]) zaehle(flags, f);
-  for (const f of ['essentials', 'kuba_massnahme', 'kuba_ausgang']) if (welt.weltflags[f]) zaehle(flags, f + '=' + welt.weltflags[f]);
-  for (const land of ['usa', 'su']) {
+  for (const f of ['juni17_panzer', 'juni17_zugestaendnisse', 'ungarn_einmarsch', 'ungarn_neutral', 'mauer_genehmigt', 'mauer_abgelehnt', 'raketen_kuba', 'radford', 'atomkrieg', 'suez_angriff', 'pariser_ratifiziert', 'nato_veto', 'saar_akzeptiert', 'rom_angebot']) if (welt.weltflags[f]) zaehle(flags, f);
+  for (const f of ['essentials', 'kuba_massnahme', 'kuba_ausgang', 'evg', 'schuman_antwort']) if (welt.weltflags[f]) zaehle(flags, f + '=' + welt.weltflags[f]);
+  const F = welt.laender.frankreich;
+  for (const f of ['de_gaulle', 'dien_bien_phu', 'indochina_beendet', 'algerien_unabhaengig', 'atomtest', 'rom_ratifiziert', 'colombey_angeboten', 'elysee', 'veto_gb']) if (F.f[f]) zaehle(flags, 'Paris: ' + f);
+  zaehle(flags, 'Paris: Regierung am Ende ' + F.lager);
+  zaehle(flags, 'Paris: Stürze bis 1958 ' + Math.min(15, Math.floor((F.stuerze || []).filter(z => z < 1958.2).length / 3) * 3) + '+');
+  for (const land of gesteuert) {
     const L = welt.laender[land];
     for (const c of L.chronik) {
       if (c.art === 'wechsel') continue;
@@ -23,7 +29,8 @@ for (let seed = 1; seed <= n; seed++) {
     }
     for (const r of L.regierungen) zaehle(regierungen, `${land}:${r.regime}${r.typ ? '/' + r.typ : ''}`);
     // Einschätzung am Ende jeder Regierungszeit: Wahrscheinlichkeit des wahren Typs
-    const E = welt.laender.brd.einschaetzung[land];
+    const E = welt.laender[gespielt].einschaetzung?.[land];
+    if (!E) continue;
     const alle = [...(E.frueher || []), { regime: E.regime, p: E.p }];
     const regs = [...L.regierungen];
     for (const e of alle) {

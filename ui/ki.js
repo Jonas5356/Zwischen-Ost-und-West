@@ -23,7 +23,8 @@
 
 import { zufall, txt, zeitIndex, sicht, api } from './engine.js';
 
-const istKI = M => !!M?.regierungen;
+/** Wird das Land vom Spiel nach Zielen gesteuert? (hat Regierungen und wird nicht gespielt) */
+const istKI = (W, welt, land) => !!W.laender[land]?.regierungen && !welt.spieler.includes(land);
 const mensch = welt => welt.spieler;
 
 // ---------------------------------------------------------------- Nutzen und Wahl
@@ -65,6 +66,15 @@ export function wahrscheinlichkeiten(s, opts, gew, lambda) {
   return e.map(x => x / summe);
 }
 
+/** Ziele, die sich aus der Richtung einer Option ergeben (`dientAus` im Landesmodul), ergänzen */
+function mitZielen(M, s, opts) {
+  if (!M.dientAus) return opts;
+  return opts.map(o => {
+    const extra = M.dientAus(o);
+    return extra ? { ...o, dient: { ...extra, ...(txt(o.dient, s) || {}) } } : o;
+  });
+}
+
 /** Gewichte einer Regierung, gegebenenfalls mit Typ */
 export function gewichteVon(R, typ) {
   const T = typ ? R.typen?.[typ] : null;
@@ -80,6 +90,7 @@ export function waehle(W, welt, land, ev, opts) {
   const L = welt.laender[land];
   const s = sicht(W, welt, land);
   const R = M.regierungen[L.regime];
+  opts = mitZielen(M, s, opts);
   const p = wahrscheinlichkeiten(s, opts, L.gewichte, R.lambda ?? 1.5);
   let r = zufall(welt), i = 0;
   for (; i < p.length - 1; i++) { if (r < p[i]) break; r -= p[i]; }
@@ -184,7 +195,7 @@ function berichte(W, welt) {
     const Mh = W.laender[h];
     const sh = sicht(W, welt, h);
     for (const [land, M] of Object.entries(W.laender)) {
-      if (!istKI(M) || land === h) continue;
+      if (!istKI(W, welt, land) || land === h) continue;
       const L = welt.laender[land];
       const R = M.regierungen[L.regime];
       const typen = Object.keys(R.typen || {});
@@ -210,14 +221,60 @@ function berichte(W, welt) {
 /** Beim Anlegen der Welt: Startregierungen */
 export function initialisiere(W, welt) {
   for (const [land, M] of Object.entries(W.laender)) {
-    if (istKI(M) && M.startRegime) starteRegime(W, welt, land, M.startRegime);
+    if (!istKI(W, welt, land)) continue;
+    if (M.regimeVon) pruefeRegime(W, welt, land);
+    else if (M.startRegime) starteRegime(W, welt, land, M.startRegime);
   }
+}
+
+/**
+ * Länder, deren Regierung sich aus ihrem eigenen Modell ergibt (Wahlen, Koalitionen,
+ * Regierungsstürze – `regimeVon(s)` im Landesmodul): Nach jeder Änderung tritt die neue
+ * Regierung mit neu ausgelostem Typ an.
+ */
+export function pruefeRegime(W, welt, land) {
+  const M = W.laender[land];
+  if (!M.regimeVon || !istKI(W, welt, land)) return;
+  const L = welt.laender[land];
+  const r = M.regimeVon(sicht(W, welt, land));
+  if (r && r !== L.regime) starteRegime(W, welt, land, r);
 }
 
 /** Zu Beginn jedes Halbjahrs: Regierungswechsel, dann Berichte */
 export function rundenstart(W, welt) {
-  for (const [land, M] of Object.entries(W.laender)) if (istKI(M)) wechsel(W, welt, land);
+  for (const land of Object.keys(W.laender)) {
+    if (!istKI(W, welt, land)) continue;
+    wechsel(W, welt, land);
+    pruefeRegime(W, welt, land);
+  }
   berichte(W, welt);
+}
+
+/**
+ * Regierungsvorhaben eines gesteuerten Landes: das Vorhaben mit dem höchsten Nutzen (nach
+ * Logit wie bei Entscheidungen); „kein Vorhaben“ hat Nutzen 0. Länder ohne Regierungen
+ * nehmen das historische Vorhaben, sonst keines.
+ */
+export function waehleVorhaben(W, welt, land, liste, anwenden) {
+  const M = W.laender[land];
+  const L = welt.laender[land];
+  const s = sicht(W, welt, land);
+  if (!M.regierungen || !L.gewichte) {
+    const v = liste.find(x => x.historisch) || null;
+    return anwenden(v ? v.id : null);
+  }
+  const R = M.regierungen[L.regime];
+  const opts = [{ id: null, verfuegbar: true }, ...liste.map(v => ({ ...v, verfuegbar: true, w: kostenwirkung(s, v) }))];
+  const p = wahrscheinlichkeiten(s, opts, L.gewichte, R.lambda ?? 1.5);
+  let r = zufall(welt), i = 0;
+  for (; i < p.length - 1; i++) { if (r < p[i]) break; r -= p[i]; }
+  return anwenden(opts[i].id);
+}
+/** Wirkung eines Vorhabens einschließlich seiner Kosten für den Haushalt */
+function kostenwirkung(s, v) {
+  const w = { ...(txt(v.w, s) || {}) };
+  if (v.kosten) w.haushalt = (w.haushalt || 0) - v.kosten;
+  return w;
 }
 
 export { istKI };

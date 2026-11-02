@@ -162,6 +162,15 @@ const ereignisse = [
     ],
   },
   {
+    id: 'usa_vautour', titel: 'Luftangriffe für Điện Biên Phủ?', nurRueckfrage: true, wiederholbar: true,
+    optionen: [
+      { text: 'Die Viet Minh vor Điện Biên Phủ aus der Luft angreifen.', antwort: 'ja', dient: { eindaemmung: 1.2, entspannung: -0.8, buendnis_fuehren: 0.4 }, w: { rueckhalt: -6, su: -6 },
+        ergebnis: 'Amerikanische Bomber von Flugzeugträgern greifen die Stellungen der Viet Minh um Điện Biên Phủ an.' },
+      { text: 'Ablehnen – ohne London und den Kongress kein Krieg in Asien.', antwort: 'nein', hist: true, dient: { kosten_senken: 0.6, entspannung: 0.4, buendnis_fuehren: -0.3 },
+        ergebnis: 'Washington lehnt Luftangriffe ab. Ohne Großbritannien und ohne den Kongress will der Präsident nicht eingreifen.' },
+    ],
+  },
+  {
     id: 'usa_radford', titel: 'Weniger Truppen in Europa?', ab: 1956.2, ordnung: 6,
     wenn: s => !!(brd(s).f.nato || brd(s).f.evg),
     optionen: [
@@ -173,6 +182,7 @@ const ereignisse = [
   },
   {
     id: 'usa_suez', titel: 'Suez', ab: 1956.2, ordnung: 10.2,
+    wenn: s => !!s.weltflags.suez_angriff,
     optionen: [
       { text: 'London und Paris mit finanziellem Druck zum Rückzug zwingen.', hist: true, dient: { buendnis_fuehren: 0.8, eindaemmung: 0.5, entspannung: 0.3 }, w: { buendnis: -6, prestige: 3 },
         ergebnis: s => `${name(s)} zwingt London und Paris mit finanziellem Druck, den Angriff auf Ägypten abzubrechen.`,

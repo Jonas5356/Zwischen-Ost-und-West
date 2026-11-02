@@ -10,11 +10,13 @@ const W = E.bereiteVor(weltSzenario);
 let welt = null;               // der Spielstand: die ganze Welt
 let s = null;                  // Sicht des gespielten Landes darauf
 let sz = W.laender[W.spielbar[0]]; // Inhalte des gespielten Landes
+let ui = sz.oberflaeche;           // was die Oberfläche über dieses Land wissen muss
 
 function uebernehme(w) {
   welt = w;
   const land = welt.spieler[0];
   sz = W.laender[land];
+  ui = sz.oberflaeche;
   s = E.sicht(W, welt, land);
 }
 const ladbar = st => st && st.version === E.VERSION && st.szenario === W.id;
@@ -27,18 +29,6 @@ const $ = id => document.getElementById(id);
 const esc = t => String(t ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const zahl = (x, d = 1) => Number(x).toLocaleString('de-DE', { minimumFractionDigits: d, maximumFractionDigits: d });
 const absaetze = t => String(t || '').split(/\n\s*\n/).filter(Boolean).map(p => `<p>${esc(p.trim()).replace(/\n/g, '<br>')}</p>`).join('');
-/** Kurzname der Kanzlerpartei, die zum Halbjahr `zeit` (vor einer Regierungsbildung darin) regierte */
-const kanzlerparteiZu = zeit => {
-  const l = s.kanzlerliste || [];
-  const k = [...l].reverse().find(x => E.zeitIndex(x.ab) < E.zeitIndex(zeit)) || l[0];
-  return k?.partei === 'SPD' ? 'SPD' : 'Union';
-};
-const parteiName = (k, st = s) => (k === 'Kleine' ? sz.modell.kleineName(st) : sz.parteien[k]?.name || k);
-const regierungText = st => {
-  const n = st.regierung.map(p => parteiName(p, st));
-  return n.length > 1 ? n.slice(0, -1).join(', ') + ' und ' + n[n.length - 1] : n[0];
-};
-const kurzKanzler = st => st.kanzler.replace(/^von /, '').charAt(0) + '.';
 const bewegung = () => !wenigBewegung;
 
 function meldung(text) {
@@ -55,8 +45,8 @@ async function zeigeTitel() {
   stoppSzene();
   $('spiel').hidden = true;
   $('titel').hidden = false;
-  $('titel-text').innerHTML = absaetze(sz.beschreibung + '\n\nDu führst die Bundesregierung. Zu Beginn stellt die Union den Kanzler; verliert sie ihre Mehrheit, regierst du mit der neuen Regierung weiter. Jedes Halbjahr legen dir Ministerien und Botschaften Vorgänge zur Entscheidung vor; am Ende bringst du ein Regierungsvorhaben ein. 1953, 1957 und 1961 wird gewählt.');
-  stoppSzene = spieleSzene($('titel-ascii'), 'bundeshaus', { bewegung: bewegung() });
+  $('titel-text').innerHTML = absaetze(W.beschreibung);
+  stoppSzene = spieleSzene($('titel-ascii'), W.szene || 'bundeshaus', { bewegung: bewegung() });
   const auto = await Sp.lade('auto');
   $('k-fortsetzen').hidden = !(ladbar(auto) && !auto.ende);
   $('k-neu').focus();
@@ -76,22 +66,41 @@ function treueText() {
   $('n-treue-wert').textContent = `${v} % – ${name}`;
   $('n-treue-text').textContent = text;
 }
+let gewaehltesLand = null;
+function laenderWahl() {
+  if (!W.spielbar.includes(gewaehltesLand)) gewaehltesLand = W.spielbar.includes(einst.land) ? einst.land : W.spielbar[0];
+  const andere = id => W.spielbar.filter(x => x !== id).map(x => W.laender[x].kurz || W.laender[x].name);
+  $('n-laender').innerHTML = W.spielbar.map(id => {
+    const M = W.laender[id];
+    return `<button class="land-karte${id === gewaehltesLand ? ' gewaehlt' : ''}" data-land="${id}" aria-pressed="${id === gewaehltesLand}">
+      <span class="land-name">${esc(M.name)}</span><span class="land-rolle">${esc(M.rolle)}</span>
+      <span class="land-text">${esc(M.beschreibung)}</span>
+      <span class="land-text klein">${esc(M.oberflaeche.rolle)}${andere(id).length ? ` Die ${esc(andere(id).join(' und '))} steuert das Spiel.` : ''}</span></button>`;
+  }).join('');
+  $('n-laender').querySelectorAll('[data-land]').forEach(b => { b.onclick = () => { gewaehltesLand = b.dataset.land; laenderWahl(); }; });
+}
 function starteNeu() {
   $('n-treue').value = Math.round(100 * (einst.geschichtstreue ?? 0.75));
   treueText();
+  laenderWahl();
   $('d-neu').showModal();
 }
 function beginneSpiel() {
   einst.geschichtstreue = Number($('n-treue').value) / 100;
+  einst.land = gewaehltesLand;
   Sp.speichereEinstellungen(einst);
   $('d-neu').close();
-  uebernehme(E.neueWelt(W, { spieler: [W.spielbar[0]], geschichtstreue: einst.geschichtstreue }));
+  uebernehme(E.neueWelt(W, { spieler: [gewaehltesLand], geschichtstreue: einst.geschichtstreue }));
+  angezeigteZeit = null;
   zeigeSpiel();
 }
 
 // ---------------------------------------------------------------- Washington und Moskau
 
-const MAECHTE = [['usa', 'Washington'], ['su', 'Moskau']];
+/** Die vom Spiel gesteuerten Länder mit Regierungen, deren Absichten der Spieler einschätzt: [[id, Hauptstadt]] */
+const maechte = () => Object.keys(W.laender)
+  .filter(id => W.laender[id].regierungen && !welt.spieler.includes(id))
+  .map(id => [id, W.laender[id].hauptstadt]);
 
 /** Verbale Einschätzung einer Wahrscheinlichkeit */
 const sicherheit = p => (p >= 0.85 ? 'sehr wahrscheinlich' : p >= 0.65 ? 'vermutlich' : 'eher');
@@ -108,7 +117,7 @@ function einschaetzung(land) {
 
 function weltKarte() {
   let html = '<section class="karte welt"><h3>Die Welt</h3>';
-  for (const [land, ort] of MAECHTE) {
+  for (const [land, ort] of maechte()) {
     const e = einschaetzung(land);
     if (!e) continue;
     const [, p, T] = e.beste || [];
@@ -124,8 +133,8 @@ function weltKarte() {
 }
 
 function zeigeDossier() {
-  let html = '<p class="hinweis">Das Auswärtige Amt rechnet nach Bayes: Jede Entscheidung, die eine Regierung trifft, und jeder Bericht verschiebt die Wahrscheinlichkeiten – je nachdem, wie gut sie zu jeder möglichen Absicht passen. Berichte können irren; die Treffsicherheit der Quelle steht dabei.</p>';
-  for (const [land, ort] of MAECHTE) {
+  let html = `<p class="hinweis">${esc(ui.dienst || 'Das Auswärtige Amt')} rechnet nach Bayes: Jede Entscheidung, die eine Regierung trifft, und jeder Bericht verschiebt die Wahrscheinlichkeiten – je nachdem, wie gut sie zu jeder möglichen Absicht passen. Berichte können irren; die Treffsicherheit der Quelle steht dabei.</p>`;
+  for (const [land, ort] of maechte()) {
     const e = einschaetzung(land);
     if (!e) continue;
     const seit = e.L.regierungen?.[e.L.regierungen.length - 1]?.ab;
@@ -162,6 +171,7 @@ function zeigeDossier() {
     html += '</section>';
   }
   $('dossier').innerHTML = html;
+  $('dossier-titel').textContent = `Dossier: ${maechte().map(m => m[1]).join(', ').replace(/, ([^,]*)$/, ' und $1')}`;
   if (!$('d-dossier').open) { $('d-dossier').showModal(); Ton.blatt(); }
 }
 
@@ -179,7 +189,7 @@ function zeichne() {
   stoppSzene();
   tippAbbruch = null;
   if (angezeigteZeit !== null && angezeigteZeit !== s.zeit && !s.ende) {
-    meldung(`${E.zeitLang(s.zeit)}: Die neue Ausgabe der Depesche liegt bereit.`);
+    meldung(`${E.zeitLang(s.zeit)}: Die neue Ausgabe von „${ui.zeitung.titel}“ liegt bereit.`);
   }
   angezeigteZeit = s.zeit;
   zeichneKopf();
@@ -191,8 +201,10 @@ function zeichne() {
   blatt.closest('.mappe').scrollTop = 0;
   if (a.typ === 'lage') { E.lageGesehen(W, welt); return zeichne(); }
   if (['ereignis', 'vorhaben', 'ende'].includes(a.typ)) Ton.blatt();
+  if (a.typ === 'telegramm') Ton.fernschreiber(0.6);
   switch (a.typ) {
     case 'ereignis': zeichneEreignis(blatt, a.ev, a.land); break;
+    case 'telegramm': zeichneTelegramm(blatt, a.telegramm); break;
     case 'ergebnis': zeichneErgebnis(blatt, a.ergebnis); break;
     case 'vorhaben': zeichneVorhaben(blatt, a.liste); break;
     case 'wahl': zeichneWahl(blatt, a.ergebnis); break;
@@ -205,13 +217,10 @@ function zeichne() {
 
 function zeichneKopf() {
   $('eingang').innerHTML = `<span class="stempel">${esc(E.zeitLang(s.zeit))}<small>Runde ${s.runde} von ${E.zeitIndex(W.ende) - E.zeitIndex(W.start) + 1}</small></span>`;
-  $('kopf-regierung').innerHTML = `<strong>Bundeskanzler ${esc(s.kanzler)}</strong>, Regierung aus ${esc(regierungText(s))}`;
+  const k = ui.kopf(s);
+  $('kopf-regierung').innerHTML = `<strong>${esc(k.titel)}</strong>${k.text ? `, ${esc(k.text)}` : ''}`;
   $('zeitung-neu').hidden = s.zeitungGelesen === s.zeit;
 }
-
-const SKALA = {
-  zustimmung: [10, 60], wachstum: [-2, 12], arbeitslosigkeit: [0, 15], ansehen: [-30, 30], haushalt: [0, 100],
-};
 
 function zeichneLage() {
   const basis = s.verlauf.length ? s.verlauf[s.verlauf.length - 1] : null;
@@ -220,13 +229,14 @@ function zeichneLage() {
     html += `<section class="karte"><h3>${esc(gruppe.titel)}</h3>`;
     for (const k of gruppe.werte) {
       const d = sz.werte[k];
-      if (k === 'flucht' && s.f.vereinigt) continue;
-      if (k === 'einheit' && s.f.vereinigt) {
-        html += `<div class="zeile"><span>${esc(d.kurz)}</span><span class="balken">vollzogen</span><span class="wert"></span><span></span></div>`;
+      const besonders = ui.zeile?.(s, k);
+      if (besonders === 'aus') continue;
+      if (besonders) {
+        html += `<div class="zeile"><span>${esc(d.kurz)}</span><span class="balken">${esc(besonders)}</span><span class="wert"></span><span></span></div>`;
         continue;
       }
       const v = s.w[k];
-      const [lo, hi] = SKALA[k] || [d.min, d.max];
+      const [lo, hi] = ui.skala?.[k] || [d.min, d.max];
       const n = Math.max(0, Math.min(10, Math.round(10 * (v - lo) / (hi - lo))));
       const balken = '█'.repeat(n) + '░'.repeat(10 - n);
       const wert = d.einheit === '%' ? zahl(v, 1) : (k === 'ansehen' && v > 0 ? '+' : '') + Math.round(v);
@@ -239,23 +249,23 @@ function zeichneLage() {
           trend = `<span class="trend ${gut === null ? '' : gut ? 'gut' : 'schlecht'}" title="seit Ende des letzten Halbjahrs: ${delta > 0 ? '+' : ''}${zahl(delta, 1)}">${hoch ? '▲' : '▼'}</span>`;
         }
       }
-      const warn = (k === 'moskau' && v <= 15) || (k === 'haushalt' && v <= 10) || (k === 'koalition' && v <= 15 && s.regierung.length > 1)
-        || (['usa', 'frankreich', 'grossbritannien'].includes(k) && v < 20 && !s.f.vereinigt && s.w.souveraenitaet < 50);
-      const titel = k === 'zustimmung' ? `${s.kanzlerpartei === 'SPD' ? 'SPD' : 'Union'} in Umfragen` : d.name;
+      const warn = !!ui.warnung?.(s, k, v);
+      const titel = ui.wertTitel?.(s, k) || d.name;
       html += `<div class="zeile${warn ? ' warnung' : ''}" title="${esc(titel)}"><span>${esc(d.kurz)}</span><span class="balken" aria-hidden="true">${balken}</span><span class="wert">${wert}</span>${trend || '<span></span>'}</div>`;
     }
     html += '</section>';
   }
   html += weltKarte();
-  // Bundestag
-  const gesamt = Object.values(s.sitze).reduce((a, b) => a + b, 0);
-  const reihenfolge = ['KPD', 'SPD', 'FDP', 'Union', 'Kleine', 'Sonstige'];
-  const balken = reihenfolge.filter(p => s.sitze[p]).map(p => `<span style="width:${(100 * s.sitze[p] / gesamt).toFixed(2)}%;background:${sz.parteien[p].farbe}" title="${esc(parteiName(p))}: ${s.sitze[p]} Sitze"></span>`).join('');
+  // Parlament
+  const P = ui.parlament(s);
+  const gesamt = Object.values(P.sitze).reduce((a, b) => a + b, 0);
+  const da = P.reihenfolge.filter(p => P.sitze[p]);
+  const balken = da.map(p => `<span style="width:${(100 * P.sitze[p] / gesamt).toFixed(2)}%;background:${P.farbe(p)}" title="${esc(P.name(p))}: ${P.sitze[p]} Sitze"></span>`).join('');
   const naechste = (s.wahlplan || []).find(z => E.zeitIndex(z) >= E.zeitIndex(s.zeit) && !s.f['wahl_' + z]);
-  const legende = reihenfolge.filter(p => s.sitze[p]).map(p => `${esc(parteiName(p))} ${s.sitze[p]}`).join(', ');
-  html += `<section class="karte"><h3>Bundestag</h3><div class="sitzbalken">${balken}</div>
+  const legende = da.map(p => `${esc(P.name(p))} ${P.sitze[p]}`).join(', ');
+  html += `<section class="karte"><h3>${esc(P.titel)}</h3><div class="sitzbalken">${balken}</div>
     <div class="legende">${legende}</div>
-    <div class="legende">${naechste ? `Nächste Wahl: ${E.zeitText(naechste)}` : 'Bis 1964 keine Wahl mehr'}</div></section>`;
+    <div class="legende">${esc(P.hinweis ?? (naechste ? `Nächste Wahl: ${E.zeitText(naechste)}` : `Bis ${E.jahrVon(W.ende)} keine Wahl mehr`))}</div></section>`;
   $('lage').innerHTML = html;
   $('k-dossier-lage')?.addEventListener('click', zeigeDossier);
 }
@@ -326,10 +336,13 @@ let zeitungZeit = null;
 function ausgabe(zeit) {
   const vor = E.zeitPlus(zeit, -1);
   const gleich = (a, b) => E.zeitIndex(a) === E.zeitIndex(b);
-  // Was Washington und Moskau im letzten Halbjahr öffentlich getan haben, dazu Regierungswechsel
-  const welt_ = MAECHTE.flatMap(([land]) => (welt.laender[land]?.chronik || [])
-    .filter(c => (c.art === 'wechsel' ? gleich(c.zeit, zeit) : gleich(c.zeit, vor) && c.oeffentlich) && c.ergebnis)
-    .map(c => c.ergebnis));
+  // Was die anderen Mächte im letzten Halbjahr öffentlich getan haben, dazu Regierungswechsel
+  // (je Land höchstens drei Meldungen, Regierungswechsel zuerst)
+  const welt_ = maechte().flatMap(([land]) => (welt.laender[land]?.chronik || [])
+    .filter(c => (c.art === 'wechsel' ? gleich(c.zeit, zeit) : gleich(c.zeit, vor) && c.oeffentlich && !c.inland && c.art !== 'vorhaben') && c.ergebnis)
+    .sort((a, b) => (b.art === 'wechsel' || b.id === 'dyn:regierungskrise') - (a.art === 'wechsel' || a.id === 'dyn:regierungskrise'))
+    .slice(0, 3)
+    .map(c => `${W.laender[land].hauptstadt} – ${c.titel}: ${c.ergebnis}`));
   const meldungen = [...welt_, ...((s.ausgaben || []).find(a => gleich(a.zeit, zeit))?.meldungen
     ?? (gleich(zeit, s.zeit) ? s.lage?.meldungen : null) ?? [])];
   const entscheidungen = s.chronik.filter(c => gleich(c.zeit, vor));
@@ -339,10 +352,11 @@ function ausgabe(zeit) {
   const erste = gleich(zeit, W.start);
   const nr = E.zeitIndex(zeit) - E.zeitIndex(W.start) + 1;
 
+  const Z = ui.zeitung;
   let html = `<header class="zkopf">
-    <div class="zkopf-meta"><span>Nr. ${nr}</span><span>${s.f.hauptstadt_berlin ? 'Berlin' : 'Bonn'}, ${erste ? 'September' : MONATE[E.halbVon(zeit)]} ${E.jahrVon(zeit)}</span><span>Preis 20 Pfennig</span></div>
-    <div class="titelzeile">Die Depesche</div>
-    <div class="zkopf-unter">Unabhängige Zeitung für Politik, Wirtschaft und Kultur</div>
+    <div class="zkopf-meta"><span>Nr. ${nr}</span><span>${esc(Z.ort(s))}, ${erste ? 'September' : MONATE[E.halbVon(zeit)]} ${E.jahrVon(zeit)}</span><span>${esc(Z.preis(s, zeit))}</span></div>
+    <div class="titelzeile">${esc(Z.titel)}</div>
+    <div class="zkopf-unter">${esc(Z.untertitel)}</div>
   </header>`;
 
   // Aufmacher
@@ -350,20 +364,14 @@ function ausgabe(zeit) {
   let aufmacher = null;
   const rest = [...entscheidungen];
   if (erste) {
-    aufmacher = { titel: 'Die neue Republik', unter: `Bundeskanzler ${s.kanzler === 'Adenauer' ? 'Adenauer' : s.kanzler} tritt sein Amt an`, text: sz.beschreibung };
+    aufmacher = Z.erste(s, sz);
   } else if (wahl) {
-    const st = wahl.stimmen;
     const bildung = entscheidungen.find(c => c.id === 'dyn:regierungsbildung');
-    const [erste, zweite] = st.SPD > st.Union ? ['SPD', 'Union'] : ['Union', 'SPD'];
-    aufmacher = {
-      titel: `${wahl.gesamtdeutsch ? 'Gesamtdeutsche Wahl' : 'Bundestagswahl'}: ${erste} ${zahl(st[erste])} Prozent`,
-      unter: `${zweite} ${zahl(st[zweite])} %, FDP ${zahl(st.FDP)} %`,
-      text: bildung ? bildung.ergebnis : '',
-    };
+    aufmacher = Z.wahl(wahl, bildung, s);
     if (bildung) rest.splice(rest.indexOf(bildung), 1);
   } else if (hauptsachen.length) {
     const c = hauptsachen[0];
-    aufmacher = { titel: c.titel, unter: `Bonn entscheidet: ${c.wahl}`, text: c.ergebnis };
+    aufmacher = { titel: c.titel, unter: `${Z.entscheidet}: ${c.wahl}`, text: c.ergebnis };
     rest.splice(rest.indexOf(c), 1);
   }
   if (aufmacher) {
@@ -372,21 +380,16 @@ function ausgabe(zeit) {
 
   html += `<div class="spalten">`;
   if (rest.length) {
-    html += `<section><h4>Aus der Bundespolitik</h4>${rest.map(c => `<div class="meldung-z"><h5>${esc(c.titel)}</h5><p>${esc(c.ergebnis || c.wahl)}</p></div>`).join('')}</section>`;
+    html += `<section><h4>${esc(Z.rubrik)}</h4>${rest.map(c => `<div class="meldung-z"><h5>${esc(c.titel)}</h5><p>${esc(c.ergebnis || c.wahl)}</p></div>`).join('')}</section>`;
   }
   if (meldungen.length) {
     html += `<section><h4>Aus aller Welt</h4>${meldungen.map(m => `<div class="meldung-z"><p>${esc(m)}</p></div>`).join('')}</section>`;
   }
   if (wirtschaft) {
-    const pfeil = (a, b) => (b === undefined ? '' : a > b ? ' (gestiegen)' : a < b ? ' (gesunken)' : '');
-    html += `<section class="kasten"><h4>Wirtschaft und Umfragen</h4>
-      <p>Wachstum im vergangenen Halbjahr: <b>${zahl(wirtschaft.wachstum)}&nbsp;%</b> (Jahresrate)</p>
-      <p>Arbeitslosenquote: <b>${zahl(wirtschaft.arbeitslosigkeit)}&nbsp;%</b>${pfeil(wirtschaft.arbeitslosigkeit, davor?.arbeitslosigkeit)}</p>
-      <p>${kanzlerparteiZu(vor) === 'SPD' ? 'Die SPD' : 'Die Union'} in Umfragen (Kanzlerpartei): <b>${zahl(wirtschaft.zustimmung)}&nbsp;%</b>${pfeil(wirtschaft.zustimmung, davor?.zustimmung)}</p>
-    </section>`;
+    html += `<section class="kasten"><h4>${esc(Z.wirtschaftTitel || 'Wirtschaft und Umfragen')}</h4>${Z.wirtschaft(wirtschaft, davor, s, vor)}</section>`;
   }
   if (gleich(zeit, s.zeit) && (s.wahlplan || []).some(z => gleich(z, zeit))) {
-    html += `<section class="kasten"><h4>Wahljahr</h4><p>In diesem Halbjahr wählen die Bürger einen neuen Bundestag. Die Parteien rüsten zum Wahlkampf.</p></section>`;
+    html += `<section class="kasten"><h4>Wahljahr</h4><p>${esc(E.txt(Z.wahljahr, s))}</p></section>`;
   }
   if (!rest.length && !meldungen.length && !wirtschaft) html += `<section><p>Ein ruhiges Halbjahr.</p></section>`;
   html += `</div>`;
@@ -431,6 +434,8 @@ function zeichneEreignis(blatt, ev, land) {
   tippe(blatt.querySelector('.text'), () => { entscheidung.hidden = false; });
   blatt.querySelectorAll('.vorschlag').forEach(b => {
     b.onclick = () => {
+      // nur einmal entscheiden, auch bei schnellem Doppelklick
+      blatt.querySelectorAll('.vorschlag').forEach(x => { x.disabled = true; });
       b.querySelector('.kaestchen').textContent = '☒';
       Ton.stempel();
       E.waehle(W, welt, Number(b.dataset.index));
@@ -453,7 +458,7 @@ function aenderungenHtml(liste) {
 
 function zeichneErgebnis(blatt, erg) {
   const letzter = s.chronik[s.chronik.length - 1];
-  let html = briefkopf('Vermerk', 'Bundeskanzleramt');
+  let html = briefkopf('Vermerk', E.txt(ui.amt, s));
   html += `<pre class="ascii" aria-hidden="true"></pre>`;
   if (erg.hist !== null && einst.randvermerke) {
     html += erg.hist
@@ -462,7 +467,7 @@ function zeichneErgebnis(blatt, erg) {
   }
   html += `<h2>${esc(erg.titel)}</h2>`;
   if (!erg.vorhaben && letzter) {
-    html += `<div class="gewaehlt"><span class="kaestchen" aria-hidden="true">☒</span><span>${esc(letzter.wahl)} <span class="paraphe">${esc(kurzKanzler(s))}</span></span></div>`;
+    html += `<div class="gewaehlt"><span class="kaestchen" aria-hidden="true">☒</span><span>${esc(letzter.wahl)} <span class="paraphe">${esc(ui.paraphe(s))}</span></span></div>`;
   }
   html += `<div class="text">${absaetze(erg.texte.join('\n\n'))}</div>`;
   html += aenderungenHtml(erg.aenderungen);
@@ -473,12 +478,27 @@ function zeichneErgebnis(blatt, erg) {
   $('k-weiter').onclick = () => { E.weiter(W, welt); zeichne(); };
 }
 
+// ---------------------------------------------------------------- Telegramm
+
+/** Eine Entscheidung eines anderen Landes, die das eigene Land unmittelbar trifft */
+function zeichneTelegramm(blatt, t) {
+  const M = W.laender[t.von];
+  blatt.classList.add('telegramm');
+  let html = briefkopf('Telegramm', `aus ${M.hauptstadt}`);
+  html += `<h2>${esc(t.titel)}</h2><p class="datum">${esc(E.zeitLang(t.zeit))}</p>`;
+  html += `<div class="text">${absaetze(t.texte.join('\n\n'))}</div>`;
+  html += aenderungenHtml(t.aenderungen);
+  html += `<div class="weiter-zeile"><button class="knopf haupt" data-primaer id="k-weiter">Zur Kenntnis genommen</button><span class="tastenhinweis">Eingabetaste</span></div>`;
+  blatt.innerHTML = html;
+  $('k-weiter').onclick = () => { E.weiter(W, welt); zeichne(); };
+}
+
 // ---------------------------------------------------------------- Regierungsvorhaben
 
 function zeichneVorhaben(blatt, liste) {
-  let html = briefkopf('Kabinettsvorlage', 'Chef des Bundeskanzleramts');
+  let html = briefkopf('Kabinettsvorlage', E.txt(ui.vorhaben.absender, s));
   html += `<h2>Regierungsvorhaben</h2><p class="datum">${esc(E.zeitLang(s.zeit))}</p>`;
-  html += `<div class="text"><p>Für ein großes Vorhaben ist in diesem Halbjahr Zeit im Bundestag. Die Kosten gehen zu Lasten des Haushalts (derzeit ${Math.round(s.w.haushalt)} Punkte).</p></div>`;
+  html += `<div class="text"><p>${esc(ui.vorhaben.text(s))}</p></div>`;
   html += `<ul class="vorhaben">`;
   for (const v of liste) {
     const kosten = v.kosten ? `Haushalt −${v.kosten}` : 'ohne Kosten';
@@ -490,9 +510,9 @@ function zeichneVorhaben(blatt, liste) {
   html += `</ul><div class="weiter-zeile"><button class="knopf" id="k-keins">Kein neues Vorhaben</button></div>`;
   blatt.innerHTML = html;
   blatt.querySelectorAll('[data-id]').forEach(b => {
-    b.onclick = () => { Ton.stempel(); E.waehleVorhaben(W, welt, b.dataset.id); zeichne(); };
+    b.onclick = () => { if (welt.phase !== 'spiel') return; Ton.stempel(); E.waehleVorhaben(W, welt, b.dataset.id); zeichne(); };
   });
-  $('k-keins').onclick = () => { E.waehleVorhaben(W, welt, null); zeichne(); };
+  $('k-keins').onclick = () => { if (welt.phase !== 'spiel') return; E.waehleVorhaben(W, welt, null); zeichne(); };
 }
 
 // ---------------------------------------------------------------- Wahlabend
@@ -500,13 +520,14 @@ function zeichneVorhaben(blatt, liste) {
 function zeichneWahl(blatt, e) {
   const vorher = s.wahlen.length > 1 ? s.wahlen[s.wahlen.length - 2] : null;
   const reihen = Object.entries(e.stimmen).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]);
-  let html = briefkopf('Wahlabend', 'Bundeswahlleiter');
-  html += `<h2>${e.gesamtdeutsch ? 'Die gesamtdeutsche Wahl' : `Die Bundestagswahl ${E.jahrVon(e.zeit)}`}</h2><p class="datum">Vorläufiges amtliches Endergebnis</p>`;
+  const WA = ui.wahlabend;
+  let html = briefkopf('Wahlabend', E.txt(WA.absender, s));
+  html += `<h2>${esc(WA.titel(e))}</h2><p class="datum">${esc(WA.unter || 'Vorläufiges amtliches Endergebnis')}</p>`;
   html += `<pre class="wahl-balken" id="wahl-balken"></pre>`;
   html += `<p class="unterueberschrift">Sitzverteilung (${e.gesamt} Sitze)</p><div class="sitzreihe" id="sitzreihe"></div>`;
   html += `<div class="weiter-zeile"><button class="knopf haupt" data-primaer id="k-weiter">Zur Regierungsbildung</button><span class="tastenhinweis">Eingabetaste</span></div>`;
   blatt.innerHTML = html;
-  const name = k => k === 'Kleine' ? e.kleineName : sz.parteien[k].name;
+  const name = k => WA.name(k, e);
   const breite = Math.max(...reihen.map(([k]) => name(k).length)) + 2;
   const zeile = (k, v, f) => {
     const vv = v * f;
@@ -524,12 +545,11 @@ function zeichneWahl(blatt, e) {
     stoppSzene = () => { clearInterval(iv); f = 1; male(); };
   }
   const sitze = $('sitzreihe');
-  const ordnung = ['KPD', 'SPD', 'FDP', 'Union', 'Kleine'];
-  for (const p of ordnung) {
+  for (const p of WA.reihenfolge) {
     const n = Math.round((e.sitze[p] || 0) / 5);
     for (let i = 0; i < n; i++) {
       const d = document.createElement('span');
-      d.style.background = sz.parteien[p].farbe;
+      d.style.background = WA.farbe(p);
       d.title = `${name(p)}: ${e.sitze[p]} Sitze`;
       sitze.appendChild(d);
     }
@@ -544,11 +564,7 @@ function diagramm() {
   if (v.length < 2) return '';
   const B_ = 640, H = 200, L = 34, R = 10, T = 12, B = 26;
   const x = i => L + (B_ - L - R) * i / (v.length - 1);
-  const reihen = [
-    { key: 'zustimmung', farbe: 'var(--farbband)', name: 'Kanzlerpartei in Umfragen' },
-    { key: 'wachstum', farbe: 'var(--gruen)', name: 'Wachstum' },
-    { key: 'arbeitslosigkeit', farbe: 'var(--stempel)', name: 'Arbeitslosigkeit' },
-  ];
+  const reihen = ui.diagramm;
   const max = 60;
   const y = val => T + (H - T - B) * (1 - Math.max(0, val) / max);
   let svg = `<svg class="diagramm" viewBox="0 0 ${B_} ${H}" role="img" aria-label="Verlauf von Umfragewerten, Wachstum und Arbeitslosigkeit">`;
@@ -563,7 +579,7 @@ function diagramm() {
 
 function zeichneEnde(blatt) {
   const ende = sz.enden[s.ende.id];
-  let html = briefkopf(s.ende.id === 'abschluss' ? 'Abschlussbericht' : 'Letzte Meldung', 'Bundeskanzleramt');
+  let html = briefkopf(s.ende.id === 'abschluss' ? 'Abschlussbericht' : 'Letzte Meldung', E.txt(ui.amt, s));
   html += `<pre class="ascii" aria-hidden="true"></pre>`;
   html += `<h2>${esc(E.txt(ende.titel, s))}</h2><p class="datum">${esc(E.zeitLang(s.ende.zeit))}</p>`;
   html += `<div class="text">${absaetze(E.txt(ende.text, s))}</div>`;
@@ -594,10 +610,11 @@ async function zeigePlaetze(modus) {
   ul.innerHTML = plaetze.map(p => {
     const st = p.stand;
     const titel = p.name === 'auto' ? 'Automatisch gespeichert' : `Platz ${p.name.slice(-1)}`;
-    const kanzler = st?.laender?.[st.spieler?.[0]]?.kanzler;
+    const M = ladbar(st) ? W.laender[st.spieler[0]] : null;
+    const kurz = M?.oberflaeche.kurzinfo(st.laender[st.spieler[0]]);
     const info = !st ? '<small>leer</small>'
       : !ladbar(st) ? '<small>Spielstand aus einer älteren Version, kann nicht mehr geladen werden</small>'
-      : `${E.zeitText(st.zeit)}${kanzler ? `, Kanzler ${esc(kanzler)}` : ''}${st.ende ? ' (beendet)' : ''}<small>${st.gespeichert ? new Date(st.gespeichert).toLocaleString('de-DE') : ''}</small>`;
+      : `${esc(M.kurz || M.name)}, ${E.zeitText(st.zeit)}${kurz ? `, ${esc(kurz)}` : ''}${st.ende ? ' (beendet)' : ''}<small>${st.gespeichert ? new Date(st.gespeichert).toLocaleString('de-DE') : ''}</small>`;
     const knopf = modus === 'speichern'
       ? `<button class="knopf klein" data-name="${p.name}">Hier speichern</button>`
       : `<button class="knopf klein" data-name="${p.name}" ${ladbar(st) ? '' : 'disabled'}>Laden</button>`;
@@ -713,7 +730,7 @@ document.addEventListener('DOMContentLoaded', () => {
   $('k-menue').onclick = () => $('d-menue').showModal();
   $('m-speichern').onclick = () => zeigePlaetze('speichern');
   $('m-laden').onclick = () => zeigePlaetze('laden');
-  $('m-hilfe').onclick = () => $('d-hilfe').showModal();
+  $('m-hilfe').onclick = () => { $('hilfe-land').innerHTML = ui.hilfe; $('d-hilfe').showModal(); };
   $('m-titel').onclick = () => { $('d-menue').close(); zeigeTitel(); };
   document.querySelectorAll('[data-schliessen]').forEach(b => { b.onclick = () => b.closest('dialog').close(); });
   einstellungenVerbinden();

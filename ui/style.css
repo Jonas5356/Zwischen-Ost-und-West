@@ -258,6 +258,20 @@ button { font: inherit; color: inherit; }
 .neu .treue { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; font-family: var(--din); font-size: 16px; }
 .neu .treue input { flex: 1 1 200px; accent-color: var(--kopierstift); }
 .hinweis { font-size: 15px; color: var(--grau); line-height: 1.45; }
+.neu-frage { font-family: var(--din); font-weight: 600; font-size: 17px; margin-bottom: 8px; }
+.laender-wahl { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.land-karte { display: flex; flex-direction: column; gap: 6px; text-align: left; font: inherit; color: inherit; background: #fbfaf5; border: 1px solid var(--linie); padding: 12px 14px; cursor: pointer; }
+.land-karte:hover { border-color: var(--grau); }
+.land-karte.gewaehlt { border: 2px solid var(--kopierstift); padding: 11px 13px; background: #fff; }
+.land-name { font-family: var(--din); font-weight: 700; font-size: 18px; }
+.land-rolle { font-family: var(--din); font-size: 14px; color: var(--kopierstift); }
+.land-text { font-size: 13.5px; line-height: 1.4; }
+.land-text.klein { color: var(--grau); }
+.dialog .neu { max-height: calc(100vh - 220px); overflow: auto; }
+
+/* Telegramm */
+.blatt.telegramm { background: #f6eedb; }
+.blatt.telegramm .text { text-transform: uppercase; letter-spacing: .02em; }
 
 /* Dossier */
 .dossier { padding: 0 24px 20px; overflow: auto; }

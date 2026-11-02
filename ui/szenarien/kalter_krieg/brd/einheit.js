@@ -256,7 +256,7 @@ Umstritten ist die Formulierung der Neutralität. Moskau will ein Verbot jeder �
         ergebnis: 'Moskau protestiert, Paris dankt.',
         w: s => ({ moskau: s.f.neutralitaet_streng ? -15 : -8, frankreich: 6, europa: 3 }) },
       { text: 'Austreten.',
-        ergebnis: 'Die Montanunion besteht nur noch aus fünf Staaten. Schuman spricht von einem schwarzen Tag.',
+        ergebnis: 'Die Montanunion besteht nur noch aus fünf Staaten. In Paris spricht man von einem schwarzen Tag.',
         w: { moskau: 6, frankreich: -14, europa: -12, impuls: -0.6 }, loesche: ['montanunion'] },
       { text: 'Ein Sonderstatus als assoziiertes Mitglied.',
         ergebnis: 'Ein kompliziertes Gebilde, das niemanden ganz zufriedenstellt.',

@@ -1,6 +1,6 @@
 # Plan: Mehrere Länder mit Regierungen und Zielen
 
-Stand: November 2026. Phase 1 ist umgesetzt (Version 0.2.0). Seit 0.3.0 kann in der BRD auch die SPD regieren, ohne dass das Spiel endet – Voraussetzung dafür, dass die BRD später vom Spiel gesteuert werden kann. Seit 0.4.0 handeln USA und Sowjetunion mit eigenen Regierungen und Zielen (erster Teil von Phase 2).
+Stand: November 2026. Phase 1 ist umgesetzt (Version 0.2.0). Seit 0.3.0 kann in der BRD auch die SPD regieren, ohne dass das Spiel endet – Voraussetzung dafür, dass die BRD später vom Spiel gesteuert werden kann. Seit 0.4.0 handeln USA und Sowjetunion mit eigenen Regierungen und Zielen (erster Teil von Phase 2). Seit 0.5.0 ist Frankreich spielbar; wer Frankreich spielt, dem steht eine vom Spiel gesteuerte Bundesrepublik gegenüber (und umgekehrt).
 
 ## Ziel
 
@@ -20,6 +20,8 @@ Eine gemeinsame Welt 1949–1964, später erweiterbar, mit mehreren Ländern. Je
 - **Ziele nur vermutet:** Die Regierungen der anderen Länder sind öffentlich, ihre Absichten nicht. Verborgene Typen (z. B. ob die Stalin-Note ernst gemeint ist) werden beim Amtsantritt ausgelost; der Spieler schätzt sie nach Bayes aus Handlungen und Berichten (Treffsicherheit abhängig von BND und Botschaft in Moskau). Im Lagebild in Worten, im Dossier mit Wahrscheinlichkeiten; der Abschlussbericht verrät die Wahrheit.
 - **Ein Regler „Geschichtstreue“** beim neuen Spiel; die Berechenbarkeit λ ist pro Regierung fest.
 - **Ereignislisten der Supermächte** (umgesetzt in 0.4.0) müssen angepasst werden, wenn weitere Länder spielbar werden.
+- **Frankreich** (0.5.0): Kolonialkriege (Indochina, Algerien) sind ein eigener Strang mit Kriegslage und Loyalität der Armee. Regierungsstürze ergeben sich aus der Lage: Ist die Republik instabil, stürzen Regierungen ungefähr so oft wie in der Geschichte; wer sie stabilisiert (Verfassungsreform, Zufriedenheit, Frieden in den Kolonien, breite Mehrheit), regiert lange. Gewählt wird regulär alle fünf Jahre; vorgezogen nur nach einer Auflösung, die (wie Art. 51 der Verfassung von 1946) erst nach zwei Stürzen binnen 18 Monaten möglich ist, oder nach einem Verfassungswechsel. Kein Zwischenrelease: Frankreich als gesteuertes und als spielbares Land kam zusammen.
+- **Wechselwirkung zwischen spielbaren Ländern** läuft über das Postfach (Angebot → Antwort, auch im selben Halbjahr), Weltflags und die Wirkung `bei` an Optionen; trifft eine Entscheidung eines gesteuerten Landes den Spieler unmittelbar, bekommt er ein Telegramm. Sofortige Rückfragen gehen nur an Länder, die nie gespielt werden (USA, SU).
 
 ## Aufbau
 
@@ -85,6 +87,6 @@ Startbildschirm mit Länderwahl und Reglern (Geschichtstreue, Berechenbarkeit); 
 |---|---|---|
 | 1 | Weltzustand, BRD als Landesmodul, Postfach, Weltereignisse, gerichtete Beziehungen mit einheitlicher Skala, gemeinsame Vorgangsliste, Hüllen für USA/SU/Frankreich/Großbritannien | **erledigt (0.2.0)**: 600 Referenzpartien vor und nach dem Umbau identisch |
 | 2a | Entscheidungslogik (`ki.js`), Regierungen mit verborgenen Typen, Einschätzung nach Bayes, Geschichtstreue-Regler; USA und SU mit Regierungen, Zielen und eigenen Entscheidungen (Stalin-Note, 17. Juni, Moskau 1955, Ungarn, Berlin-Ultimatum, Mauer, Kuba; Wehrbeitrag, Viermächtekonferenz, EVG-Druck, Radford, Suez, Teilhabe, Essentials, MLF); Rückfragen; Karte „Die Welt“ und Dossier | **erledigt (0.4.0)** |
-| 2b | Frankreich als Nebenrolle; Ereignisse BRD–Frankreich zweiseitig (Schuman-Plan, EVG, Saar, Colombey, Élysée); `dient`-Angaben an allen BRD-Optionen | offen |
-| 3 | Frankreich spielbar (Indochina, Algerien, EVG und Suez aus Pariser Sicht, Force de frappe, Mai 1958, Generalsputsch) | offen |
+| 2b | Frankreich als Nebenrolle; Ereignisse BRD–Frankreich zweiseitig (Schuman-Plan, Pleven-Plan, EVG, Saar, Suez, Römische Verträge, FIG, Colombey, Élysée); BRD als gesteuertes Land (Regierungen aus dem eigenen Modell, Ziele aus Richtung und `dient`) | **erledigt (0.5.0)** |
+| 3 | Frankreich spielbar (Vierte Republik mit Regierungsstürzen, Indochina, Algerien, EVG und Suez aus Pariser Sicht, Force de frappe, Mai 1958, Fünfte Republik, Generalsputsch, Évian), Länderwahl beim Spielstart | **erledigt (0.5.0)** |
 | 4 ff. | weitere Länder, jeweils erst Nebenrolle, dann spielbar | offen |

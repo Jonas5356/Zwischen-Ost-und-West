@@ -1,4 +1,5 @@
 // Hauptereignisse 1959 bis Frühjahr 1964
+import { pariserChef, pariserSpitze, deGaulleRegiert } from '../frankreich/hilfen.js';
 import { west, geteilt, vereinigt, imBuendnis, adenauer, land, Land, hauptstadt, wahlIn, unionRegiert, spdRegiert, SPD_WAHLKAMPF, praesident, praesidentVoll, usaAussen, usaRegime, suChef, suAussen, suRegime } from './hilfen.js';
 import { kandidat, vollerName } from './modell.js';
 
@@ -221,7 +222,7 @@ Für die Union ist die Lage neu: Die SPD wird für bürgerliche Wähler wählbar
       { text: 'Rasch nach Washington reisen und ein persönliches Verhältnis aufbauen.', hist: true, richtung: 'west',
         ergebnis: s => (usaRegime(s) === 'kennedy' ? 'Das Treffen ist höflich. Die Chemie zwischen den Generationen bleibt schwierig.' : 'Das Treffen ist herzlich; Nixon kennt Bonn aus seiner Zeit als Vizepräsident.'),
         w: { usa: 3 } },
-      { text: 'Abwartende Distanz halten und enger mit de Gaulle zusammenarbeiten.',
+      { text: s => `Abwartende Distanz halten und enger mit ${deGaulleRegiert(s) ? 'de Gaulle' : 'Paris'} zusammenarbeiten.`, dient: { aussoehnung: 0.6, westbindung: -0.3 },
         ergebnis: 'Paris registriert es mit Genugtuung, Washington mit Stirnrunzeln.',
         w: { usa: -3, frankreich: 4 } },
     ],
@@ -406,13 +407,16 @@ Womit soll die SPD in den Wahlkampf ziehen?` : `Am 17. September wird gewählt. 
     id: 'degaulle_besuch',
     titel: 'De Gaulle in Deutschland',
     datum: 'September 1962',
-    ab: 1962.2, ordnung: 9,
+    ab: 1962.2, bis: 1963.2, ordnung: 9.2,
+    ausloeser: 'staatsbesuch', ausloeserVon: 'frankreich',
     absender: 'Protokoll des Auswärtigen Amtes',
     text: s => `Präsident de Gaulle kommt zu einem Staatsbesuch – sechs Tage, Bonn, Düsseldorf, Hamburg, München, Ludwigsburg. Er will seine Reden auf Deutsch halten, auswendig gelernt. In Ludwigsburg wird er zur Jugend sprechen.${s.f.colombey ? ' Seit Colombey verbindet euch eine persönliche Freundschaft.' : ''}`,
     optionen: [
       { text: 'Einen großen Empfang bereiten.', hist: true,
         ergebnis: 'Hunderttausende jubeln dem General zu, als er von den Deutschen als „großem Volk“ spricht. Ein Wendepunkt in der Geschichte zweier Völker.',
-        w: { frankreich: 8, ansehen: 2, usa: -1, europa: 2 } },
+        w: { frankreich: 8, ansehen: 2, usa: -1, europa: 2 },
+        bei: { frankreich: { titel: 'Triumph in Deutschland', w: { brd: 6, rang: 2 }, ergebnis: 'Hunderttausende jubeln de Gaulle zu, als er von den Deutschen als „großem Volk“ spricht.' } },
+        dient: { aussoehnung: 1 } },
       { text: 'Einen protokollarisch korrekten, aber nüchternen Besuch organisieren.',
         ergebnis: 'Der Besuch verläuft ohne Zwischenfälle und ohne Wirkung.',
         w: { frankreich: 2 } },
@@ -483,19 +487,26 @@ Die Justizministerin der FDP war nicht eingeweiht. Studenten demonstrieren für 
     id: 'elysee',
     titel: 'Der Élysée-Vertrag',
     datum: '22. Januar 1963',
-    ab: 1963.1, ordnung: 1,
+    ab: 1963.1, bis: 1963.2, ordnung: 1.7,
+    ausloeser: 'elysee', ausloeserVon: 'frankreich',
     absender: 'Charles de Gaulle',
-    text: s => `Eine Woche bevor ${s.kanzler === 'Adenauer' ? 'du' : 'der Kanzler'} nach Paris reisen sollte, hat de Gaulle auf einer Pressekonferenz den britischen Beitritt zur EWG abgelehnt. Die Partner sind empört. Im Élysée-Palast liegt dennoch ein Vertrag über die deutsch-französische Zusammenarbeit zur Unterschrift bereit: regelmäßige Gipfeltreffen, Abstimmung in der Außen- und Verteidigungspolitik, Jugendaustausch.
+    text: s => `${s.welt.laender.frankreich?.f.veto_gb ? `Eine Woche bevor ${s.kanzler === 'Adenauer' ? 'du' : 'der Kanzler'} nach Paris reisen sollte, hat de Gaulle auf einer Pressekonferenz den britischen Beitritt zur EWG abgelehnt. Die Partner sind empört. Im Élysée-Palast liegt dennoch` : 'Im Élysée-Palast liegt'} ein Vertrag über die deutsch-französische Zusammenarbeit zur Unterschrift bereit: regelmäßige Gipfeltreffen, Abstimmung in der Außen- und Verteidigungspolitik, Jugendaustausch.
 
 In Washington sieht man darin den Versuch, Europa von Amerika zu lösen. ${spdRegiert(s) ? 'In deiner Partei und in der Opposition verlangen viele einen klaren Vorbehalt zugunsten der USA.' : 'In der Union wächst die Zahl der „Atlantiker“, die einen klaren Vorbehalt verlangen.'}`,
     optionen: [
       { text: s => (s.f.vereinigt ? 'Unterzeichnen – mit einer Präambel, die Deutschlands Neutralität und die Freundschaft zu den USA bekräftigt.' : 'Unterzeichnen – der Bundestag soll eine Präambel voranstellen, die die NATO bekräftigt.'), hist: true,
         ergebnis: 'Der Vertrag wird unterzeichnet, de Gaulle umarmt den Kanzler. Im Mai stellt der Bundestag eine atlantische Präambel voran. Der General ist enttäuscht: „Verträge sind wie junge Mädchen und Rosen – sie halten, solange sie halten.“',
-        w: { frankreich: 6, usa: 1, grossbritannien: -2, europa: 2 }, setze: ['elysee'] },
+        w: { frankreich: 6, usa: 1, grossbritannien: -2, europa: 2 }, setze: ['elysee'],
+        bei: { frankreich: { titel: 'Der Élysée-Vertrag', w: { brd: 6 }, setze: ['elysee'], ergebnis: 'Der Vertrag ist unterzeichnet. Im Mai stellt der Bundestag ihm allerdings eine atlantische Präambel voran.' } },
+        dient: { aussoehnung: 1, westbindung: 0.5 } },
       { text: 'Unterzeichnen und gegen jede Präambel verteidigen.',
         ergebnis: s => (unionRegiert(s) ? 'Eine deutsch-französische Achse entsteht. Washington ist alarmiert, Erhard und Schröder rebellieren.' : 'Eine deutsch-französische Achse entsteht. Washington ist alarmiert, in der Koalition rumort es.'),
-        w: { frankreich: 14, usa: -8, grossbritannien: -6, koalition: -6 }, setze: ['elysee', 'achse_paris'] },
-      { text: 'Wegen des Vetos gegen London die Unterzeichnung verschieben.',
+        w: { frankreich: 14, usa: -8, grossbritannien: -6, koalition: -6 }, setze: ['elysee', 'achse_paris'],
+        bei: { frankreich: { titel: 'Eine Achse Paris–Bonn', w: { brd: 12, rang: 3 }, setze: ['elysee'], ergebnis: 'Der Vertrag ist unterzeichnet – ohne Vorbehalt zugunsten Washingtons. Eine deutsch-französische Achse entsteht.' } },
+        dient: { aussoehnung: 1.6, westbindung: -0.8 } },
+      { text: s => (s.welt.laender.frankreich?.f.veto_gb ? 'Wegen des Vetos gegen London die Unterzeichnung verschieben.' : 'Die Unterzeichnung verschieben – Washington und London gehen vor.'),
+        bei: { frankreich: { titel: 'Bonn zögert', w: { brd: -10 }, ergebnis: 'Bonn verschiebt die Unterzeichnung des Vertrags. Der General ist tief gekränkt.' } },
+        dient: { westbindung: 1, aussoehnung: -1 },
         ergebnis: 'De Gaulle ist tief gekränkt. London und Washington loben die Bonner Solidarität.',
         w: { frankreich: -12, usa: 4, grossbritannien: 8 } },
     ],

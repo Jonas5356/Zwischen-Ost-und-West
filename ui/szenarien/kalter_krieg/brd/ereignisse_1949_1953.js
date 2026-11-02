@@ -1,4 +1,5 @@
 // Hauptereignisse Herbst 1949 bis Ende 1953
+import { pariserChef, pariserSpitze, pariserAussen } from '../frankreich/hilfen.js';
 import { west, geteilt, adenauer, regiertMit, wahlIn, unionRegiert, spdRegiert, SPD_WAHLKAMPF, praesident, usaAussen } from './hilfen.js';
 
 export default [
@@ -78,22 +79,32 @@ Treten Bonn und Saarbrücken gleichzeitig bei, sieht das wie eine Anerkennung de
     id: 'schuman',
     titel: 'Der Schuman-Plan',
     datum: '9. Mai 1950',
-    ab: 1950.1, ordnung: 5,
+    ab: 1950.1, bis: 1950.2, ordnung: 5,
+    ausloeser: 'schuman', ausloeserVon: 'frankreich',
     wenn: west,
-    absender: 'Robert Schuman, Außenminister der Französischen Republik',
-    text: s => `Ein Bote überbringt dir einen persönlichen Brief des französischen Außenministers, noch bevor das französische Kabinett davon erfährt. Schuman schlägt vor, die gesamte deutsche und französische Kohle- und Stahlproduktion einer gemeinsamen Hohen Behörde zu unterstellen, offen für weitere Länder. Krieg zwischen beiden Ländern solle dadurch „nicht nur undenkbar, sondern materiell unmöglich“ werden.
+    absender: s => `${pariserAussen(s)}, Außenminister der Französischen Republik`,
+    text: s => `Ein Bote überbringt dir einen persönlichen Brief des französischen Außenministers, noch bevor das französische Kabinett davon erfährt. ${pariserAussen(s).split(' ').pop()} schlägt vor, die gesamte deutsche und französische Kohle- und Stahlproduktion einer gemeinsamen Hohen Behörde zu unterstellen, offen für weitere Länder. Krieg zwischen beiden Ländern solle dadurch „nicht nur undenkbar, sondern materiell unmöglich“ werden.
 
 Für die deutsche Schwerindustrie heißt das Abgabe von Souveränität – aber zum ersten Mal auf Augenhöhe, nicht als Besiegte. Die Ruhrbehörde würde überflüssig. ${spdRegiert(s) ? 'In der eigenen Partei warnen viele' : 'Die SPD warnt'} vor einem „kleineuropäischen, klerikalen, kapitalistischen“ Block, der die Teilung vertieft.`,
     optionen: [
       { text: 'Sofort und vorbehaltlos zustimmen.', hist: true, richtung: 'west',
         ergebnis: 'Bonn antwortet noch am selben Tag. Jean Monnet beginnt mit den Verhandlungen; Italien und die Benelux-Staaten schließen sich an.',
-        w: { europa: 12, frankreich: 12, usa: 5, souveraenitaet: 3, moskau: -2, einheit: -2 }, setze: ['schuman'] },
+        w: { europa: 12, frankreich: 12, usa: 5, souveraenitaet: 3, moskau: -2, einheit: -2 }, setze: ['schuman'],
+        aktion: (s, a) => a.weltflag('schuman_antwort', 'ja'),
+        bei: { frankreich: { titel: 'Bonn sagt Ja', w: { brd: 6, europa: 2 }, ergebnis: 'Der Kanzler hat noch am selben Tag geantwortet: Bonn stimmt dem Plan vorbehaltlos zu.' } },
+        dient: { europa: 1, aussoehnung: 1 } },
       { text: 'Grundsätzlich zustimmen, aber hart über die Bedingungen verhandeln.',
         ergebnis: 'Die Verhandlungen ziehen sich. Die Industrie ist zufriedener, Paris etwas weniger.',
-        w: { europa: 8, frankreich: 5, usa: 2, souveraenitaet: 2, impuls: 0.3 }, setze: ['schuman'] },
+        w: { europa: 8, frankreich: 5, usa: 2, souveraenitaet: 2, impuls: 0.3 }, setze: ['schuman'],
+        aktion: (s, a) => a.weltflag('schuman_antwort', 'bedingungen'),
+        bei: { frankreich: { titel: 'Bonn sagt Ja – mit Bedingungen', w: { brd: 2 }, ergebnis: 'Bonn stimmt grundsätzlich zu, will aber hart über die Bedingungen verhandeln.' } },
+        dient: { europa: 0.6, aussoehnung: 0.4 } },
       { text: 'Ablehnen – keine europäische Integration vor der Einheit.', richtung: 'ost',
-        ergebnis: 'Schuman ist enttäuscht, Monnet sucht andere Wege. Die Ruhrbehörde bleibt.',
-        w: { europa: -5, frankreich: -12, usa: -6, einheit: 3, ansehen: 1 } },
+        ergebnis: 'Paris ist enttäuscht, Monnet sucht andere Wege. Die Ruhrbehörde bleibt.',
+        w: { europa: -5, frankreich: -12, usa: -6, einheit: 3, ansehen: 1 },
+        aktion: (s, a) => a.weltflag('schuman_antwort', 'nein'),
+        bei: { frankreich: { titel: 'Bonn lehnt ab', w: { brd: -6, europa: -2 }, ergebnis: 'Bonn lehnt den Plan ab: keine europäische Integration vor der Einheit Deutschlands.' } },
+        dient: { einheit: 0.6, europa: -1, aussoehnung: -1 } },
     ],
     historisch: 'Adenauer stimmte dem Plan noch am 9. Mai 1950 zu, nachdem Schuman ihn vorab vertraulich informiert hatte. Daraus entstand die Europäische Gemeinschaft für Kohle und Stahl (Montanunion).',
   },
@@ -146,21 +157,26 @@ Heinemann ist einer der wenigen prominenten Protestanten in der Union. Lässt du
   },
   {
     id: 'pleven',
-    titel: 'Der Pleven-Plan',
+    titel: s => (pariserChef(s) === 'René Pleven' ? 'Der Pleven-Plan' : 'Eine europäische Armee'),
     datum: '24. Oktober 1950',
-    ab: 1950.2, ordnung: 10.5,
+    ab: 1950.2, bis: 1951.1, ordnung: 10.5,
+    ausloeser: 'pleven', ausloeserVon: 'frankreich',
     wenn: s => west(s) && (s.f.wehrbeitrag || s.f.bundespolizei),
     absender: 'Botschaft in Paris (Generalkonsulat)',
-    text: `Frankreich will deutsche Soldaten nur unter einer Bedingung: in einer europäischen Armee, unter europäischem Kommando, in möglichst kleinen Einheiten. Ministerpräsident René Pleven hat einen entsprechenden Plan vorgelegt. Einen deutschen Generalstab oder ein deutsches Verteidigungsministerium soll es nicht geben.
+    text: s => `Frankreich will deutsche Soldaten nur unter einer Bedingung: in einer europäischen Armee, unter europäischem Kommando, in möglichst kleinen Einheiten. ${pariserSpitze(s)} hat einen entsprechenden Plan vorgelegt. Einen deutschen Generalstab oder ein deutsches Verteidigungsministerium soll es nicht geben.
 
 Das ist weniger als Gleichberechtigung – aber es wäre ein Weg, den Wehrbeitrag mit der europäischen Einigung zu verbinden.`,
     optionen: [
       { text: 'Den Plan unterstützen und auf Gleichberechtigung im Detail hinarbeiten.', hist: true, richtung: 'west',
         ergebnis: 'In Paris beginnen die Verhandlungen über eine Europäische Verteidigungsgemeinschaft. Die deutsche Delegation verhandelt zäh über jede Diskriminierung.',
-        w: { frankreich: 6, europa: 5, usa: 2 }, setze: ['evg_verhandlung'] },
+        w: { frankreich: 6, europa: 5, usa: 2 }, setze: ['evg_verhandlung'],
+        bei: { frankreich: { titel: 'Bonn verhandelt', w: { brd: 3 }, ergebnis: 'Bonn unterstützt den Plan einer europäischen Armee und will im Detail für Gleichberechtigung kämpfen.' } },
+        dient: { wiederbewaffnung: 0.8, aussoehnung: 0.8, europa: 0.5 } },
       { text: 'Volle Gleichberechtigung zur Vorbedingung machen.',
         ergebnis: 'Paris ist pikiert, Washington aber versteht das Bonner Anliegen.',
-        w: { frankreich: -5, souveraenitaet: 2, usa: 1, ansehen: 1 }, setze: ['evg_verhandlung'] },
+        w: { frankreich: -5, souveraenitaet: 2, usa: 1, ansehen: 1 }, setze: ['evg_verhandlung'],
+        bei: { frankreich: { titel: 'Bonn stellt Bedingungen', w: { brd: -2 }, ergebnis: 'Bonn macht volle Gleichberechtigung zur Vorbedingung für einen Wehrbeitrag.' } },
+        dient: { wiederbewaffnung: 0.8, aussoehnung: -0.4 } },
     ],
     historisch: 'Der Pleven-Plan führte zu den Verhandlungen über die Europäische Verteidigungsgemeinschaft (EVG). Die Bundesrepublik nahm ab Februar 1951 an den Pariser Gesprächen teil und erreichte schrittweise mehr Gleichberechtigung.',
   },
@@ -338,6 +354,8 @@ Umstritten ist die „Bindungsklausel“: Ein wiedervereinigtes Deutschland wär
         ergebnis: 'Ein Affront gegenüber allen drei Westmächten. Das Besatzungsstatut bleibt in Kraft.',
         w: { usa: -15, grossbritannien: -10, frankreich: -8, einheit: 4, moskau: 4, ansehen: -2 }, setze: ['westvertraege_abgelehnt'] },
     ],
+    // Paris muss den EVG-Vertrag noch unterzeichnen
+    nachher: (s, a) => { if (s.f.westvertraege) a.sende('frankreich', 'westvertraege'); },
     historisch: 'Der Deutschlandvertrag wurde am 26. Mai 1952 in Bonn, der EVG-Vertrag am 27. Mai in Paris unterzeichnet. Die Bindungsklausel wurde auf deutschen Druck noch abgeschwächt. Der Bundestag ratifizierte beide Verträge im März 1953.',
   },
 

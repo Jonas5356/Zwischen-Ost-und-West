@@ -47,6 +47,7 @@ test('Im historischen Modus kommen die historischen Regierungen, solange die Lag
   let anders = 0;
   for (let seed = 1; seed <= 40; seed++) {
     const { welt } = spiele(seed, 'historisch');
+    if (welt.ende.id !== 'abschluss') continue; // selten: Atomkrieg nach Kuba
     assert.deepEqual(welt.laender.usa.regierungen.map(r => r.regime), ['truman', 'eisenhower', 'kennedy', 'johnson']);
     const su = welt.laender.su.regierungen.map(r => r.regime).join(',');
     if (su === 'stalin,kollektiv,malenkow,chruschtschow') continue;

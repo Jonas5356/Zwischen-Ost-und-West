@@ -30,7 +30,7 @@ test('Nach der Einheit kommt die Teilung in keinem Text mehr vor', () => {
         if (s.f.vereinigt) for (const m of s.lage?.meldungen || []) if (VERBOTEN.test(m.replace(ERLAUBT, ''))) fehler.add('Zeitgeschehen: ' + m);
         E.lageGesehen(W, welt); continue;
       }
-      if (a.typ === 'ergebnis' || a.typ === 'wahl' || a.typ === 'rundenende') { E.weiter(W, welt); continue; }
+      if (a.typ === 'ergebnis' || a.typ === 'wahl' || a.typ === 'rundenende' || a.typ === 'telegramm') { E.weiter(W, welt); continue; }
       if (a.typ === 'vorhaben') {
         if (s.f.vereinigt) for (const v of a.liste) for (const x of [E.txt(v.titel, s), E.txt(v.beschreibung, s), E.txt(v.ergebnis, s)]) if (VERBOTEN.test(x)) fehler.add('Vorhaben ' + v.id + ': ' + x.match(VERBOTEN)[0]);
         const l = a.liste.filter(v => v.leistbar);
@@ -47,7 +47,7 @@ test('Nach der Einheit kommt die Teilung in keinem Text mehr vor', () => {
     }
     if (welt.ende && s.f.vereinigt) {
       // Der Rückblick auf die Absichten Washingtons und Moskaus darf von der Teilung sprechen
-      const t = E.txt(sz.enden[s.ende.id].text, s).split('\n\n').filter(x => !x.startsWith('Was Washington und Moskau wirklich wollten')).join('\n\n').replace(ERLAUBT, '');
+      const t = E.txt(sz.enden[s.ende.id].text, s).split('\n\n').filter(x => !/^Was .* wirklich wollten/.test(x)).join('\n\n').replace(ERLAUBT, '');
       const m = t.match(VERBOTEN); if (m) fehler.add(`Ende ${s.ende.id}: „${m[0]}“`);
     }
   }

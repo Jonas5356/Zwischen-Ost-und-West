@@ -8,6 +8,8 @@ import akten from './akten.js';
 import vorhaben from './vorhaben.js';
 import zeitgeschehen from './zeitgeschehen.js';
 import { ENDEN } from './enden.js';
+import oberflaeche from './oberflaeche.js';
+import { REGIERUNGEN, regimeVon, dientAus } from './regierungen.js';
 import { zeitIndex } from '../../../engine.js';
 
 function lagebericht(s) {
@@ -22,9 +24,15 @@ function lagebericht(s) {
 export default {
   id: 'brd',
   name: 'Bundesrepublik Deutschland',
+  kurz: 'Bundesrepublik',
+  hauptstadt: 'Bonn',
   titel: 'Bundesrepublik Deutschland',
   untertitel: '1949–1964',
   rolle: 'Bundesregierung',
+  // Wird die Bundesrepublik vom Spiel gesteuert, regiert sie nach Zielen (ki.js)
+  regierungen: REGIERUNGEN,
+  regimeVon,
+  dientAus,
   beschreibung: 'Herbst 1949. Konrad Adenauer ist mit einer Stimme Mehrheit zum ersten Bundeskanzler gewählt worden. Das Land ist besetzt, geteilt und zerstört; zwölf Millionen Vertriebene suchen ein Zuhause. Zwischen Washington, Paris, London und Moskau muss die junge Republik ihren Weg finden – und wer regiert, muss Wahlen gewinnen.',
   wahlen: [1953.2, 1957.2, 1961.2],
   werte: modell.WERTE,
@@ -46,6 +54,7 @@ export default {
   ereignisse: [...teil1, ...teil2, ...teil3, ...einheit, ...akten],
   vorhaben,
   enden: ENDEN,
+  oberflaeche,
   // Anzeigegruppen im Lagebild
   anzeige: [
     { titel: 'Außenpolitik', werte: ['usa', 'frankreich', 'grossbritannien', 'moskau', 'souveraenitaet', 'einheit', 'europa'] },

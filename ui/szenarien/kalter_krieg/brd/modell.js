@@ -509,11 +509,11 @@ export const dynamisch = {
       optionen: [
         { text: 'Einlenken: öffentliche Zugeständnisse an Moskau.',
           ergebnis: 'Die Krise flaut ab. In Washington und in der eigenen Partei wird dem Kanzler Schwäche vorgeworfen.',
-          w: { moskau: 35, usa: -8, ansehen: -6, souveraenitaet: -4 } },
+          w: { moskau: 35, usa: -8, ansehen: -6, souveraenitaet: -4 }, dient: { frieden: 1 } },
         { text: 'Die Supermächte zur Vermittlung drängen und selbst schweigen.',
           ergebnis: 'Hinter verschlossenen Türen verhandeln Washington und Moskau – über Bonns Kopf hinweg.',
           w: { moskau: 22, ansehen: -3, einheit: -3, usa: -2 } },
-        { text: 'Standhalten.',
+        { text: 'Standhalten.', dient: { frieden: -2.5 },
           zufall: [
             { p: s2 => 0.25, ergebnis: s2 => (s2.f.vereinigt ? 'Ein Zwischenfall an der Oder gerät außer Kontrolle.' : 'Ein Zwischenfall an der Zonengrenze gerät außer Kontrolle.'),
               aktion: (st, a) => a.ende('krieg') },
@@ -627,6 +627,7 @@ export function aufklaerung(s, land) {
     return { q, quelle };
   }
   if (land === 'usa') return { q: 0.65 + (s.w.usa >= 65 ? 0.1 : 0), quelle: s.zeit < 1955.2 ? 'Verbindungsstelle Washington' : 'Botschaft Washington' };
+  if (land === 'frankreich') return { q: 0.66 + (s.w.frankreich >= 65 ? 0.08 : 0), quelle: s.zeit < 1955.2 ? 'Generalkonsulat Paris' : 'Botschaft Paris' };
   return { q: 0.6, quelle: 'Auswärtiges Amt' };
 }
 

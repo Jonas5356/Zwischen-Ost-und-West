@@ -38,7 +38,7 @@ test('Unter einer SPD-geführten Regierung passen Absender und Texte', () => {
     while (!welt.ende && n++ < 3000) {
       if (!gewechselt && welt.runde >= ab) { M.wechsleRegierung(s, 'SPD', varianten[seed % 3]); gewechselt = true; }
       const a = E.aktuelles(W, welt);
-      if (a.typ === 'ergebnis' || a.typ === 'wahl' || a.typ === 'rundenende') { E.weiter(W, welt); continue; }
+      if (a.typ === 'ergebnis' || a.typ === 'wahl' || a.typ === 'rundenende' || a.typ === 'telegramm') { E.weiter(W, welt); continue; }
       if (a.typ === 'vorhaben') {
         if (s.kanzlerpartei === 'SPD') for (const v of a.liste) for (const x of [E.txt(v.titel, s), E.txt(v.beschreibung, s), E.txt(v.ergebnis, s)]) { const m = x?.match(VERBOTEN); if (m) fehler.add(`Vorhaben ${v.id}: „${m[0]}“`); }
         const l = a.liste.filter(v => v.leistbar);

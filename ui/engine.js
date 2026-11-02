@@ -11,7 +11,7 @@
 
 import * as KI from './ki.js';
 
-export const VERSION = 3;
+export const VERSION = 4;
 
 // ---------- Zeit: Halbjahre als 1952.1 (I) und 1952.2 (II) ----------
 
@@ -113,7 +113,7 @@ export function sicht(W, welt, land = welt.spieler[0]) {
   return s;
 }
 
-const istMensch = (welt, land) => welt.spieler.includes(land);
+export const istMensch = (welt, land) => welt.spieler.includes(land);
 
 // ---------- Wirkungen ----------
 
@@ -158,7 +158,11 @@ export function api(W, welt, land) {
     normal: () => normal(welt),
     wende: eff => wende(W, welt, land, eff),
     plane: (id, n = 1) => s.geplant.push({ id, zeit: zeitPlus(welt.zeit, n) }),
-    ende: id => { welt.ende = { id, zeit: welt.zeit, land }; },
+    // Ein vom Spiel gesteuertes Land kann nur Enden auslösen, die alle betreffen (z. B. Krieg)
+    ende: id => {
+      if (!istMensch(welt, land) && !(W.weltenden || []).includes(id)) return;
+      welt.ende = { id, zeit: welt.zeit, land: istMensch(welt, land) ? land : welt.spieler[0], ausgeloest: land };
+    },
     sende: (an, art, daten = {}) => sende(welt, land, an, art, daten),
     weltflag: (name, wert = true) => { welt.weltflags[name] = wert; },
   };
@@ -239,6 +243,7 @@ export function neueWelt(W, { spieler, seed, geschichtstreue = 1 } = {}) {
     postfach: [],
     weltflags: {},
     weltErledigt: {},
+    telegramme: {},
     queue: [],
     pos: 0,
     phase: 'lage',
@@ -287,6 +292,7 @@ function moeglich(W, welt, land, ev, s) {
 
 const istHauptereignis = ev => ev.art !== 'akte' && !ev.nurGeplant && !ev.nurRueckfrage;
 const istVorhaben = item => item.id === '@vorhaben';
+const istTelegramm = item => item.id === '@telegramm';
 
 // ---------- Rundenablauf ----------
 
@@ -359,8 +365,8 @@ export function starteRunde(W, welt) {
   items.sort((a, b) => a.ordnung - b.ordnung);
   welt.queue = items.map(({ land, id }) => ({ land, id }));
 
-  // Regierungsvorhaben der gespielten Länder am Ende des Halbjahrs
-  for (const land of welt.spieler) if (W.laender[land].vorhaben?.length) welt.queue.push({ land, id: '@vorhaben' });
+  // Regierungsvorhaben am Ende des Halbjahrs (gesteuerte Länder wählen selbst)
+  for (const land of Object.keys(W.laender)) if (W.laender[land].vorhaben?.length) welt.queue.push({ land, id: '@vorhaben' });
 
   for (const land of Object.keys(W.laender)) {
     const M = W.laender[land];
@@ -390,6 +396,7 @@ export function aktuelles(W, welt) {
   const item = welt.queue[welt.pos];
   if (!item) return { typ: 'rundenende' };
   if (istVorhaben(item)) return { typ: 'vorhaben', land: item.land, liste: verfuegbareVorhaben(W, welt, item.land) };
+  if (istTelegramm(item)) return { typ: 'telegramm', land: item.land, telegramm: welt.telegramme[item.nr] };
   return { typ: 'ereignis', land: item.land, ev: findeEreignis(W, welt, item.land, item.id) };
 }
 
@@ -406,7 +413,13 @@ function vorruecken(W, welt) {
       else abschliessen(W, welt);
       continue;
     }
-    if (istVorhaben(item)) return;
+    if (istTelegramm(item)) return;
+    if (istVorhaben(item)) {
+      if (istMensch(welt, item.land)) return;
+      KI.waehleVorhaben(W, welt, item.land, verfuegbareVorhaben(W, welt, item.land).filter(v => v.leistbar), id => vorhabenAnwenden(W, welt, item.land, id));
+      naechsterVorgang(W, welt, true);
+      continue;
+    }
     const ev = findeEreignis(W, welt, item.land, item.id);
     const s = sicht(W, welt, item.land);
     if (!ev || (!ev.dynamisch && ev.wenn && !ev.wenn(s))) { welt.pos++; continue; }
@@ -427,7 +440,7 @@ function spielEntscheidet(W, welt, land, ev) {
   const M = W.laender[land];
   const opts = optionen(W, welt, land, ev);
   if (!opts.some(o => o.verfuegbar)) throw new Error(`Keine mögliche Option bei ${land}:${ev.id}`);
-  if (KI.istKI(M)) {
+  if (KI.istKI(W, welt, land)) {
     const { index, like } = KI.waehle(W, welt, land, ev, opts);
     entscheide(W, welt, land, ev, index);
     KI.beobachte(W, welt, land, ev, opts.find(o => o.index === index), like);
@@ -455,6 +468,36 @@ function wendeZufall(W, welt, land, eff, texte) {
   if (treffer) {
     wende(W, welt, land, treffer);
     if (treffer.ergebnis) texte.push(txt(treffer.ergebnis, s));
+  }
+  return treffer;
+}
+
+/**
+ * Wirkung einer Entscheidung bei anderen Ländern. Wird ein betroffenes Land gespielt und hat
+ * ein anderes Land entschieden, bekommt der Spieler ein Telegramm: was geschah und was es
+ * für ihn bedeutet (`ergebnis` der Wirkung, aus seiner Sicht in der dritten Person).
+ */
+function wendeBei(W, welt, land, ev, quelle, texte) {
+  const s = sicht(W, welt, land);
+  const bei = txt(quelle.bei, s) || {};
+  for (const [ziel, eff] of Object.entries(bei)) {
+    if (!eff || !W.laender[ziel]) continue;
+    const Mz = W.laender[ziel];
+    const sz = sicht(W, welt, ziel);
+    const vorher = schnappschuss(Mz, sz);
+    wende(W, welt, ziel, eff);
+    if (!istMensch(welt, ziel) || istMensch(welt, land)) continue;
+    const nr = (welt.naechstesTelegramm = (welt.naechstesTelegramm || 0) + 1);
+    (welt.telegramme ||= {})[nr] = {
+      von: land,
+      titel: txt(eff.titel, sz) || txt(ev.titel, s),
+      // was es für das betroffene Land heißt; sonst, was entschieden wurde
+      texte: (eff.ergebnis ? [txt(eff.ergebnis, sz)] : [...texte]).filter(Boolean),
+      aenderungen: differenz(Mz, vorher, sz),
+      zeit: welt.zeit,
+    };
+    // gleich nach dem laufenden Vorgang zeigen
+    welt.queue.splice(welt.pos + 1, 0, { land: ziel, id: '@telegramm', nr });
   }
 }
 
@@ -513,7 +556,9 @@ function entscheide(W, welt, land, ev, index) {
   M.modell?.nachOption?.(s, o, ev, api(W, welt, land));
   if (o.ergebnis) texte.push(txt(o.ergebnis, s));
   if (o.rueckfrage) rueckfrage(W, welt, land, o, texte);
-  wendeZufall(W, welt, land, o, texte);
+  const getroffen = wendeZufall(W, welt, land, o, texte);
+  // Wirkungen bei anderen Ländern (`bei: { brd: { w, setze, ergebnis } }`), auch aus dem Zufallsausgang
+  for (const quelle of [o, getroffen]) if (quelle?.bei) wendeBei(W, welt, land, ev, quelle, texte);
 
   // Auslösende Nachricht ist damit beantwortet
   if (ev.ausloeser) {
@@ -536,6 +581,8 @@ function entscheide(W, welt, land, ev, index) {
     ergebnis: texte.join(' '),
     // für Zeitung und Einschätzung: Entscheidungen, die niemand mitbekommt, und Rückfragen nicht
     oeffentlich: !(o.still || ev.geheim || ev.nurRueckfrage),
+    // innenpolitische Kleinigkeiten und Briefe stehen nicht in den Zeitungen anderer Länder
+    ...(ev.inland || ev.art === 'akte' ? { inland: true } : {}),
   });
 
   const ergebnis = {
@@ -548,13 +595,15 @@ function entscheide(W, welt, land, ev, index) {
   };
   M.modell?.pruefeKrise?.(s, api(W, welt, land));
   M.modell?.nachEntscheidung?.(s);
+  KI.pruefeRegime(W, welt, land);
   return ergebnis;
 }
 
 /** Der Spieler entscheidet den aktuellen Vorgang */
 export function waehle(W, welt, index) {
   const item = welt.queue[welt.pos];
-  if (!item || istVorhaben(item) || !istMensch(welt, item.land)) throw new Error('Kein Vorgang des Spielers');
+  if (welt.phase !== 'spiel') throw new Error('Der Vorgang ist schon entschieden');
+  if (!item || istVorhaben(item) || istTelegramm(item) || !istMensch(welt, item.land)) throw new Error('Kein Vorgang des Spielers');
   const ev = findeEreignis(W, welt, item.land, item.id);
   welt.ergebnis = entscheide(W, welt, item.land, ev, index);
   welt.ergebnisLand = item.land;
@@ -584,8 +633,17 @@ export function verfuegbareVorhaben(W, welt, land = welt.spieler[0]) {
 
 export function waehleVorhaben(W, welt, id) {
   const item = welt.queue[welt.pos];
+  if (welt.phase !== 'spiel') throw new Error('Das Vorhaben ist schon entschieden');
   if (!item || !istVorhaben(item)) throw new Error('Kein Regierungsvorhaben an der Reihe');
-  const land = item.land;
+  welt.ergebnis = vorhabenAnwenden(W, welt, item.land, id);
+  welt.ergebnisLand = item.land;
+  welt.ergebnisVorhaben = true;
+  welt.phase = 'ergebnis';
+  return welt.ergebnis;
+}
+
+/** Ein Regierungsvorhaben einbringen (oder keines, id = null) – für Spieler und gesteuerte Länder */
+function vorhabenAnwenden(W, welt, land, id) {
   const M = W.laender[land];
   const L = welt.laender[land];
   const s = sicht(W, welt, land);
@@ -604,16 +662,14 @@ export function waehleVorhaben(W, welt, id) {
     titel = txt(v.titel, s);
     if (v.ergebnis) texte.push(txt(v.ergebnis, s));
     historisch = txt(v.historisch, s) || null;
-    L.chronik.push({ zeit: welt.zeit, id: 'vorhaben:' + v.id, titel, art: 'vorhaben', wahl: 'Regierungsvorhaben', hist: null, ergebnis: texte.join(' ') });
+    L.chronik.push({ zeit: welt.zeit, id: 'vorhaben:' + v.id, titel, art: 'vorhaben', wahl: 'Regierungsvorhaben', hist: null, ergebnis: texte.join(' '), oeffentlich: false });
   } else {
     texte.push('Die Regierung beschränkt sich in diesem Halbjahr auf die laufenden Geschäfte.');
   }
-  welt.ergebnis = { titel, texte, historisch, hist: null, aenderungen: differenz(M, vorher, s), vorhaben: true };
-  welt.ergebnisLand = land;
-  welt.ergebnisVorhaben = true;
+  const ergebnis = { titel, texte, historisch, hist: null, aenderungen: differenz(M, vorher, s), vorhaben: true };
   M.modell?.nachEntscheidung?.(s);
-  welt.phase = 'ergebnis';
-  return welt.ergebnis;
+  KI.pruefeRegime(W, welt, land);
+  return ergebnis;
 }
 
 /** Krisenereignisse, die Länder in `einschub` angemeldet haben, einsammeln */
@@ -636,10 +692,14 @@ function naechsterVorgang(W, welt, nachVorhaben) {
   if (neu.length) welt.queue.splice(welt.pos, 0, ...neu);
 }
 
-/** Nach einer Ergebnisanzeige oder dem Wahlabend weiter */
+/** Nach einer Ergebnisanzeige, einem Telegramm oder dem Wahlabend weiter */
 export function weiter(W, welt) {
   if (welt.ende) return;
-  if (welt.phase === 'wahl') {
+  const item = welt.queue[welt.pos];
+  if (welt.phase === 'spiel' && item && istTelegramm(item)) {
+    delete welt.telegramme[item.nr];
+    welt.pos++;
+  } else if (welt.phase === 'wahl') {
     welt.phase = 'spiel';
   } else if (welt.phase === 'ergebnis') {
     welt.phase = 'spiel';
@@ -714,7 +774,7 @@ function naechsteRunde(W, welt) {
 function aktualisiereQueue(W, welt, abOrdnung) {
   const rest = welt.queue.slice(welt.pos);
   const bleibt = rest.filter(item => {
-    if (istVorhaben(item) || item.id.startsWith('dyn:')) return true;
+    if (istVorhaben(item) || istTelegramm(item) || item.id.startsWith('dyn:')) return true;
     const L = welt.laender[item.land];
     if (L.erledigt[item.id] !== undefined && !findeEreignis(W, welt, item.land, item.id)?.wiederholbar) return false;
     const ev = findeEreignis(W, welt, item.land, item.id);
@@ -744,6 +804,7 @@ function aktualisiereQueue(W, welt, abOrdnung) {
   }
   const ord = item => {
     if (istVorhaben(item)) return 1e9;
+    if (istTelegramm(item)) return -2;
     if (item.id.startsWith('dyn:')) return -1;
     return ordnungVon(findeEreignis(W, welt, item.land, item.id));
   };
