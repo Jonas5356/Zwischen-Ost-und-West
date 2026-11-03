@@ -20,4 +20,16 @@ export default [
     ki: true,
     dient: { westbindung: 0.2 },
   },
+  {
+    id: 'rueckendeckung_london',
+    titel: 'London um Rückendeckung für Berlin bitten',
+    text: 'West-Berlin liegt mitten in der Zone, und die Briten haben dort Truppen. Eine öffentliche Zusage aus London, für die Freiheit der Stadt einzustehen, würde Moskau warnen und die Berliner beruhigen. Die Antwort kommt nicht sofort – und London redet lieber mit Moskau als über Berlin.',
+    ab: 1949.2, bis: 1964.1,
+    wenn: s => !s.f.vereinigt && !s.f.neutral && !s.f.freistadt_vereinbart,
+    kosten: { ansehen: -1 },
+    abklingzeit: 4,
+    aktion: (s, a) => a.sende('grossbritannien', 'berlin_rueckendeckung'),
+    ergebnis: 'Bonn bittet London um eine öffentliche Zusage für West-Berlin.',
+    richtung: 'west',
+  },
 ];

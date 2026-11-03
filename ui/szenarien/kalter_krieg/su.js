@@ -351,7 +351,7 @@ const ereignisse = [
       { text: 'Den Westmächten ein Ultimatum stellen: West-Berlin soll Freie Stadt werden.', hist: true,
         dient: s => ({ west_berlin: 1, ddr_halten: 0.5 * flucht(s) / 30, koexistenz: -0.5 }), w: { prestige: 3, usa: -5 },
         ergebnis: s => `${name(s)} verlangt in einer Note an die Westmächte, West-Berlin binnen sechs Monaten in eine „entmilitarisierte Freie Stadt“ umzuwandeln.`,
-        aktion: (s, a) => a.sende('brd', 'berlin_ultimatum') },
+        aktion: (s, a) => { a.weltflag('berlin_ultimatum'); a.sende('brd', 'berlin_ultimatum'); } },
       { text: 'Abwarten.', still: true, dient: { koexistenz: 0.3 } },
     ],
   },

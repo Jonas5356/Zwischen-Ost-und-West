@@ -156,6 +156,8 @@ function wechsel(W, welt, land) {
   for (const x of M.wechsel || []) {
     if (zeitIndex(x.zeit) !== zeitIndex(welt.zeit) || L.f['wechsel_' + x.id]) continue;
     if (x.von && !x.von.includes(L.regime)) continue;
+    // Bedingte Wechsel (z. B. eine vorgezogene Wahl nur bei knapper Mehrheit) fallen sonst aus
+    if (x.wenn && !x.wenn(s)) continue;
     L.f['wechsel_' + x.id] = true;
     const gewicht = (art) => x.ausgaenge.map(a => Math.max(0, txt(a[art], s) ?? 0));
     const norm = v => { const t = v.reduce((a, b) => a + b, 0); return t > 0 ? v.map(y => y / t) : v.map(() => 1 / v.length); };
@@ -163,9 +165,12 @@ function wechsel(W, welt, land) {
     const p = Object.fromEntries(x.ausgaenge.map((a, i) => [i, g * h[i] + (1 - g) * f[i]]));
     const a = x.ausgaenge[Number(ziehe(welt, p))];
     const vorher = L.regime;
-    if (a.regime !== vorher || a.neu) starteRegime(W, welt, land, a.regime);
+    // Die neue Regierung darf von der Lage abhängen (z. B. „wer gerade die Konservativen führt“)
+    const neu = txt(a.regime, s);
+    L.regimeVorher = vorher;
+    if (neu !== vorher || a.neu) starteRegime(W, welt, land, neu);
     const meldung = txt(a.meldung, s);
-    L.chronik.push({ zeit: welt.zeit, id: 'wechsel:' + x.id, titel: txt(x.titel, s), art: 'wechsel', wahl: M.regierungen[a.regime].titel, hist: null, ergebnis: meldung || '' });
+    L.chronik.push({ zeit: welt.zeit, id: 'wechsel:' + x.id, titel: txt(x.titel, s), art: 'wechsel', wahl: M.regierungen[neu].titel, hist: null, ergebnis: meldung || '' });
     a.aktion?.(s, api(W, welt, land));
   }
 }

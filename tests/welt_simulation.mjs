@@ -6,7 +6,7 @@ const n = Number(process.argv[2] || 300);
 const g = Number(process.argv[3] ?? 1);
 const strategie = process.argv[4] || (g >= 0.99 ? 'historisch' : 'zufall');
 const gespielt = process.argv[5] || 'brd';
-const gesteuert = ['usa', 'su', 'frankreich', 'brd'].filter(l => l !== gespielt);
+const gesteuert = ['usa', 'su', 'grossbritannien', 'frankreich', 'brd'].filter(l => l !== gespielt);
 
 const wahl = {}, regierungen = {}, flags = {}, enden = {};
 let treffer = 0, faelle = 0, brier = 0, priorBrier = 0, vereinigt = 0;
@@ -16,8 +16,8 @@ for (let seed = 1; seed <= n; seed++) {
   zaehle(enden, welt.ende.id + (welt.ende.ausgeloest && welt.ende.ausgeloest !== gespielt ? ' (' + welt.ende.ausgeloest + ')' : ''));
   if (welt.laender.brd.f?.vereinigt) vereinigt++;
   if (welt.laender.brd.nie) zaehle(flags, 'Bundesrepublik nie gegründet');
-  for (const f of ['iran_besetzt', 'bizone', 'truman_doktrin', 'kominform', 'prag_putsch', 'blockade', 'blockade_ende', 'berlin_aufgegeben', 'juni17_panzer', 'juni17_zugestaendnisse', 'ungarn_einmarsch', 'ungarn_neutral', 'mauer_genehmigt', 'mauer_abgelehnt', 'raketen_kuba', 'radford', 'atomkrieg', 'suez_angriff', 'pariser_ratifiziert', 'nato_veto', 'saar_akzeptiert', 'rom_angebot']) if (welt.weltflags[f]) zaehle(flags, f);
-  for (const f of ['marshall_ost', 'weststaat_usa', 'weststaat_paris', 'berlin_massnahme', 'nato_angebot', 'essentials', 'kuba_massnahme', 'kuba_ausgang', 'evg', 'schuman_antwort']) if (welt.weltflags[f]) zaehle(flags, f + '=' + welt.weltflags[f]);
+  for (const f of ['suez_abbruch', 'suez_london_haelt', 'indien_unabhaengig', 'gb_atommacht', 'iran_besetzt', 'bizone', 'truman_doktrin', 'kominform', 'prag_putsch', 'blockade', 'blockade_ende', 'berlin_aufgegeben', 'juni17_panzer', 'juni17_zugestaendnisse', 'ungarn_einmarsch', 'ungarn_neutral', 'mauer_genehmigt', 'mauer_abgelehnt', 'raketen_kuba', 'radford', 'atomkrieg', 'suez_angriff', 'pariser_ratifiziert', 'nato_veto', 'saar_akzeptiert', 'rom_angebot']) if (welt.weltflags[f]) zaehle(flags, f);
+  for (const f of ['marshall_ost', 'weststaat_usa', 'weststaat_paris', 'berlin_massnahme', 'nato_angebot', 'essentials', 'kuba_massnahme', 'kuba_ausgang', 'evg', 'schuman_antwort', 'schuman_london', 'gb_truppen', 'suez_london', 'nassau']) if (welt.weltflags[f]) zaehle(flags, f + '=' + welt.weltflags[f]);
   const F = welt.laender.frankreich;
   for (const f of ['de_gaulle', 'dien_bien_phu', 'indochina_beendet', 'algerien_unabhaengig', 'atomtest', 'rom_ratifiziert', 'colombey_angeboten', 'elysee', 'veto_gb']) if (F.f[f]) zaehle(flags, 'Paris: ' + f);
   zaehle(flags, 'Paris: Regierung am Ende ' + F.lager);

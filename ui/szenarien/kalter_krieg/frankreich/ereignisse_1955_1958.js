@@ -2,6 +2,11 @@
 import { vierte, fuenfte, istDeGaulle, algerienkrieg, indochinakrieg, machtUebergabeDeGaulle, notiereChef, gesamtSitze, zieheWahlVor } from './modell.js';
 import { pariserAussen, brd, kanzler, bonn, bonnImWesten, bonnExistiert, deutschland } from './hilfen.js';
 import { praesident } from '../brd/hilfen.js';
+import { londonerChefKurz } from '../grossbritannien/hilfen.js';
+
+// Suez: London ist dabei (Sèvres), hat abgesagt, hält am Kanal aus
+const londonDabei = s => s.weltflags.suez_london !== 'nein';
+const londonHaelt = s => !!s.weltflags.suez_london_haelt;
 import { zeitIndex, zeitPlus } from '../../../engine.js';
 
 const chef = s => s.regierungschef;
@@ -200,14 +205,16 @@ Die Kommunisten wollen dafür stimmen – sie hoffen auf eine Volksfront.`,
     absender: 'Christian Pineau, Außenminister',
     text: s => `Im Juli hat Präsident Nasser den Suezkanal verstaatlicht. Für Paris ist Nasser mehr als ein ägyptischer Nationalist: Er liefert der FLN Waffen und gibt ihr in Kairo eine Stimme. „Nasser ist ein neuer Hitler“, heißt es im Kabinett.
 
-In Sèvres haben französische, britische und israelische Unterhändler geheim einen Plan verabredet: Israel greift Ägypten an, Paris und London fordern beide Seiten zum Rückzug vom Kanal auf und besetzen ihn dann, „um die Schifffahrt zu schützen“. Washington weiß davon nichts – ${praesident(s)} steht kurz vor seiner Wiederwahl.`,
+${londonDabei(s)
+    ? 'In Sèvres haben französische, britische und israelische Unterhändler geheim einen Plan verabredet: Israel greift Ägypten an, Paris und London fordern beide Seiten zum Rückzug vom Kanal auf und besetzen ihn dann, „um die Schifffahrt zu schützen“.'
+    : `In Sèvres haben französische und israelische Unterhändler einen Plan verabredet: Israel greift Ägypten an, französische Truppen besetzen den Kanal, „um die Schifffahrt zu schützen“. London hat abgesagt – ${londonerChefKurz(s)} will nichts gegen den Willen Washingtons unternehmen. Paris müsste ohne die Briten handeln.`} Washington weiß davon nichts – ${praesident(s)} steht kurz vor seiner Wiederwahl.`,
     optionen: [
-      { text: 'Den Plan von Sèvres ausführen.', hist: true, richtung: 'kolonial',
-        ergebnis: 'Israel greift an, britische und französische Fallschirmjäger landen am Suezkanal.',
-        w: { usa: -3, moskau: -6, armee: 4 }, aktion: (s, a) => a.weltflag('suez_angriff'),
-        dient: { kolonien: 1.3, unabhaengigkeit: 0.6, westbindung: -0.3 } },
+      { text: s => (londonDabei(s) ? 'Den Plan von Sèvres ausführen.' : 'Mit Israel allein losschlagen.'), hist: true, richtung: 'kolonial',
+        ergebnis: s => (londonDabei(s) ? 'Israel greift an, britische und französische Fallschirmjäger landen am Suezkanal.' : 'Israel greift an, französische Fallschirmjäger landen am Suezkanal – ohne die Briten. (Fiktion)'),
+        w: s => ({ usa: londonDabei(s) ? -3 : -6, moskau: -6, armee: 4 }), aktion: (s, a) => a.weltflag('suez_angriff'),
+        dient: s => ({ kolonien: londonDabei(s) ? 1.3 : 0.8, unabhaengigkeit: 0.6, westbindung: londonDabei(s) ? -0.3 : -0.8 }) },
       { text: 'Nur diplomatisch protestieren und den Sicherheitsrat anrufen.',
-        ergebnis: 'Paris bringt die Frage vor den Sicherheitsrat. Nasser behält den Kanal.',
+        ergebnis: s => (londonDabei(s) ? 'Paris bringt die Frage vor den Sicherheitsrat. Ohne Frankreich gibt London den Plan auf; Nasser behält den Kanal.' : 'Paris bringt die Frage vor den Sicherheitsrat. Nasser behält den Kanal.'),
         w: { armee: -3, usa: 3, algerien: -3 }, dient: { westbindung: 0.5, frieden_kolonien: 0.3 } },
     ],
     historisch: 'Am 29. Oktober 1956 griff Israel an, am 5. November landeten britische und französische Truppen. Unter amerikanischem Druck und sowjetischen Drohungen brach London am 6. November ab; Paris musste folgen.',
@@ -220,16 +227,16 @@ In Sèvres haben französische, britische und israelische Unterhändler geheim e
     wenn: s => !!s.weltflags.suez_angriff,
     absender: 'Oberkommando der Suez-Operation',
     text: s => (s.weltflags.suez_druck
-      ? `Washington hat London mit dem Zusammenbruch des Pfunds gedroht, Moskau mit Raketen auf Paris und London. Premierminister Eden hat ohne Absprache einem Waffenstillstand zugestimmt – die Truppen stehen erst auf halbem Weg am Kanal.${bonnExistiert(s) ? ` ${kanzler(s)} ist ausgerechnet heute in Paris zu Besuch.` : ''}`
+      ? `${!londonDabei(s) ? 'Washington droht Paris mit dem Entzug aller Hilfe, Moskau mit Raketen. Die Truppen stehen erst auf halbem Weg am Kanal.' : londonHaelt(s) ? `Washington hat London mit dem Zusammenbruch des Pfunds gedroht, Moskau mit Raketen auf Paris und London. Premierminister ${londonerChefKurz(s)} will trotzdem weiterkämpfen – die Truppen stehen erst auf halbem Weg am Kanal.` : `Washington hat London mit dem Zusammenbruch des Pfunds gedroht, Moskau mit Raketen auf Paris und London. Premierminister ${londonerChefKurz(s)} hat ohne Absprache einem Waffenstillstand zugestimmt – die Truppen stehen erst auf halbem Weg am Kanal.`}${bonnExistiert(s) ? ` ${kanzler(s)} ist ausgerechnet heute in Paris zu Besuch.` : ''}`
       : 'Washington hat nicht eingegriffen. Britische und französische Truppen kontrollieren die Kanalzone; Nasser ist in Kairo eingeschlossen. Moskau droht mit Raketen, doch Washington stellt sich vor seine Verbündeten.'),
     optionen: s => (s.weltflags.suez_druck ? [
-      { text: 'Mit London den Waffenstillstand annehmen.', hist: true,
+      { text: s => (londonDabei(s) && !londonHaelt(s) ? 'Mit London den Waffenstillstand annehmen.' : 'Den Waffenstillstand annehmen.'), hist: true,
         ergebnis: 'Paris muss dem Waffenstillstand zustimmen. Die Demütigung sitzt tief: Auf die Amerikaner ist kein Verlass – Frankreich braucht die Bombe und Europa.',
         w: { usa: -4, armee: -4, ansehen: -3 }, setze: ['suez_demuetigung'], dient: { westbindung: 0.6, stabilitaet: 0.4 } },
-      { text: 'Allein weiterkämpfen.', richtung: 'national',
+      { text: s => (londonHaelt(s) ? 'Mit London weiterkämpfen.' : 'Allein weiterkämpfen.'), richtung: 'national',
         zufall: [
-          { p: 0.25, ergebnis: 'Französische Fallschirmjäger erreichen Ismailia. Nasser stürzt; Washington tobt.', w: { usa: -15, moskau: -12, armee: 6 } },
-          { ergebnis: 'Ohne britische Unterstützung bricht der Vormarsch zusammen. Der Franc gerät unter Druck, die Welt verurteilt Paris.', w: { usa: -12, franc: -15, armee: -6 } },
+          { p: s => (londonHaelt(s) ? 0.4 : 0.25), ergebnis: 'Französische Fallschirmjäger erreichen Ismailia. Nasser stürzt; Washington tobt.', w: { usa: -15, moskau: -12, armee: 6 } },
+          { ergebnis: s => (londonHaelt(s) ? 'Der Vormarsch bleibt stecken. Pfund und Franc geraten unter Druck, die Welt verurteilt Paris und London.' : 'Ohne britische Unterstützung bricht der Vormarsch zusammen. Der Franc gerät unter Druck, die Welt verurteilt Paris.'), w: { usa: -12, franc: -15, armee: -6 } },
         ],
         dient: { unabhaengigkeit: 0.8, kolonien: 0.5, westbindung: -1 } },
     ] : [
@@ -566,7 +573,7 @@ De Gaulle erwägt eine ungewöhnliche Geste: ${kanzler(s)} nicht in Paris, sonde
     ab: 1958.2, bis: 1959.2, ordnung: 9.5,
     wenn: s => istDeGaulle(s) && !s.f.memorandum && !s.f.nato_fern,
     absender: 'Präsidialamt',
-    text: s => `De Gaulle will Frankreich wieder als Weltmacht behandelt sehen. Ein Memorandum an ${praesident(s)} und den britischen Premierminister Macmillan liegt bereit: Die NATO soll von einem Direktorium der drei Mächte geführt werden, das über den Einsatz von Atomwaffen weltweit gemeinsam entscheidet. Lehnen die Angelsachsen ab, behält sich Paris seine Haltung zur NATO vor.
+    text: s => `De Gaulle will Frankreich wieder als Weltmacht behandelt sehen. Ein Memorandum an ${praesident(s)} und den britischen Premierminister ${londonerChefKurz(s)} liegt bereit: Die NATO soll von einem Direktorium der drei Mächte geführt werden, das über den Einsatz von Atomwaffen weltweit gemeinsam entscheidet. Lehnen die Angelsachsen ab, behält sich Paris seine Haltung zur NATO vor.
 
 ${bonnExistiert(s) ? 'Die Bundesrepublik, Italien' : 'Italien'} und die kleineren Verbündeten wären ausgeschlossen.`,
     optionen: [

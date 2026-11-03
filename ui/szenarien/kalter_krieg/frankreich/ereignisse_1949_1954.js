@@ -2,6 +2,10 @@
 import { vierte, indochinakrieg, gesamtSitze } from './modell.js';
 import { pariserAussen, brd, kanzler, bonn, bonnImWesten } from './hilfen.js';
 import { usaAussen } from '../brd/hilfen.js';
+import { londonerAussen, londonerAussenKurz } from '../grossbritannien/hilfen.js';
+
+/** London hat die Truppenzusage verweigert (1954) */
+const ohneBriten = s => s.weltflags.gb_truppen === 'nein';
 
 const chef = s => s.regierungschef;
 const ergebnisChef = s => (s.lager === 'de_gaulle' ? 'De Gaulle' : `Ministerpräsident ${s.regierungschef}`);
@@ -86,7 +90,7 @@ Washington drängt, Deutschland wieder stärker werden zu lassen; im September t
       { text: 'Den Plan als Angebot an Bonn verkünden – vorher vertraulich den Kanzler fragen.', hist: true, richtung: 'europa',
         ergebnis: s => `${pariserAussen(s)} verkündet den Plan am 9. Mai im Uhrensaal des Quai d’Orsay. ${kanzler(s)} ist vorab vertraulich unterrichtet worden.`,
         w: { europa: 4, usa: 5, brd: 6 }, setze: ['schuman_plan'],
-        aktion: (s, a) => a.sende('brd', 'schuman'),
+        aktion: (s, a) => { a.sende('brd', 'schuman'); a.sende('grossbritannien', 'schuman'); },
         dient: { europa: 1.2, deutschland_einbinden: 1.5, deutschland_klein: -0.4 } },
       { text: 'Bei der Ruhrbehörde bleiben: Kontrolle statt Gemeinschaft.', richtung: 'national',
         ergebnis: 'Paris hält an der Kontrolle der Ruhr fest. In Washington wächst die Ungeduld mit der französischen Deutschlandpolitik.',
@@ -511,14 +515,16 @@ Du kannst die Abstimmung mit der Vertrauensfrage verbinden: Wer gegen die EVG st
     datum: 'September 1954',
     ab: 1954.2, bis: 1955.2, ordnung: 8.7,
     wenn: s => bonnImWesten(s) && !brd(s).f.evg && !brd(s).f.nato && (s.weltflags.evg === 'gescheitert' || (s.zeit >= 1954.2 && (!!s.weltflags.pleven_abgelehnt || !!brd(s).f.evg_gescheitert || !!brd(s).f.westvertraege_abgelehnt))),
-    absender: 'Anthony Eden, britischer Außenminister',
-    text: s => `Nach dem Scheitern der europäischen Armee hat Eden in einer Rundreise durch die Hauptstädte eine Ersatzlösung gefunden: Die Bundesrepublik wird souverän und tritt direkt der NATO bei. Der Brüsseler Pakt wird zur Westeuropäischen Union erweitert, die die deutsche Rüstung kontrolliert. Großbritannien verpflichtet sich, Truppen auf dem Kontinent zu halten – eine alte französische Forderung.
+    absender: s => `${londonerAussen(s)}, britischer Außenminister`,
+    text: s => `Nach dem Scheitern der europäischen Armee hat ${londonerAussenKurz(s)} in einer Rundreise durch die Hauptstädte eine Ersatzlösung gefunden: Die Bundesrepublik wird souverän und tritt direkt der NATO bei. Der Brüsseler Pakt wird zur Westeuropäischen Union erweitert, die die deutsche Rüstung kontrolliert. ${ohneBriten(s) ? 'Nur eines verweigert London: eine Zusage, auf Dauer Truppen auf dem Kontinent zu halten – die alte französische Forderung.' : 'Großbritannien verpflichtet sich, Truppen auf dem Kontinent zu halten – eine alte französische Forderung.'}
 
 Als Preis kannst du verlangen, dass ${kanzler(s)} auf atomare, biologische und chemische Waffen verzichtet. Sagt Frankreich nein, steht es gegen alle Verbündeten.`,
     optionen: [
-      { text: 'Zustimmen – mit dem Verzicht der Deutschen auf ABC-Waffen und britischen Truppen auf dem Kontinent.', hist: true, richtung: 'atlantisch',
-        ergebnis: 'Auf der Londoner Konferenz stimmt Paris dem NATO-Beitritt der Bundesrepublik zu. Bonn verzichtet auf ABC-Waffen, London sagt vier Divisionen auf dem Kontinent zu.',
-        w: { usa: 8, grossbritannien: 8, brd: 6 }, dient: { westbindung: 1.2, deutschland_einbinden: 0.8, deutschland_klein: 0.4 } },
+      { text: s => (ohneBriten(s) ? 'Zustimmen – mit dem Verzicht der Deutschen auf ABC-Waffen, auch ohne britische Truppen.' : 'Zustimmen – mit dem Verzicht der Deutschen auf ABC-Waffen und britischen Truppen auf dem Kontinent.'), hist: true, richtung: 'atlantisch',
+        ergebnis: s => (ohneBriten(s)
+          ? 'Auf der Londoner Konferenz stimmt Paris dem NATO-Beitritt der Bundesrepublik zu. Bonn verzichtet auf ABC-Waffen; britische Truppen gibt es nur so lange, wie London es will.'
+          : 'Auf der Londoner Konferenz stimmt Paris dem NATO-Beitritt der Bundesrepublik zu. Bonn verzichtet auf ABC-Waffen, London sagt vier Divisionen auf dem Kontinent zu.'),
+        w: { usa: 8, grossbritannien: 8, brd: 6 }, dient: s => ({ westbindung: 1.2, deutschland_einbinden: 0.8, deutschland_klein: ohneBriten(s) ? -0.2 : 0.4 }) },
       { text: 'Den NATO-Beitritt verhindern.', richtung: 'national',
         ergebnis: 'Paris legt sein Veto ein. Die Westmächte stehen vor einem Scherbenhaufen; Washington erwägt eine „periphere Verteidigung“ ohne Frankreich.',
         w: { usa: -16, grossbritannien: -12, brd: -12, moskau: 6 },

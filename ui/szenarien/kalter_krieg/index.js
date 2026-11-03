@@ -3,7 +3,7 @@ import brd from './brd/index.js';
 import usa from './usa.js';
 import su from './su.js';
 import frankreich from './frankreich/index.js';
-import grossbritannien from './grossbritannien.js';
+import grossbritannien from './grossbritannien/index.js';
 import weltereignisse from './weltereignisse.js';
 import { BLOECKE, STANDARD, BEZIEHUNGSREIHE } from './werte.js';
 
@@ -20,11 +20,11 @@ export default {
   // Wie Land A Land B sieht (0 = feindlich, 100 = engste Partnerschaft); fehlende Paare: 50
   startBeziehungen: {
     // 1946: Die Sieger sind noch Verbündete; die Werte zur Bundesrepublik gelten ab ihrer Gründung
-    usa: { brd: 55, su: 40, frankreich: 55 },
-    frankreich: { brd: 30 },
-    brd: { frankreich: 40 },
+    usa: { brd: 55, su: 40, frankreich: 55, grossbritannien: 70 },
+    frankreich: { brd: 30, grossbritannien: 60 },
+    brd: { frankreich: 40, grossbritannien: 50 },
     grossbritannien: { brd: 40, frankreich: 60 },
-    su: { brd: 50, usa: 40, frankreich: 50 },
+    su: { brd: 50, usa: 40, frankreich: 50, grossbritannien: 40 },
   },
   weltereignisse,
   // Lagebild: in jedem Land dieselben Blöcke; Standardwerte und Beziehungen in fester Reihenfolge

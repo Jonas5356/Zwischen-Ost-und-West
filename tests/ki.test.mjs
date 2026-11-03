@@ -6,6 +6,10 @@ import * as KI from '../ui/ki.js';
 import { W, spiele } from './spieler.mjs';
 
 const nah = (a, b, eps = 1e-9) => Math.abs(a - b) < eps;
+/** Länder, die nie gespielt werden */
+const GESTEUERT = ['usa', 'su', 'grossbritannien'];
+/** Landsicht mit zusätzlichen Weltflags (ohne die Welt zu verändern) */
+const mitFlags = (s, flags) => Object.defineProperty(Object.create(s), 'weltflags', { value: { ...s.weltflags, ...flags } });
 
 test('Logit: P(o) = exp(λU) / Σ exp(λU)', () => {
   const s = { w: {}, f: {} };
@@ -55,6 +59,8 @@ test('Im historischen Modus kommen die historischen Regierungen, solange die Lag
     const { welt } = spiele(seed, 'historisch');
     if (welt.ende.id !== 'abschluss') continue; // selten: Atomkrieg nach Kuba
     assert.deepEqual(welt.laender.usa.regierungen.map(r => r.regime), ['truman', 'eisenhower', 'kennedy', 'johnson']);
+    // In London: Attlee, Churchill (1951), Eden (1955), Macmillan (1957), Douglas-Home (1963)
+    assert.deepEqual(welt.laender.grossbritannien.regierungen.map(r => r.regime), ['attlee', 'churchill', 'eden', 'macmillan', 'home']);
     const su = welt.laender.su.regierungen.map(r => r.regime).join(',');
     if (su === 'stalin,kollektiv,malenkow,chruschtschow') continue;
     // Berija hat nur eine Chance, wenn Moskau am 17. Juni nachgegeben hat
@@ -64,24 +70,36 @@ test('Im historischen Modus kommen die historischen Regierungen, solange die Lag
   assert.ok(anders <= 4, `${anders} von 40 Partien mit anderer Führung in Moskau`);
 });
 
-test('Im freien Modus kommen auch andere Regierungen, und jede Entscheidung der Supermächte kommt vor', () => {
+test('Im freien Modus kommen auch andere Regierungen, und jede Entscheidung der gesteuerten Länder kommt vor', () => {
   const regime = new Set(), entscheidungen = new Set();
   for (let seed = 1; seed <= 250; seed++) {
     // Auch als Frankreich: Wer die Bundesrepublik spielt, für den sind Entscheidungen gegen ihre Gründung gesperrt
     for (const [st, g, land] of [['zufall', 0, 'brd'], ['einheit', 0.5, 'brd'], ['ost', 0, 'brd'], ['zufall', 0, 'frankreich']]) {
       if (seed > 120 && st !== 'zufall') continue;
       const { welt } = spiele(seed, st, null, { geschichtstreue: g, land });
-      for (const land of ['usa', 'su']) {
+      for (const land of GESTEUERT) {
         for (const r of welt.laender[land].regierungen) regime.add(land + ':' + r.regime);
         for (const c of welt.laender[land].chronik) if (c.art !== 'wechsel') entscheidungen.add(`${land}:${c.id}:${c.wahl}`);
       }
     }
   }
-  for (const land of ['usa', 'su']) {
+  // Suez, wenn Washington die Verbündeten gewähren lässt (sonst sehr selten): als Frankreich angreifen
+  for (let seed = 1; seed <= 30; seed++) {
+    const eingriff = welt => {
+      if (E.zeitIndex(welt.zeit) !== E.zeitIndex(1956.2) || welt.weltflags.suez_gewaehren) return;
+      welt.laender.usa.erledigt.usa_suez = 1;
+      welt.weltflags.suez_gewaehren = true;
+    };
+    const { welt } = spiele(seed, 'historisch', null, { land: 'frankreich', vorgabe: { fr_suez: 0 }, eingriff });
+    for (const c of welt.laender.grossbritannien.chronik) if (c.art !== 'wechsel') entscheidungen.add(`grossbritannien:${c.id}:${c.wahl}`);
+  }
+  for (const land of GESTEUERT) {
     for (const r of Object.keys(W.laender[land].regierungen)) assert.ok(regime.has(land + ':' + r), 'nie regiert: ' + land + ':' + r);
     const s = E.sicht(W, E.neueWelt(W, { spieler: ['brd'], seed: 1 }), land);
     for (const ev of W.laender[land].ereignisse) {
-      for (const o of E.txt(ev.optionen, s)) {
+      // Optionen, die von der Lage abhängen (z. B. Suez mit oder ohne Druck aus Washington), in jeder Lage
+      const lagen = typeof ev.optionen === 'function' && ev.lagen ? ev.lagen : [{}];
+      for (const flags of lagen) for (const o of E.txt(ev.optionen, mitFlags(s, flags))) {
         assert.ok(entscheidungen.has(`${land}:${ev.id}:${E.txt(o.text, s)}`), `nie gewählt: ${land}:${ev.id} → ${E.txt(o.text, s)}`);
       }
     }
@@ -95,7 +113,7 @@ test('Die Einschätzung ist kalibriert: Wo Bonn 70 % sagt, stimmt es in etwa 70 
   let besser = 0, faelle = 0;
   for (let seed = 1; seed <= 250; seed++) {
     const { welt } = spiele(seed, seed % 2 ? 'historisch' : 'zufall');
-    for (const land of ['usa', 'su']) {
+    for (const land of GESTEUERT) {
       const L = welt.laender[land];
       const Ein = welt.laender.brd.einschaetzung[land];
       const schaetzungen = [...Ein.frueher, { regime: Ein.regime, p: Ein.p }];

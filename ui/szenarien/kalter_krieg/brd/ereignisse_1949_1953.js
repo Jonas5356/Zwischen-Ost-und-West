@@ -1,5 +1,6 @@
 // Hauptereignisse Herbst 1949 bis Ende 1953
 import { pariserChef, pariserSpitze, pariserAussen } from '../frankreich/hilfen.js';
+import { londonerChef, londonerChefKurz, londonerAussenKurz } from '../grossbritannien/hilfen.js';
 import { west, geteilt, adenauer, regiertMit, wahlIn, unionRegiert, spdRegiert, SPD_WAHLKAMPF, praesident, usaAussen } from './hilfen.js';
 
 export default [
@@ -345,7 +346,7 @@ Umstritten ist die „Bindungsklausel“: Ein wiedervereinigtes Deutschland wär
         setze: ['westvertraege'] },
       { text: 'Die Bindungsklausel streichen lassen, dann unterzeichnen.',
         zufall: [
-          { p: s => 0.4 + (s.w.usa - 50) / 200, ergebnis: s => `${usaAussen(s) || 'Washington'} und Eden lenken ein: Die Klausel wird abgeschwächt. Ein Erfolg, der in der Fraktion viel Ruhe bringt.`,
+          { p: s => 0.4 + (s.w.usa - 50) / 200, ergebnis: s => `${usaAussen(s) || 'Washington'} und ${londonerAussenKurz(s)} lenken ein: Die Klausel wird abgeschwächt. Ein Erfolg, der in der Fraktion viel Ruhe bringt.`,
             w: { souveraenitaet: 8, usa: 4, frankreich: 1, moskau: -6, einheit: -2, europa: 4, rueckhalt: 4 }, setze: ['westvertraege'] },
           { ergebnis: 'Die Westmächte bleiben hart. Nach wochenlanger Verzögerung unterschreibt Bonn doch, mit Ansehensverlust.',
             w: { souveraenitaet: 6, usa: 2, moskau: -7, einheit: -5, europa: 4, ansehen: -2 }, setze: ['westvertraege'] },
@@ -414,15 +415,15 @@ Die Bundesrepublik würde damit wieder kreditwürdig. Einzelne Gläubiger, vor a
     ab: 1953.1, ordnung: 3,
     wenn: west,
     absender: 'Auswärtiges Amt, Länderreferat Sowjetunion',
-    text: `Am 5. März ist Josef Stalin gestorben. In Moskau regiert eine kollektive Führung aus Malenkow, Berija und Molotow; aus dem Kreml kommen ungewohnt versöhnliche Töne.
+    text: s => `Am 5. März ist Josef Stalin gestorben. In Moskau regiert eine kollektive Führung aus Malenkow, Berija und Molotow; aus dem Kreml kommen ungewohnt versöhnliche Töne.
 
-Der britische Premierminister Winston Churchill schlägt im Unterhaus eine Gipfelkonferenz der Großmächte vor, ohne feste Tagesordnung. Für dich ist das eine Gefahr: Die Großmächte könnten sich über Deutschland verständigen, bevor die Westverträge in Kraft sind – im schlimmsten Fall auf eine Neutralisierung.`,
+Der britische Premierminister ${londonerChef(s)} schlägt im Unterhaus eine Gipfelkonferenz der Großmächte vor, ohne feste Tagesordnung. Für dich ist das eine Gefahr: Die Großmächte könnten sich über Deutschland verständigen, bevor die Westverträge in Kraft sind – im schlimmsten Fall auf eine Neutralisierung.`,
     optionen: [
-      { text: 'In London und Washington gegen Churchills Vorstoß intervenieren.', hist: true, richtung: 'west',
-        ergebnis: s => `${praesident(s)}${usaAussen(s) ? ' und ' + usaAussen(s) : ''} teilen die Bonner Bedenken. Churchill ist verärgert, der Gipfel kommt nicht zustande.`,
+      { text: s => `In London und Washington gegen ${londonerChefKurz(s)}s Vorstoß intervenieren.`, hist: true, richtung: 'west',
+        ergebnis: s => `${praesident(s)}${usaAussen(s) ? ' und ' + usaAussen(s) : ''} teilen die Bonner Bedenken. ${londonerChefKurz(s)} ist verärgert, der Gipfel kommt nicht zustande.`,
         w: { usa: 4, grossbritannien: -5, einheit: -3, moskau: -2 } },
-      { text: 'Churchill unterstützen: Ein Gespräch der Großmächte kann nur nützen.', richtung: 'ost',
-        ergebnis: s => `Churchill ist entzückt, ${usaAussen(s) || 'Washington'} besorgt. Die Westverträge geraten in Frankreich weiter ins Stocken.`,
+      { text: s => `${londonerChefKurz(s)} unterstützen: Ein Gespräch der Großmächte kann nur nützen.`, richtung: 'ost',
+        ergebnis: s => `${londonerChefKurz(s)} ist entzückt, ${usaAussen(s) || 'Washington'} besorgt. Die Westverträge geraten in Frankreich weiter ins Stocken.`,
         w: { grossbritannien: 6, usa: -5, frankreich: -1, einheit: 5, moskau: 5 } },
       { text: 'Abwarten und schweigen.',
         ergebnis: 'Die Initiative verläuft im Sande. Niemand hat die Haltung Bonns bemerkt.',

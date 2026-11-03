@@ -2,6 +2,7 @@
 import { fuenfte, istDeGaulle, algerienkrieg, zieheWahlVor } from './modell.js';
 import { brd, kanzler, bonnImWesten } from './hilfen.js';
 import { praesident } from '../brd/hilfen.js';
+import { londonerChefKurz } from '../grossbritannien/hilfen.js';
 import { zeitIndex } from '../../../engine.js';
 
 const seitVerhandlung = s => zeitIndex(s.zeit) - zeitIndex(s.f.verhandlung_seit || s.zeit);
@@ -346,18 +347,26 @@ De Gaulle will die Gelegenheit nutzen: Der Präsident soll künftig direkt vom V
   {
     id: 'fr_veto_gb',
     titel: 'Großbritannien in die EWG?',
-    datum: '14. Januar 1963',
-    ab: 1962.2, bis: 1963.2, ordnung: 1,
+    datum: s => (zeitIndex(s.zeit) === zeitIndex(1963.1) ? '14. Januar 1963' : null),
+    ab: 1963.1, bis: 1964.1, ordnung: 1,
+    ausloeser: 'ewg_antrag', ausloeserVon: 'grossbritannien',
     wenn: s => !!s.f.rom_ratifiziert && !s.f.gb_entschieden,
     absender: 'Quai d’Orsay',
-    text: s => `Großbritannien verhandelt seit 1961 über den Beitritt zur EWG. Im Dezember hat Premierminister Macmillan mit ${praesident(s)} in Nassau vereinbart, dass die Briten amerikanische Polaris-Raketen für ihre Atom-U-Boote bekommen. Für ${s.lager === 'de_gaulle' ? 'de Gaulle' : 'viele in Paris'} ist das der Beweis: London ist ein „trojanisches Pferd“ Washingtons. Die anderen fünf EWG-Staaten wollen die Briten dabeihaben.`,
+    text: s => `Großbritannien verhandelt seit ${s.welt.laender.grossbritannien.f.ewg_antrag_zeit ? Math.floor(s.welt.laender.grossbritannien.f.ewg_antrag_zeit) : 1961} über den Beitritt zur EWG. ${s.weltflags.nassau === 'ja'
+    ? `Im Dezember hat Premierminister ${londonerChefKurz(s)} mit ${praesident(s)} in Nassau vereinbart, dass die Briten amerikanische Polaris-Raketen für ihre Atom-U-Boote bekommen. Für ${s.lager === 'de_gaulle' ? 'de Gaulle' : 'viele in Paris'} ist das der Beweis: London ist ein „trojanisches Pferd“ Washingtons.`
+    : s.weltflags.nassau === 'nein'
+      ? `Premierminister ${londonerChefKurz(s)} hat in Nassau das amerikanische Angebot von Polaris-Raketen ausgeschlagen und Paris eine Zusammenarbeit bei Atomraketen angeboten. Selbst ${s.lager === 'de_gaulle' ? 'de Gaulle' : 'die Skeptiker in Paris'} können London kaum noch Hörigkeit gegenüber Washington vorwerfen.`
+      : `Für ${s.lager === 'de_gaulle' ? 'de Gaulle' : 'viele in Paris'} ist London ein „trojanisches Pferd“ Washingtons.`} Die anderen fünf EWG-Staaten wollen die Briten dabeihaben.`,
     optionen: [
       { text: 'Den Beitritt Großbritanniens mit einem Veto blockieren.', hist: true, richtung: 'national',
         ergebnis: s => `${s.lager === 'de_gaulle' ? 'De Gaulle' : 'Paris'} erklärt auf einer Pressekonferenz, Großbritannien sei für Europa noch nicht reif. Die Verhandlungen sind beendet. Die Partner sind empört.`,
-        w: { grossbritannien: -15, usa: -6, europa: -2, brd: -2 }, setze: ['gb_entschieden', 'veto_gb'], dient: { unabhaengigkeit: 1.3, westbindung: -0.6, europa: -0.3 } },
+        w: { grossbritannien: -15, usa: -6, europa: -2, brd: -2 }, setze: ['gb_entschieden', 'veto_gb'],
+        dient: s => ({ unabhaengigkeit: s.weltflags.nassau === 'nein' ? 0.6 : 1.3, westbindung: -0.6, europa: -0.3 }),
+        bei: { grossbritannien: { titel: 'Das Veto aus Paris', w: { frankreich: -8, europa: -4 }, setze: ['veto'], ergebnis: 'Paris hat den Beitritt Großbritanniens zur EWG mit einem Veto blockiert. Die Verhandlungen in Brüssel sind beendet.' } } },
       { text: 'Dem Beitritt zustimmen.', richtung: ['europa', 'atlantisch'],
         ergebnis: 'Paris stimmt dem Beitritt Großbritanniens zu. Die Gemeinschaft wird größer – und atlantischer.',
-        w: { grossbritannien: 12, usa: 6, europa: 4 }, setze: ['gb_entschieden'], dient: { westbindung: 1, europa: 0.6, unabhaengigkeit: -0.8 } },
+        w: { grossbritannien: 12, usa: 6, europa: 4 }, setze: ['gb_entschieden'], dient: { westbindung: 1, europa: 0.6, unabhaengigkeit: -0.8 },
+        bei: { grossbritannien: { titel: 'Willkommen in Europa', w: { frankreich: 6, europa: 25, empire: -4, impuls: 0.5 }, setze: ['ewg_mitglied'], ergebnis: 'Paris stimmt dem Beitritt Großbritanniens zur EWG zu. Großbritannien wird Mitglied der Gemeinschaft. (Fiktion)' } } },
     ],
     historisch: 'Am 14. Januar 1963 lehnte de Gaulle auf einer Pressekonferenz den britischen Beitritt ab. Großbritannien trat der EWG erst 1973 bei.',
   },

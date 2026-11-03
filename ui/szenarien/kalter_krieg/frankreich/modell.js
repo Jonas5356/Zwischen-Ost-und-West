@@ -806,6 +806,7 @@ export function aufklaerung(s, land) {
   if (land === 'brd') return { q: 0.72, quelle: 'Botschaft Bonn' };
   if (land === 'su') return { q: 0.6 + (s.f.sdece_reform ? 0.08 : 0), quelle: 'SDECE' };
   if (land === 'usa') return { q: 0.65 + (s.w.usa >= 65 ? 0.1 : 0), quelle: 'Botschaft Washington' };
+  if (land === 'grossbritannien') return { q: 0.7 + (s.w.grossbritannien >= 65 ? 0.06 : 0), quelle: 'Botschaft London' };
   return { q: 0.6, quelle: 'Quai d’Orsay' };
 }
 

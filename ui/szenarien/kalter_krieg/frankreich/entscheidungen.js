@@ -41,6 +41,16 @@ export default [
     dient: { kolonien: 0.4, westbindung: 0.2, unabhaengigkeit: -0.3 },
   },
   {
+    id: 'abstimmung_london',
+    titel: 'Sich mit London gegen Washington abstimmen',
+    text: 'Paris und London sind die beiden alten Mächte Europas, beide mit einem Empire und beide oft genug von Washington übergangen. Wenn sie sich vorher absprechen – im Sicherheitsrat, in der NATO, in den Fragen der Kolonien –, kann Washington sie nicht gegeneinander ausspielen. London muss allerdings mitmachen; die Antwort kommt nicht sofort.',
+    kosten: { ansehen: -1 },
+    abklingzeit: 4,
+    aktion: (s, a) => a.sende('grossbritannien', 'abstimmung'),
+    ergebnis: 'Paris schlägt London vor, die Haltung beider Länder abzustimmen, bevor Washington entscheidet.',
+    richtung: 'national',
+  },
+  {
     id: 'franc_abwertung',
     titel: 'Den Franc abwerten',
     text: 'Der Franc ist überbewertet; Ausfuhren lohnen sich nicht mehr, das Kapital flieht. Eine Abwertung würde Vertrauen zurückbringen und die Ausfuhr ankurbeln – aber die Einfuhren verteuern und das Ansehen der Regierung kosten.',

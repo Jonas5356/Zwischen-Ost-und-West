@@ -5,7 +5,7 @@ Eine textbasierte Politiksimulation über Europa im Kalten Krieg, vom Januar 194
 - **Bundesrepublik Deutschland** (ab ihrer Gründung 1949) – durch Petersberger Abkommen, Stalin-Note, Wiederbewaffnung, Römische Verträge, Mauerbau und Spiegel-Affäre.
 - **Frankreich** (ab 1946) – durch die Verfassungskämpfe der Nachkriegszeit, den Bruch mit den Kommunisten, den Marshallplan, die Regierungskrisen der Vierten Republik, Indochina und Điện Biên Phủ, Schuman-Plan und EVG, Suez, Algerien, den Mai 1958, de Gaulles Fünfte Republik und den Élysée-Vertrag.
 
-Das jeweils andere Land, die USA und die Sowjetunion steuert das Spiel: Sie verfolgen eigene Ziele, die du nur vermuten kannst.
+Das jeweils andere Land, Großbritannien, die USA und die Sowjetunion steuert das Spiel: Sie verfolgen eigene Ziele, die du nur vermuten kannst.
 
 Angeregt von [Third Bloc](https://store.steampowered.com/app/5155860/Third_Bloc/), aber mit einem konkreten Land und den tatsächlichen Ereignissen statt einer erfundenen Republik.
 
@@ -36,6 +36,7 @@ Selbst bauen: `build_windows.bat` doppelklicken (braucht Rust und Node.js, das S
 - **Landesspezifisch:** Indochina, Algerien, Loyalität der Armee, Atomprogramm, Europa und der Franc. Die Zeitung heißt „Le Messager“.
 - **Enden:** Bürgerkrieg, Staatsbankrott oder ein Krieg der Supermächte; sonst der Abschlussbericht mit allen Regierungschefs.
 - **Washington und Moskau:** Die Supermächte steuert das Spiel. Ihre Regierungen wechseln – Präsidentschaftswahlen, Stalins Tod, Machtkämpfe im Kreml – und jede verfolgt eigene Ziele. Ob Moskau die Stalin-Note schickt, Ulbricht die Mauer erlaubt oder Raketen nach Kuba bringt, ob Washington einen Wehrbeitrag verlangt oder Truppen abziehen will, entscheiden sie selbst. Auf der Viermächtekonferenz und bei den Verhandlungen über die Einheit antwortet Moskau nach seinen Absichten.
+- **London:** Großbritannien steuert vorerst das Spiel. Gewählt wird nach Lage – Attlee kann 1950 klar gewinnen, Labour 1955 an der Regierung bleiben, nach Suez Butler statt Macmillan kommen. Ob London Indien entlässt, die Bombe baut, der Montanunion beitritt, Truppen auf dem Kontinent zusagt, Suez mitträgt oder in die EWG will, entscheidet die jeweilige Regierung nach ihren Zielen. Du kannst London um Abstimmung gegen Washington (Paris) oder um Rückendeckung für Berlin (Bonn) bitten; die Antwort kommt als Telegramm.
 - **Verborgene Absichten:** Was eine Regierung wirklich will (war die Stalin-Note ernst gemeint? geht Chruschtschow in Berlin aufs Ganze?), siehst du nicht. Das Auswärtige Amt schätzt es nach Bayes aus ihrem Handeln und aus Berichten von Botschaften und Diensten, die sich irren können. Die Einschätzung steht im Lagebild, mit Wahrscheinlichkeiten im Dossier; der Abschlussbericht verrät die Wahrheit.
 - **Geschichtstreue:** Beim neuen Spiel stellst du ein, wie nah sich die Welt an die Geschichte hält – von „historisch“ (die historischen Regierungen mit ihren überlieferten Zielen) bis „frei“ (Stevenson, Nixon, Berija oder Molotow können an die Macht kommen, die Ziele streuen).
 - **Zeitung:** Zu jedem Halbjahr erscheint eine Ausgabe der „Depesche“ mit den Entscheidungen des letzten Halbjahrs, Wahlergebnissen, Wirtschaftsdaten und Meldungen aus aller Welt. Sie ist freiwillige Lektüre; ältere Ausgaben lassen sich nachblättern.

@@ -2,6 +2,7 @@
 import { pariserChef, pariserSpitze, pariserAussen, deGaulleRegiert } from '../frankreich/hilfen.js';
 import { west, geteilt, vereinigt, imBuendnis, adenauer, regiertMit, land, Land, wahlIn, hauptstadt, unionRegiert, spdRegiert, SPD_WAHLKAMPF, praesident, usaAussen, suChef, suRegime } from './hilfen.js';
 import { hatMehrheit } from './modell.js';
+import { londonerAussen, londonerAussenKurz, londonerChefKurz } from '../grossbritannien/hilfen.js';
 
 export default [
   // ------------------------------------------------------------------ 1954/I
@@ -12,15 +13,15 @@ export default [
     ab: 1954.1, ordnung: 1,
     wenn: west,
     absender: 'Beobachterdelegation in Berlin',
-    text: s => `Zum ersten Mal seit fünf Jahren sitzen die Außenminister der vier Mächte wieder zusammen, im Gebäude des Alliierten Kontrollrats in Berlin. Der britische Außenminister Eden legt einen Plan vor: zuerst freie gesamtdeutsche Wahlen, dann eine Nationalversammlung, dann ein Friedensvertrag. Molotow verlangt dagegen eine provisorische Regierung aus Vertretern beider deutscher Staaten und ein neutrales Deutschland.${s.f.westvertraege ? ' Die Westverträge sind unterzeichnet, aber in Paris noch nicht ratifiziert.' : ''}
+    text: s => `Zum ersten Mal seit fünf Jahren sitzen die Außenminister der vier Mächte wieder zusammen, im Gebäude des Alliierten Kontrollrats in Berlin. Der britische Außenminister ${londonerAussenKurz(s)} legt einen Plan vor: zuerst freie gesamtdeutsche Wahlen, dann eine Nationalversammlung, dann ein Friedensvertrag. Molotow verlangt dagegen eine provisorische Regierung aus Vertretern beider deutscher Staaten und ein neutrales Deutschland.${s.f.westvertraege ? ' Die Westverträge sind unterzeichnet, aber in Paris noch nicht ratifiziert.' : ''}
 
 Die Delegationen sind festgefahren. Ein Signal aus Bonn könnte die Gewichte verschieben.`,
     optionen: [
-      { text: 'Den Eden-Plan ohne Abstriche unterstützen.', hist: true, richtung: 'west',
+      { text: s => `Den ${londonerAussenKurz(s)}-Plan ohne Abstriche unterstützen.`, hist: true, richtung: 'west',
         ergebnis: 'Die Konferenz endet nach vier Wochen ohne Ergebnis. Die Teilung wirkt endgültiger als zuvor.',
         w: { usa: 3, grossbritannien: 3, einheit: -3, moskau: -2 } },
       { text: 'Einen Kompromiss signalisieren: Neutralität eines vereinten Deutschlands, wenn freie Wahlen garantiert sind.', richtung: 'ost',
-        ergebnis: s => `${usaAussen(s) || 'Washington'} ist außer sich, ${pariserAussen(s)} kühl, Eden nachdenklich. Molotow lässt eine Pause einlegen.`,
+        ergebnis: s => `${usaAussen(s) || 'Washington'} ist außer sich, ${pariserAussen(s)} kühl, ${londonerAussenKurz(s)} nachdenklich. Molotow lässt eine Pause einlegen.`,
         w: { usa: -12, frankreich: -3, grossbritannien: -4, einheit: 8, rueckhalt: -6 },
         rueckfrage: { land: 'su', id: 'su_berliner_konferenz' },
         antworten: {
@@ -69,8 +70,8 @@ Ob die Nationalversammlung danach zustimmt, ist offen. Kommst du ihm entgegen?`,
     datum: 'September/Oktober 1954',
     ab: 1954.2, bis: 1955.2, ordnung: 9,
     wenn: s => west(s) && !s.f.evg && (s.f.evg_gescheitert || s.f.westvertraege_abgelehnt) && !s.weltflags.nato_veto && !s.f.westintegration_gescheitert,
-    absender: 'Anthony Eden, britischer Außenminister',
-    text: s => `${s.f.westvertraege_abgelehnt ? 'Nachdem Bonn die Westverträge 1952 nicht unterzeichnet hat, unternehmen die Westmächte einen letzten Anlauf.' : 'Nach dem Scheitern der EVG hat Eden in einer Rundreise durch die Hauptstädte eine Ersatzlösung zusammengezimmert.'} Die Bundesrepublik soll souverän werden und direkt der NATO beitreten; die Brüsseler Pakt-Staaten werden zur Westeuropäischen Union erweitert, die die deutsche Rüstung kontrolliert.
+    absender: s => `${londonerAussen(s)}, britischer Außenminister`,
+    text: s => `${s.f.westvertraege_abgelehnt ? 'Nachdem Bonn die Westverträge 1952 nicht unterzeichnet hat, unternehmen die Westmächte einen letzten Anlauf.' : `Nach dem Scheitern der EVG hat ${londonerAussenKurz(s)} in einer Rundreise durch die Hauptstädte eine Ersatzlösung zusammengezimmert.`} Die Bundesrepublik soll souverän werden und direkt der NATO beitreten; die Brüsseler Pakt-Staaten werden zur Westeuropäischen Union erweitert, die die deutsche Rüstung kontrolliert.${s.weltflags.gb_truppen === 'nein' ? ' London allerdings will keine Truppen auf Dauer auf dem Kontinent zusagen; in Paris wächst der Widerstand.' : ''}
 
 Frankreichs Preis: Die Bundesrepublik soll freiwillig auf die Herstellung atomarer, biologischer und chemischer Waffen verzichten.`,
     optionen: [
@@ -224,7 +225,7 @@ In der Bundesrepublik fragen sich viele: Warum nicht auch für uns? ${spdRegiert
     ab: 1955.2, ordnung: 7,
     wenn: geteilt,
     absender: 'Beobachterdelegation in Genf',
-    text: s => `${praesident(s)}, Eden, ${pariserChef(s)} und ${suRegime(s) === 'chruschtschow' ? 'Bulganin mit Chruschtschow' : suChef(s)} treffen sich in Genf – der erste Gipfel der Großmächte seit Potsdam. Die Stimmung ist freundlich, man spricht vom „Geist von Genf“. Über Deutschland gibt es keine Einigung: Moskau spricht jetzt von „zwei deutschen Staaten“.
+    text: s => `${praesident(s)}, ${londonerChefKurz(s)}, ${pariserChef(s)} und ${suRegime(s) === 'chruschtschow' ? 'Bulganin mit Chruschtschow' : suChef(s)} treffen sich in Genf – der erste Gipfel der Großmächte seit Potsdam. Die Stimmung ist freundlich, man spricht vom „Geist von Genf“. Über Deutschland gibt es keine Einigung: Moskau spricht jetzt von „zwei deutschen Staaten“.
 
 Bonn ist nur Beobachter. Was soll die Delegation den westlichen Regierungschefs mit auf den Weg geben?`,
     optionen: [
@@ -232,7 +233,7 @@ Bonn ist nur Beobachter. Was soll die Delegation den westlichen Regierungschefs 
         ergebnis: 'Die Westmächte halten an der Formel fest. Die Konferenz endet in freundlicher Ratlosigkeit.',
         w: { usa: 2, einheit: -1 } },
       { text: 'Ein europäisches Sicherheitssystem als Gegenleistung für die Einheit anregen.', richtung: 'ost',
-        ergebnis: 'Ein interessanter Gedanke, sagt Eden. Mehr geschieht nicht.',
+        ergebnis: s => `Ein interessanter Gedanke, sagt ${londonerChefKurz(s)}. Mehr geschieht nicht.`,
         w: { einheit: 3, usa: -3, moskau: 3, grossbritannien: 2 } },
     ],
     historisch: 'Der Genfer Gipfel (18.–23. Juli 1955) brachte keine Annäherung in der deutschen Frage. Auf der Rückreise erklärte Chruschtschow in Ost-Berlin die Zwei-Staaten-Theorie.',
@@ -437,7 +438,9 @@ Für ${land(s)} wäre das ein Albtraum: Ohne amerikanische Soldaten würde jede 
     ab: 1956.2, ordnung: 10.5,
     wenn: s => !!s.weltflags.suez_angriff,
     absender: 'Botschaft Paris',
-    text: s => `Großbritannien und Frankreich haben zusammen mit Israel Ägypten angegriffen, um den von Nasser verstaatlichten Suezkanal zurückzugewinnen. ${s.weltflags.suez_gewaehren ? `${praesident(s)} lässt die Verbündeten gewähren; britische und französische Truppen besetzen die Kanalzone. Moskau droht London und Paris mit Raketen.` : `${praesident(s)} ist empört und zwingt London und Paris mit finanziellem Druck zum Rückzug; Moskau droht mit Raketen. Für Paris und London ist es eine Demütigung.`}
+    text: s => `${s.weltflags.suez_london === 'nein' ? 'Frankreich hat zusammen mit Israel Ägypten angegriffen – ohne die Briten –' : 'Großbritannien und Frankreich haben zusammen mit Israel Ägypten angegriffen,'} um den von Nasser verstaatlichten Suezkanal zurückzugewinnen. ${s.weltflags.suez_london === 'nein'
+    ? (s.weltflags.suez_gewaehren ? `${praesident(s)} lässt Paris gewähren; französische Truppen besetzen die Kanalzone. Moskau droht Paris mit Raketen.` : `${praesident(s)} ist empört und zwingt Paris mit finanziellem Druck zum Rückzug; Moskau droht mit Raketen. Für Paris ist es eine Demütigung.`)
+    : (s.weltflags.suez_gewaehren ? `${praesident(s)} lässt die Verbündeten gewähren; britische und französische Truppen besetzen die Kanalzone. Moskau droht London und Paris mit Raketen.` : `${praesident(s)} ist empört und zwingt London und Paris mit finanziellem Druck zum Rückzug; Moskau droht mit Raketen. Für Paris und London ist es eine Demütigung.`)}
 
 Für den 6. November ist ${s.kanzler} zu einem lange geplanten Besuch bei ${pariserSpitze(s)} in Paris angekündigt. ${s.weltflags.suez_gewaehren ? 'Das Auswärtige Amt rät zur Absage – man dürfe nicht in den Konflikt hineingezogen werden.' : 'Das Auswärtige Amt rät zur Absage – man dürfe sich nicht an die Seite der Verlierer stellen.'}`,
     optionen: [

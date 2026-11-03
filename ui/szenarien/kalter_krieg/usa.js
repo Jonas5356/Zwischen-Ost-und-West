@@ -328,10 +328,10 @@ const ereignisse = [
     wenn: s => !!s.weltflags.suez_angriff,
     optionen: [
       { text: 'London und Paris mit finanziellem Druck zum Rückzug zwingen.', hist: true, dient: { buendnis_fuehren: 0.8, eindaemmung: 0.5, entspannung: 0.3 }, w: { buendnis: -6, prestige: 3 },
-        ergebnis: s => `${name(s)} zwingt London und Paris mit finanziellem Druck, den Angriff auf Ägypten abzubrechen.`,
+        ergebnis: s => `${name(s)} zwingt ${s.weltflags.suez_london === 'nein' ? 'Paris' : 'London und Paris'} mit finanziellem Druck, den Angriff auf Ägypten abzubrechen.`,
         aktion: (s, a) => a.weltflag('suez_druck') },
       { text: 'Die Verbündeten gewähren lassen.', dient: { buendnis_fuehren: -0.3, eindaemmung: -0.5 }, w: { prestige: -4, su: -5 },
-        ergebnis: 'Washington hält still. Britische und französische Truppen besetzen die Kanalzone, Moskau droht mit Raketen.',
+        ergebnis: s => `Washington hält still. ${s.weltflags.suez_london === 'nein' ? 'Französische' : 'Britische und französische'} Truppen besetzen die Kanalzone, Moskau droht mit Raketen.`,
         aktion: (s, a) => a.weltflag('suez_gewaehren') },
     ],
   },

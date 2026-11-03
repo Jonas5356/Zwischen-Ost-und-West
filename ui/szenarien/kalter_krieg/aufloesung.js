@@ -4,8 +4,9 @@ import { REGIERUNGEN as USA } from './usa.js';
 import { REGIERUNGEN as SU } from './su.js';
 import { REGIERUNGEN as FR } from './frankreich/regierungen.js';
 import { REGIERUNGEN as BRD } from './brd/regierungen.js';
+import { REGIERUNGEN as GB } from './grossbritannien/regierungen.js';
 
-const LAENDER = [['usa', USA, 'Washington'], ['su', SU, 'Moskau'], ['frankreich', FR, 'Paris'], ['brd', BRD, 'Bonn']];
+const LAENDER = [['usa', USA, 'Washington'], ['su', SU, 'Moskau'], ['grossbritannien', GB, 'London'], ['frankreich', FR, 'Paris'], ['brd', BRD, 'Bonn']];
 
 /** `wer`: wie das gespielte Land in den Sätzen heißt („Bonn“, „Paris“) */
 export function aufloesung(s, wer) {

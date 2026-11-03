@@ -652,6 +652,7 @@ export function aufklaerung(s, land) {
   }
   if (land === 'usa') return { q: 0.65 + (s.w.usa >= 65 ? 0.1 : 0), quelle: s.zeit < 1955.2 ? 'Verbindungsstelle Washington' : 'Botschaft Washington' };
   if (land === 'frankreich') return { q: 0.66 + (s.w.frankreich >= 65 ? 0.08 : 0), quelle: s.zeit < 1955.2 ? 'Generalkonsulat Paris' : 'Botschaft Paris' };
+  if (land === 'grossbritannien') return { q: 0.68 + (s.w.grossbritannien >= 65 ? 0.08 : 0), quelle: s.zeit < 1955.2 ? 'Generalkonsulat London' : 'Botschaft London' };
   return { q: 0.6, quelle: 'Auswärtiges Amt' };
 }
 
