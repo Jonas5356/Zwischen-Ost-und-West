@@ -21,7 +21,7 @@ Die Delegationen sind festgefahren. Ein Signal aus Bonn könnte die Gewichte ver
         w: { usa: 3, grossbritannien: 3, einheit: -3, moskau: -2 } },
       { text: 'Einen Kompromiss signalisieren: Neutralität eines vereinten Deutschlands, wenn freie Wahlen garantiert sind.', richtung: 'ost',
         ergebnis: s => `${usaAussen(s) || 'Washington'} ist außer sich, ${pariserAussen(s)} kühl, Eden nachdenklich. Molotow lässt eine Pause einlegen.`,
-        w: { usa: -12, frankreich: -3, grossbritannien: -4, einheit: 8, koalition: -6 },
+        w: { usa: -12, frankreich: -3, grossbritannien: -4, einheit: 8, rueckhalt: -6 },
         rueckfrage: { land: 'su', id: 'su_berliner_konferenz' },
         antworten: {
           ja: { ergebnis: 'Die Westverträge liegen auf Eis; ein Vertrag über die Einheit wird ausgehandelt.',
@@ -56,7 +56,7 @@ Ob die Nationalversammlung danach zustimmt, ist offen. Kommst du ihm entgegen?`,
         dient: { westbindung: 0.6, wiederbewaffnung: 0.8 } },
       { text: 'Paris entgegenkommen: Zusatzprotokolle und Bewegung in der Saarfrage.', richtung: 'west',
         ergebnis: 'Bonn kommt Paris weit entgegen – auch in der Saarfrage. Die Fraktion murrt.',
-        w: { ansehen: -2, koalition: -4, frankreich: 4 }, setze: ['saar_zugestaendnis'],
+        w: { ansehen: -2, rueckhalt: -4, frankreich: 4 }, setze: ['saar_zugestaendnis'],
         aktion: (s, a) => a.weltflag('evg_bruessel', 'entgegen'),
         bei: { frankreich: { titel: 'Bonn kommt entgegen', w: { brd: 3 }, ergebnis: 'Der Kanzler kommt Paris in Brüssel weit entgegen, auch in der Saarfrage.' } },
         dient: { aussoehnung: 0.6, europa: 0.3, wiederbewaffnung: -0.6 } },
@@ -102,12 +102,12 @@ ${spdRegiert(s) ? 'FDP, BHE und Teile deiner eigenen Partei' : 'FDP, BHE und die
     optionen: [
       { text: 'Dem Statut zustimmen und auf die Abstimmung vertrauen.', hist: true, richtung: 'west',
         ergebnis: 'Die Koalitionspartner murren laut. Paris ist zufrieden.',
-        w: { frankreich: 8, europa: 3, ansehen: -2, koalition: -8 }, setze: ['saarstatut'],
+        w: { frankreich: 8, europa: 3, ansehen: -2, rueckhalt: -8 }, setze: ['saarstatut'],
         bei: { frankreich: { titel: 'Bonn stimmt dem Saarstatut zu', w: { brd: 2 }, ergebnis: 'Bonn stimmt dem europäischen Statut für die Saar zu. Die Saarländer sollen abstimmen.' } },
         dient: { aussoehnung: 1, europa: 0.4 } },
       { text: 'Ablehnen – die Saar ist deutsch.',
         ergebnis: 'In Paris wird die Ratifizierung der Verträge zur Zitterpartie.',
-        w: { frankreich: -14, ansehen: 3, koalition: 4 }, setze: ['saar_abgelehnt'],
+        w: { frankreich: -14, ansehen: 3, rueckhalt: 4 }, setze: ['saar_abgelehnt'],
         bei: { frankreich: { titel: 'Bonn lehnt das Saarstatut ab', w: { brd: -4 }, ergebnis: 'Bonn lehnt das Saarstatut ab: Die Saar sei deutsch.' } },
         dient: { aussoehnung: -1 } },
     ],
@@ -182,7 +182,7 @@ Wie soll der Tag begangen werden?`;
     optionen: [
       { text: 'Einlenken und dem Saarstatut doch zustimmen.', richtung: 'west',
         ergebnis: 'Bonn stimmt dem Saarstatut zu. Paris ratifiziert die Pariser Verträge; der Weg zu Souveränität und NATO-Beitritt ist frei.',
-        w: { frankreich: 8, ansehen: -4, koalition: -6 },
+        w: { frankreich: 8, ansehen: -4, rueckhalt: -6 },
         setze: ['saarstatut'], loesche: ['saar_abgelehnt'],
         aktion: (s, a) => { a.weltflag('ratifizierung_haengt', false); a.weltflag('pariser_ratifiziert'); },
         bei: { frankreich: { titel: 'Bonn lenkt ein', w: { brd: -2, usa: 3 }, ergebnis: 'Bonn stimmt dem Saarstatut zu. Die Nationalversammlung ratifiziert die Pariser Verträge.' } },
@@ -352,12 +352,12 @@ Die jungen Landespolitiker der FDP in Nordrhein-Westfalen – Döring, Weyer, Sc
           s.regierung = s.regierung.filter(p => p !== 'FDP');
           if (!s.regierung.includes('Kleine')) s.regierung.push('Kleine');
           s.f.fdp_opposition = true;
-          s.w.koalition = 45;
-          if (!hatMehrheit(s, s.regierung)) s.w.koalition = 0;
+          s.w.rueckhalt = 45;
+          if (!hatMehrheit(s, s.regierung)) s.w.rueckhalt = 0;
         } },
       { text: 'Das Wahlrecht begraben und mit Dehler ein offenes Gespräch führen.',
         ergebnis: 'Der Konflikt wird vertagt, nicht gelöst.',
-        w: { koalition: 6, ansehen: -1 } },
+        w: { rueckhalt: 6, ansehen: -1 } },
     ],
     historisch: 'Am 20. Februar 1956 stürzte die FDP in Düsseldorf Karl Arnold. Am 23. Februar verließ die FDP-Bundestagsfraktion die Koalition; die FDP-Minister und 16 Abgeordnete gründeten die FVP, die mit der Union weiterregierte.',
   },
@@ -382,7 +382,7 @@ ${unionRegiert(s) ? 'Die SPD will eine kleinere Freiwilligenarmee. Die NATO-Plan
         w: { usa: 6, grossbritannien: 2, moskau: -5, haushalt: -4, ansehen: -4, bundeswehr: 1 }, setze: ['wehrpflicht'] },
       { text: 'Eine kleinere Berufsarmee.',
         ergebnis: s => (unionRegiert(s) ? 'Die SPD stimmt zu, die NATO schüttelt den Kopf.' : 'Die eigene Fraktion ist erleichtert, die NATO schüttelt den Kopf.'),
-        w: { usa: -6, haushalt: -1, ansehen: 2, koalition: 2 } },
+        w: { usa: -6, haushalt: -1, ansehen: 2, rueckhalt: 2 } },
     ],
     historisch: 'Das Wehrpflichtgesetz wurde am 7. Juli 1956 verabschiedet und sah 12 Monate Grundwehrdienst vor. Die ersten Wehrpflichtigen wurden am 1. April 1957 einberufen.',
   },
@@ -402,7 +402,7 @@ Mit Moskau bestehen inzwischen diplomatische Beziehungen. Ein Verbot wäre ein S
         w: { moskau: -4, ansehen: 1 }, setze: ['kpd_verboten'] },
       { text: 'Den Antrag zurückziehen.',
         ergebnis: 'Die Richter sind erleichtert. Die Vertriebenenverbände und die CSU sprechen von Schwäche.',
-        w: { moskau: 2, ansehen: -1, koalition: -2 } },
+        w: { moskau: 2, ansehen: -1, rueckhalt: -2 } },
     ],
     historisch: 'Das Bundesverfassungsgericht verbot die KPD am 17. August 1956. 1968 wurde die DKP als Nachfolgepartei neu gegründet.',
   },
@@ -522,7 +522,7 @@ ${unionRegiert(s) ? 'Finanzminister Schäffer und Wirtschaftsminister Erhard hal
     optionen: [
       { text: 'Die dynamische Rente durchsetzen.', hist: true,
         ergebnis: 'Über Nacht steigen die Renten um 60 Prozent und mehr. Für Millionen alte Menschen ist es die größte Wohltat, die je ein Staat getan hat.',
-        w: { ansehen: 6, haushalt: -6, koalition: 2, impuls: 0.8 }, setze: ['rentenreform'] },
+        w: { ansehen: 6, haushalt: -6, rueckhalt: 2, impuls: 0.8 }, setze: ['rentenreform'] },
       { text: 'Eine einmalige kräftige Erhöhung ohne Dynamisierung.',
         ergebnis: 'Die Rentner freuen sich, die Fachleute warnen, dass das Problem bald zurückkehrt.',
         w: { ansehen: 3, haushalt: -3 } },

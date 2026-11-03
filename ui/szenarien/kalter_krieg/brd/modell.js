@@ -2,24 +2,32 @@
 // Alle Größen sind bewusst einfach gehalten und so kalibriert, dass ein Spiel mit
 // den historischen Entscheidungen ungefähr die historischen Werte ergibt.
 
+import { STANDARD, BAUSTEINE, beziehungen } from '../werte.js';
 import { jahrVon, zeitIndex, zeitText, runde1 } from '../../../engine.js';
 
 export const WERTE = {
-  usa:             { name: 'Beziehung zu den USA', kurz: 'Washington', min: 0, max: 100, gruppe: 'aussen', beziehung: 'usa' },
-  frankreich:      { name: 'Beziehung zu Frankreich', kurz: 'Paris', min: 0, max: 100, gruppe: 'aussen', beziehung: 'frankreich' },
-  grossbritannien: { name: 'Beziehung zu Großbritannien', kurz: 'London', min: 0, max: 100, gruppe: 'aussen', beziehung: 'grossbritannien' },
-  moskau:          { name: 'Beziehung zu Moskau', kurz: 'Moskau', min: 0, max: 100, gruppe: 'aussen', beziehung: 'su' },
-  souveraenitaet:  { name: 'Souveränität', kurz: 'Souveränität', min: 0, max: 100, gruppe: 'aussen' },
-  einheit:         { name: 'Aussicht auf Einheit', kurz: 'Einheit', min: 0, max: 100, gruppe: 'aussen' },
-  europa:          { name: 'Europäische Integration', kurz: 'Europa', min: 0, max: 100, gruppe: 'aussen' },
-  zustimmung:      { name: 'Kanzlerpartei in Umfragen', kurz: 'Umfrage', min: 10, max: 70, einheit: '%', gruppe: 'innen', keinHinweis: true },
-  ansehen:         { name: 'Ansehen des Kanzlers', kurz: 'Ansehen', min: -30, max: 30, gruppe: 'innen' },
-  koalition:       { name: 'Koalitionsklima', kurz: 'Koalition', min: 0, max: 100, gruppe: 'innen' },
-  haushalt:        { name: 'Haushaltslage', kurz: 'Haushalt', min: -20, max: 100, gruppe: 'wirtschaft' },
-  wachstum:        { name: 'Wirtschaftswachstum', kurz: 'Wachstum', min: -10, max: 20, einheit: '%', gruppe: 'wirtschaft', keinHinweis: true },
-  arbeitslosigkeit:{ name: 'Arbeitslosenquote', kurz: 'Arbeitslose', min: 0.5, max: 25, einheit: '%', invertiert: true, gruppe: 'wirtschaft', keinHinweis: true },
-  impuls:          { name: 'Konjunkturimpuls', kurz: 'Konjunktur', min: -6, max: 6, gruppe: 'wirtschaft' },
-  flucht:          { name: 'Fluchtbewegung aus der DDR', kurz: 'Flucht aus der DDR', min: 0, max: 100, neutral: true, gruppe: 'aussen' },
+  // Beziehungen: wie Washington, Moskau, London und Paris die Bundesrepublik sehen
+  ...beziehungen('brd'),
+  // Landesspezifisch
+  souveraenitaet:  { name: 'Souveränität', kurz: 'Souveränität', min: 0, max: 100, block: 'land',
+    erklaerung: { was: 'Wie viel die Bundesrepublik selbst entscheiden darf, von 0 (Besatzungsstatut) bis 100 (voll souverän).',
+      hebt: 'Petersberger Abkommen, Westverträge, NATO-Beitritt.', senkt: 'Gescheiterte Verträge, Misstrauen der Westmächte.',
+      wirkt: 'Unter 60 zahlt die Bundesrepublik Besatzungskosten; unter 30 lähmen die Demontagen das Wachstum. Sinken Souveränität und Vertrauen der Westmächte zu tief, setzen sie das Besatzungsrecht wieder in Kraft.' } },
+  einheit:         { name: 'Aussicht auf Einheit', kurz: 'Einheit', min: 0, max: 100, block: 'land',
+    erklaerung: { was: 'Wie realistisch eine Wiedervereinigung ist, von 0 bis 100.', hebt: 'Verhandlungen mit Moskau, Neutralität, Entspannung.',
+      senkt: 'Die Bindung an den Westen (NATO, EVG), die Zeit.', wirkt: 'Öffnet die Verhandlungen über die Einheit; strebt ohne Zutun langsam gegen 10.' } },
+  europa:          { ...BAUSTEINE.europa },
+  zustimmung:      { ...STANDARD.zustimmung, min: 10, max: 70 },
+  ansehen:         STANDARD.ansehen,
+  rueckhalt:       STANDARD.rueckhalt,
+  haushalt:        STANDARD.haushalt,
+  wachstum:        STANDARD.wachstum,
+  inflation:       STANDARD.inflation,
+  arbeitslosigkeit: STANDARD.arbeitslosigkeit,
+  impuls:          { name: 'Konjunkturimpuls', kurz: 'Konjunktur', min: -6, max: 6, versteckt: true },
+  flucht:          { name: 'Fluchtbewegung aus der DDR', kurz: 'Flucht aus der DDR', min: 0, max: 100, neutral: true, block: 'land',
+    erklaerung: { was: 'Wie viele Menschen aus der DDR in den Westen fliehen, von 0 bis 100.', hebt: 'Härte in der DDR, Krisen in Berlin.',
+      senkt: 'Die Mauer, Entspannung, eine Einigung mit Moskau.', wirkt: 'Flüchtlinge erhöhen zunächst die Arbeitslosigkeit; eine hohe Fluchtbewegung setzt Ost-Berlin und Moskau unter Druck.' } },
   kanzlerbonus:    { name: 'Kanzlerbonus', min: -10, max: 10, versteckt: true },
   klima:           { name: 'Konjunkturklima', min: -10, max: 20, versteckt: true },
   bundeswehr:      { name: 'Aufbau der Streitkräfte', min: 0, max: 5, versteckt: true },
@@ -29,6 +37,12 @@ export const WERTE = {
 const BASIS = {
   1949: 8.6, 1950: 9.4, 1951: 8.2, 1952: 7.6, 1953: 7.0, 1954: 6.0, 1955: 9.8, 1956: 5.4,
   1957: 4.0, 1958: 3.0, 1959: 5.6, 1960: 6.8, 1961: 3.6, 1962: 3.2, 1963: 1.8, 1964: 5.2,
+};
+
+// Grundinflation (Verbraucherpreise, % p. a.): Deflation nach der Währungsreform, Korea-Schub 1951
+const INFLATION = {
+  1949: 0, 1950: -4, 1951: 7.5, 1952: 2, 1953: -1.5, 1954: 0.3, 1955: 1.6, 1956: 2.6,
+  1957: 2.1, 1958: 2.2, 1959: 1.0, 1960: 1.4, 1961: 2.3, 1962: 2.8, 1963: 3.0, 1964: 2.3,
 };
 
 // Sammlungsbewegung: die Union nimmt bis Ende der 50er Jahre kleinere bürgerliche Parteien auf
@@ -97,21 +111,24 @@ export function wechsleRegierung(s, partei, regierung, kanzler = kandidat(s, par
     s.w.kanzlerbonus = 4;
     delete s.f.adenauer_ruecktritt_zugesagt;
   }
-  s.w.koalition = Math.max(s.w.koalition, regierung.length > 1 ? 55 : 60);
+  s.w.rueckhalt = Math.max(s.w.rueckhalt, regierung.length > 1 ? 55 : 60);
   notiereKanzler(s);
 }
+
+/** Steigende Preise ärgern erst, wenn sie spürbar sind */
+const teuerung = w => 0.4 * Math.max(0, (w.inflation ?? 2) - 3);
 
 export function berechneUmfrage(s) {
   const w = s.w;
   const g = w.klima ?? w.wachstum;
   if (kanzlerpartei(s) === 'SPD') {
     // Die SPD in der Regierung: eigene Stammwählerschaft, Amtsbonus und die Regierungsbilanz
-    let u = spdBasis(s.zeit) + (s.f.godesberg ? 3 : 0) + 4 + 0.6 * (g - 5) - 0.6 * (w.arbeitslosigkeit - 5)
+    let u = spdBasis(s.zeit) + (s.f.godesberg ? 3 : 0) + 4 + 0.6 * (g - 5) - 0.6 * (w.arbeitslosigkeit - 5) - teuerung(w)
       + w.ansehen + w.kanzlerbonus;
     if (s.f.vereinigt) u += 2;
     return Math.max(15, Math.min(65, runde1(u)));
   }
-  let u = 30 + sammlung(s.zeit) + 0.6 * (g - 5) - 0.6 * (w.arbeitslosigkeit - 5)
+  let u = 30 + sammlung(s.zeit) + 0.6 * (g - 5) - 0.6 * (w.arbeitslosigkeit - 5) - teuerung(w)
     + w.ansehen + w.kanzlerbonus - altersmalus(s);
   if (s.f.vereinigt) u -= s.f.ost_cdu ? 0.5 : 2.5; // in den neuen Ländern ist die Union schwächer
   return Math.max(15, Math.min(65, runde1(u)));
@@ -121,7 +138,7 @@ export function startzustand() {
   return {
     w: {
       souveraenitaet: 10, einheit: 15, europa: 5,
-      ansehen: 0, koalition: 60, haushalt: 40, wachstum: 9.0, arbeitslosigkeit: 9.5, impuls: 0,
+      ansehen: 0, rueckhalt: 60, haushalt: 40, wachstum: 9.0, inflation: 0, arbeitslosigkeit: 9.5, impuls: 0,
       flucht: 30, kanzlerbonus: 0, bundeswehr: 0, zustimmung: 31, klima: 9,
     },
     f: {},
@@ -165,6 +182,13 @@ export function rundenende(s, a) {
   w.impuls *= 0.5;
   w.klima = runde1(((w.klima ?? w.wachstum) + w.wachstum) / 2);
 
+  // --- Inflation: Grundrate, Konjunkturprogramme und Defizite treiben die Preise
+  let inf = 0.4 * (w.inflation ?? 2) + 0.6 * (INFLATION[j] ?? 2) + 0.3 * Math.max(0, w.impuls);
+  if (w.haushalt < 15) inf += (15 - w.haushalt) * 0.05;
+  if (seit !== null && seit < 4) inf += 2;
+  inf += 0.3 * a.normal();
+  w.inflation = runde1(Math.max(-6, Math.min(30, inf)));
+
   // --- Arbeitslosigkeit (Halbjahresveränderung, Okun-artig plus Zustrom von Vertriebenen und Flüchtlingen)
   const zustrom = j <= 1952 ? 1.15 : j <= 1955 ? 0.75 : j <= 1958 ? 0.2 : 0;
   let al = w.arbeitslosigkeit - 0.22 * (w.wachstum - 3) + zustrom + 0.004 * w.flucht;
@@ -182,7 +206,7 @@ export function rundenende(s, a) {
 
   // --- Langsame Rückkehr zu Normalwerten
   w.moskau += (50 - w.moskau) * 0.12;
-  w.koalition += (55 - w.koalition) * 0.08;
+  w.rueckhalt += (55 - w.rueckhalt) * 0.08;
   w.ansehen *= 0.78;
   // Vertrauen will gepflegt werden
   for (const k of ['usa', 'frankreich', 'grossbritannien']) w[k] += (50 - w[k]) * 0.08;
@@ -191,7 +215,7 @@ export function rundenende(s, a) {
   const fluchtBasis = s.f.mauer ? 3 : s.f.vereinigt ? 0 : s.f.neutral ? 15 : 25;
   w.flucht += (fluchtBasis - w.flucht) * 0.15;
   if (s.f.nato || s.f.evg) w.einheit = Math.max(0, w.einheit - 0.6);
-  for (const k of ['moskau', 'koalition', 'ansehen', 'flucht', 'einheit', 'usa', 'frankreich', 'grossbritannien']) w[k] = runde1(w[k]);
+  for (const k of ['moskau', 'rueckhalt', 'ansehen', 'flucht', 'einheit', 'usa', 'frankreich', 'grossbritannien']) w[k] = runde1(w[k]);
 
   // Schumacher (gest. August 1952) und Ollenhauer (gest. Dezember 1963) können nicht im Amt bleiben
   const abschied = { Schumacher: [1952.1, 'Bundeskanzler Kurt Schumacher tritt aus gesundheitlichen Gründen zurück.'],
@@ -269,7 +293,7 @@ export function fdpBereit(s, partei = kanzlerpartei(s)) {
   if (partei === 'SPD' && !fdpSpdOffen(s)) return false;
   const e = s.wahlen[s.wahlen.length - 1];
   const abstand = e ? e.stimmen[partei] - e.stimmen[andere(partei)] : (partei === 'Union' ? 10 : -10);
-  return (eigene ? s.w.koalition : 50) + 2 * abstand >= 50;
+  return (eigene ? s.w.rueckhalt : 50) + 2 * abstand >= 50;
 }
 /** Die kleinen bürgerlichen Parteien koalieren nur mit der Union */
 const kleineBereit = (s, partei = 'Union') => partei === 'Union' && !s.f.grenze_anerkannt;
@@ -320,7 +344,7 @@ function uebernahme(s, neu, anlass) {
     aktion: st => {
       const fdpRaus = st.regierung.includes('FDP') && !neu.regierung.includes('FDP');
       wechsleRegierung(st, neu.partei, neu.regierung, kanzler);
-      if (neu.minderheit) st.w.koalition = 40;
+      if (neu.minderheit) st.w.rueckhalt = 40;
       if (fdpRaus) st.f.fdp_opposition = true;
     },
   };
@@ -355,7 +379,7 @@ export const dynamisch = {
     const j = jahrVon(e.zeit);
     const k = kleineName(s);
     const opts = [];
-    const neuBonus = { aktion: (st) => { st.w.koalition = Math.max(st.w.koalition, 50); } };
+    const neuBonus = { aktion: (st) => { st.w.rueckhalt = Math.max(st.w.rueckhalt, 50); } };
     const K = kanzlerpartei(s);
     const fdpOk = fdpBereit(s);
     const kleineDa = (s.sitze.Kleine || 0) > 0 && kleineBereit(s, K);
@@ -365,11 +389,11 @@ export const dynamisch = {
       if (hatMehrheit(s, ['Union'])) {
         opts.push({ text: 'Allein regieren – die Union hat die absolute Mehrheit.', hist: false,
           ergebnis: 'Die Union stellt alle Minister. Die Fraktionsdisziplin ersetzt den Koalitionsausschuss.',
-          aktion: st => { st.regierung = ['Union']; st.w.koalition = 75; delete st.f.grosse_koalition; } });
+          aktion: st => { st.regierung = ['Union']; st.w.rueckhalt = 75; delete st.f.grosse_koalition; } });
         if (kleineDa) opts.push({ text: `Trotz eigener Mehrheit mit der ${k} koalieren.`, hist: j === 1957,
           ergebnis: 'Die kleinen Partner sind dankbar; die Regierung steht auf breiterer Grundlage.',
           w: { ansehen: 1 },
-          aktion: st => { st.regierung = ['Union', 'Kleine']; st.w.koalition = 68; delete st.f.grosse_koalition; } });
+          aktion: st => { st.regierung = ['Union', 'Kleine']; st.w.rueckhalt = 68; delete st.f.grosse_koalition; } });
       }
       if (fdpOk && !hatMehrheit(s, ['Union']) && hatMehrheit(s, ['Union', 'FDP', ...(kleineDa ? ['Kleine'] : [])])) {
         const mitAdenauer = s.kanzler === 'Adenauer' && j >= 1961;
@@ -378,30 +402,30 @@ export const dynamisch = {
           opts.push({ text: 'Koalition mit der FDP – und zusagen, dass Adenauer vor Ende der Wahlperiode abtritt.', hist: true,
             ergebnis: 'Die FDP hatte „mit der CDU, aber ohne Adenauer“ geworben. Nach wochenlangen Verhandlungen trägt sie den Kanzler mit – auf Zeit.',
             w: { ansehen: -3 }, setze: ['adenauer_ruecktritt_zugesagt'],
-            aktion: st => { st.regierung = partner; st.w.koalition = 45; delete st.f.grosse_koalition; } });
+            aktion: st => { st.regierung = partner; st.w.rueckhalt = 45; delete st.f.grosse_koalition; } });
           opts.push({ text: 'Koalition mit der FDP ohne jede Zusage durchsetzen.',
             zufall: [
               { p: 0.35, ergebnis: 'Die FDP fällt um. Die Zeitungen sprechen von der „Umfallerpartei“ – der Kanzler regiert ohne Befristung weiter.',
-                aktion: st => { st.regierung = partner; st.w.koalition = 30; } },
+                aktion: st => { st.regierung = partner; st.w.rueckhalt = 30; } },
               { ergebnis: 'Die FDP bricht die Verhandlungen ab. Eine andere Mehrheit muss her.',
                 aktion: (st, a) => { st.f['fdp_lehnt_ab_' + st.zeit] = true; st.einschub = ['dyn:regierungsbildung']; delete st.erledigt['dyn:regierungsbildung']; } },
             ] });
         } else {
           opts.push({ text: kleineDa ? `Koalition mit FDP und ${k}.` : 'Koalition mit der FDP.', hist: j === 1953 || j === 1961,
             ergebnis: 'Die bürgerliche Koalition wird fortgesetzt.',
-            aktion: st => { st.regierung = partner; st.w.koalition = Math.max(st.w.koalition, 55); delete st.f.grosse_koalition; } });
+            aktion: st => { st.regierung = partner; st.w.rueckhalt = Math.max(st.w.rueckhalt, 55); delete st.f.grosse_koalition; } });
         }
       }
       if (!hatMehrheit(s, ['Union']) && kleineDa && hatMehrheit(s, ['Union', 'Kleine'])) {
         opts.push({ text: `Bürgerliche Koalition mit der ${k}, ohne die FDP.`,
           ergebnis: 'Eine knappe, aber berechenbare Mehrheit.',
-          aktion: st => { st.regierung = ['Union', 'Kleine']; st.w.koalition = 55; delete st.f.grosse_koalition; } });
+          aktion: st => { st.regierung = ['Union', 'Kleine']; st.w.rueckhalt = 55; delete st.f.grosse_koalition; } });
       }
       if (!hatMehrheit(s, ['Union']) && unionVorn && spdBereit(s) && hatMehrheit(s, ['Union', 'SPD'])) {
         opts.push({ text: 'Große Koalition mit der SPD.',
           ergebnis: 'Union und SPD regieren gemeinsam. In der Deutschland- und Ostpolitik muss die Union der SPD entgegenkommen.',
           w: { ansehen: -2, usa: -3, einheit: 3 }, setze: ['grosse_koalition'],
-          aktion: st => { st.regierung = ['Union', 'SPD']; st.w.koalition = 60; } });
+          aktion: st => { st.regierung = ['Union', 'SPD']; st.w.rueckhalt = 60; } });
       }
     } else {
       // Die SPD stellt den Kanzler
@@ -409,18 +433,18 @@ export const dynamisch = {
       if (hatMehrheit(s, ['SPD'])) {
         opts.push({ text: 'Allein regieren – die SPD hat die absolute Mehrheit.',
           ergebnis: 'Die SPD stellt alle Minister. Die Fraktionsdisziplin ersetzt den Koalitionsausschuss.',
-          aktion: st => { wechsleRegierung(st, 'SPD', ['SPD'], st.kanzler); st.w.koalition = 75; } });
+          aktion: st => { wechsleRegierung(st, 'SPD', ['SPD'], st.kanzler); st.w.rueckhalt = 75; } });
       }
       if (fdpOk && !hatMehrheit(s, ['SPD']) && hatMehrheit(s, ['SPD', 'FDP'])) {
         opts.push({ text: s.regierung.includes('FDP') ? 'Die Koalition mit der FDP fortsetzen.' : 'Eine Koalition mit der FDP bilden.',
           ergebnis: 'SPD und FDP regieren gemeinsam. In der Wirtschaftspolitik setzt die FDP der SPD enge Grenzen.',
-          aktion: st => { wechsleRegierung(st, 'SPD', ['SPD', 'FDP'], st.kanzler); st.w.koalition = Math.max(st.w.koalition, 55); } });
+          aktion: st => { wechsleRegierung(st, 'SPD', ['SPD', 'FDP'], st.kanzler); st.w.rueckhalt = Math.max(st.w.rueckhalt, 55); } });
       }
       if (!hatMehrheit(s, ['SPD']) && spdVorn && hatMehrheit(s, ['SPD', 'Union'])) {
         opts.push({ text: 'Große Koalition mit der Union.',
           ergebnis: 'SPD und Union regieren gemeinsam. In der Außen- und Wirtschaftspolitik muss die SPD der Union weit entgegenkommen.',
           w: { ansehen: -2, usa: 2, einheit: -2 },
-          aktion: st => { wechsleRegierung(st, 'SPD', ['SPD', 'Union'], st.kanzler); st.w.koalition = 60; } });
+          aktion: st => { wechsleRegierung(st, 'SPD', ['SPD', 'Union'], st.kanzler); st.w.rueckhalt = 60; } });
       }
     }
 
@@ -459,25 +483,25 @@ export const dynamisch = {
     if (!s.f[zugestaendnisFlag]) {
       opts.push({ text: `Der ${name} weitreichende Zugeständnisse machen, um die Koalition zu retten.`,
         ergebnis: 'Der Koalitionsausschuss tagt bis in die Nacht. Die Regierung bleibt im Amt – um den Preis der Autorität des Kanzlers.',
-        w: { ansehen: -5, koalition: 40 }, setze: [zugestaendnisFlag] });
+        w: { ansehen: -5, rueckhalt: 40 }, setze: [zugestaendnisFlag] });
     }
     if (rest.length && hatMehrheit(s, rest)) {
       opts.push({ text: `Ohne die ${name} weiterregieren.`,
         ergebnis: `Die ${name} verlässt die Regierung. Die verbleibende Koalition hat noch eine Mehrheit.`,
         w: { ansehen: -1 },
-        aktion: st => { st.regierung = rest; st.w.koalition = 45; if (haupt === 'FDP') st.f.fdp_opposition = true; if (haupt === O) delete st.f.grosse_koalition; } });
+        aktion: st => { st.regierung = rest; st.w.rueckhalt = 45; if (haupt === 'FDP') st.f.fdp_opposition = true; if (haupt === O) delete st.f.grosse_koalition; } });
     }
     if (K === 'Union' && haupt !== 'SPD' && spdBereit(s) && hatMehrheit(s, ['Union', 'SPD'])) {
       opts.push({ text: 'Der SPD eine Große Koalition anbieten.',
         ergebnis: 'Die Sozialdemokraten treten in die Regierung ein. Für viele in der Union ist das eine bittere Pille.',
         w: { ansehen: -3, usa: -3, einheit: 3 }, setze: ['grosse_koalition'],
-        aktion: st => { st.regierung = ['Union', 'SPD']; st.w.koalition = 55; if (haupt === 'FDP') st.f.fdp_opposition = true; } });
+        aktion: st => { st.regierung = ['Union', 'SPD']; st.w.rueckhalt = 55; if (haupt === 'FDP') st.f.fdp_opposition = true; } });
     }
     if (K === 'SPD' && haupt !== 'Union' && hatMehrheit(s, ['SPD', 'Union'])) {
       opts.push({ text: 'Der Union eine Große Koalition anbieten.',
         ergebnis: 'Die Union tritt in die Regierung ein – unter einem sozialdemokratischen Kanzler. Für viele in der SPD ist das eine bittere Pille.',
         w: { ansehen: -3, usa: 2, einheit: -2 },
-        aktion: st => { const fdpRaus = haupt === 'FDP'; wechsleRegierung(st, 'SPD', ['SPD', 'Union'], st.kanzler); st.w.koalition = 55; if (fdpRaus) st.f.fdp_opposition = true; } });
+        aktion: st => { const fdpRaus = haupt === 'FDP'; wechsleRegierung(st, 'SPD', ['SPD', 'Union'], st.kanzler); st.w.rueckhalt = 55; if (fdpRaus) st.f.fdp_opposition = true; } });
     }
     if (!opts.length) {
       // Konstruktives Misstrauensvotum: die Opposition wählt mit den abtrünnigen Partnern einen neuen Kanzler
@@ -535,7 +559,7 @@ export const dynamisch = {
       text: `Die Kassen des Bundes sind leer. Der Finanzminister kann die nächsten Gehaltszahlungen nur noch mit kurzfristigen Krediten sichern, die Bank deutscher Länder verweigert weitere Kassenkredite.${n >= 1 ? '\n\nEs ist nicht die erste Krise dieser Art. Ein weiterer Notstand wäre der Staatsbankrott.' : ''}`,
       optionen: [
         { text: 'Steuern erhöhen.', ergebnis: 'Die Einnahmen steigen, die Stimmung sinkt.', w: { haushalt: 18, ansehen: -6, impuls: -1.5 } },
-        { text: 'Ausgaben kürzen, auch bei den Koalitionspartnern.', ergebnis: 'Jedes Ressort muss bluten. Die Partner murren.', w: { haushalt: 18, koalition: -12, ansehen: -3, impuls: -1 } },
+        { text: 'Ausgaben kürzen, auch bei den Koalitionspartnern.', ergebnis: 'Jedes Ressort muss bluten. Die Partner murren.', w: { haushalt: 18, rueckhalt: -12, ansehen: -3, impuls: -1 } },
         { text: 'Die Notenbank zur Finanzierung drängen.', ergebnis: 'Die Preise ziehen an. Die Erinnerung an 1923 ist in jedem Haushalt lebendig.', w: { haushalt: 14, ansehen: -9, usa: -3 } },
       ],
       nachher: st => { st.f.notstaende = (st.f.notstaende || 0) + 1; delete st.f.haushalt_offen; },
@@ -555,7 +579,7 @@ export const dynamisch = {
           aktion: st => { st.kanzler = nf; st.w.ansehen = 0; st.w.kanzlerbonus = 5; } },
         { text: 'Die Revolte niederschlagen.',
           zufall: [
-            { p: 0.5, ergebnis: 'Ein paar Einzelgespräche, ein paar Posten – der Aufstand bricht zusammen.', w: { ansehen: 8, koalition: -5 } },
+            { p: 0.5, ergebnis: 'Ein paar Einzelgespräche, ein paar Posten – der Aufstand bricht zusammen.', w: { ansehen: 8, rueckhalt: -5 } },
             { ergebnis: `Die Fraktion setzt sich durch. ${nf} wird Kanzler, der Abgang ist unschön.`,
               aktion: st => { st.kanzler = nf; st.w.ansehen = -3; st.w.kanzlerbonus = 3; } },
           ] },
@@ -574,7 +598,7 @@ export function pruefeKrise(s) {
     delete s.erledigt[id];
     s.einschub.push(id);
   };
-  if (s.w.koalition <= 0 && s.regierung.length > 1) neu('koalitionskrise_offen', 'dyn:koalitionskrise');
+  if (s.w.rueckhalt <= 0 && s.regierung.length > 1) neu('koalitionskrise_offen', 'dyn:koalitionskrise');
   if (s.w.moskau <= 0) neu('kriegsgefahr_offen', 'dyn:kriegsgefahr');
   if (s.w.ansehen <= -25) neu('revolte_offen', 'dyn:fraktionsrevolte');
 }
@@ -585,14 +609,14 @@ export function nachOption(s, o) {
     if (o.richtung === 'west') s.w.ansehen -= 2;
     if (o.richtung === 'ost') s.w.ansehen += 1;
     if (s.regierung.includes('Union')) {
-      if (o.richtung === 'ost') s.w.koalition -= 6;
-      if (o.richtung === 'west') s.w.koalition += 3;
+      if (o.richtung === 'ost') s.w.rueckhalt -= 6;
+      if (o.richtung === 'west') s.w.rueckhalt += 3;
     }
     return;
   }
   if (s.regierung.includes('SPD')) {
-    if (o.richtung === 'west') s.w.koalition -= 6;
-    if (o.richtung === 'ost') s.w.koalition += 3;
+    if (o.richtung === 'west') s.w.rueckhalt -= 6;
+    if (o.richtung === 'ost') s.w.rueckhalt += 3;
   }
 }
 

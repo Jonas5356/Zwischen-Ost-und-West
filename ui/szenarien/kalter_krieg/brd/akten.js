@@ -19,8 +19,8 @@ export default [
     absender: 'Zentralverband der vertriebenen Deutschen',
     text: 'Die Vertriebenenverbände haben in Stuttgart eine Charta verkündet. Sie verzichten auf „Rache und Vergeltung“, fordern aber das „Recht auf Heimat“ und eine gerechte Verteilung der Kriegslasten. Sie bitten die Bundesregierung um öffentliche Unterstützung.',
     optionen: [
-      { text: 'Die Charta ausdrücklich würdigen.', hist: true, ergebnis: 'Die Vertriebenen fühlen sich ernst genommen. In Warschau und Prag wird das „Recht auf Heimat“ mit Sorge gelesen.', w: { ansehen: 2, moskau: -2, koalition: 2 } },
-      { text: 'Zurückhaltend reagieren.', ergebnis: 'Die Verbände sind enttäuscht.', w: { ansehen: -1, koalition: -2 } },
+      { text: 'Die Charta ausdrücklich würdigen.', hist: true, ergebnis: 'Die Vertriebenen fühlen sich ernst genommen. In Warschau und Prag wird das „Recht auf Heimat“ mit Sorge gelesen.', w: { ansehen: 2, moskau: -2, rueckhalt: 2 } },
+      { text: 'Zurückhaltend reagieren.', ergebnis: 'Die Verbände sind enttäuscht.', w: { ansehen: -1, rueckhalt: -2 } },
     ],
   }),
   akte({
@@ -29,7 +29,7 @@ export default [
     absender: 'Hermann Ehlers, Präsident des Bundestages, und die Kirchen',
     text: 'Im amerikanischen Kriegsverbrechergefängnis Landsberg warten verurteilte Täter der Einsatzgruppen und KZ-Ärzte auf ihre Hinrichtung. Kirchen, Abgeordnete aller Parteien außer der KPD und Veteranenverbände bitten dich, beim Hohen Kommissar McCloy für Gnade zu intervenieren. Die Amerikaner brauchen deutsche Soldaten – und die Veteranen machen die Freilassung zur Bedingung.',
     optionen: [
-      { text: 'Bei McCloy intervenieren.', hist: true, ergebnis: 'McCloy wandelt die meisten Urteile in Haftstrafen um, sieben werden vollstreckt. In der amerikanischen Presse ist die Empörung groß.', w: { ansehen: 2, usa: -3, koalition: 2 } },
+      { text: 'Bei McCloy intervenieren.', hist: true, ergebnis: 'McCloy wandelt die meisten Urteile in Haftstrafen um, sieben werden vollstreckt. In der amerikanischen Presse ist die Empörung groß.', w: { ansehen: 2, usa: -3, rueckhalt: 2 } },
       { text: 'Sich heraushalten – das ist Sache der Alliierten.', ergebnis: 'Die Veteranenverbände sind verärgert. Washington respektiert die Zurückhaltung.', w: { ansehen: -2, usa: 2 } },
     ],
     historisch: 'McCloy bestätigte im Januar 1951 fünf der Todesurteile (dazu kamen zwei vom Militärgouverneur Handy); die übrigen wurden umgewandelt. Die Frage der Kriegsverurteilten belastete die Verhandlungen über den Wehrbeitrag.',
@@ -40,8 +40,8 @@ export default [
     absender: 'Herbert Blankenhorn',
     text: 'Mit der kleinen Revision des Besatzungsstatuts darf die Bundesrepublik ein Auswärtiges Amt einrichten. Wer soll Außenminister werden? Viele denken an Heinrich von Brentano. Du könntest das Amt auch selbst übernehmen.',
     optionen: [
-      { text: 'Das Amt selbst übernehmen.', hist: true, ergebnis: 'Kanzler und Außenminister in einer Person. Die Außenpolitik bleibt Chefsache.', w: { ansehen: 1, koalition: -2 } },
-      { text: 'Brentano ernennen.', ergebnis: 'Ein loyaler Minister, aber ein weiterer Mitspieler.', w: { koalition: 3 } },
+      { text: 'Das Amt selbst übernehmen.', hist: true, ergebnis: 'Kanzler und Außenminister in einer Person. Die Außenpolitik bleibt Chefsache.', w: { ansehen: 1, rueckhalt: -2 } },
+      { text: 'Brentano ernennen.', ergebnis: 'Ein loyaler Minister, aber ein weiterer Mitspieler.', w: { rueckhalt: 3 } },
     ],
     historisch: 'Adenauer war von März 1951 bis Juni 1955 zugleich Außenminister. Danach übernahm Heinrich von Brentano.',
   }),
@@ -61,8 +61,8 @@ export default [
     absender: 'Karl Georg Pfleiderer, MdB (FDP)',
     text: 'Der FDP-Abgeordnete Pfleiderer hat einen Plan veröffentlicht: Die Besatzungstruppen sollen sich an die Ränder Deutschlands zurückziehen, die Mitte würde eine militärisch verdünnte Zone, in der ein wiedervereinigtes Deutschland entstehen könnte. Er bittet dich um ein Gespräch.',
     optionen: [
-      { text: 'Den Plan öffentlich zurückweisen.', hist: true, ergebnis: 'Pfleiderer wird in seiner Partei isoliert. Die FDP-Spitze ist dennoch verstimmt.', w: { koalition: -2, usa: 1 } },
-      { text: 'Ihn zum Gespräch einladen.', ergebnis: 'Ein langes Gespräch. Der Koalitionspartner fühlt sich gewürdigt.', w: { koalition: 3, einheit: 1, usa: -1 } },
+      { text: 'Den Plan öffentlich zurückweisen.', hist: true, ergebnis: 'Pfleiderer wird in seiner Partei isoliert. Die FDP-Spitze ist dennoch verstimmt.', w: { rueckhalt: -2, usa: 1 } },
+      { text: 'Ihn zum Gespräch einladen.', ergebnis: 'Ein langes Gespräch. Der Koalitionspartner fühlt sich gewürdigt.', w: { rueckhalt: 3, einheit: 1, usa: -1 } },
     ],
   }),
   akte({
@@ -71,7 +71,7 @@ export default [
     text: 'Alfried Krupp von Bohlen und Halbach ist 1951 aus der Haft in Landsberg entlassen worden. Die Alliierten verlangen, dass er seine Kohle- und Stahlbetriebe verkauft, bevor er das Unternehmen zurückbekommt. Die Industrie bittet um Unterstützung gegen die „Entflechtung“.',
     optionen: [
       { text: 'Einen Kompromiss vermitteln: Verkauf auf dem Papier, mit langen Fristen.', hist: true, ergebnis: 'Im Mehlemer Abkommen verpflichtet sich Krupp zum Verkauf. Er wird nie vollzogen.', w: { impuls: 0.3, usa: -1 } },
-      { text: 'Die Entflechtung unterstützen.', ergebnis: 'Die Alliierten sind zufrieden, die Ruhrindustrie nicht.', w: { usa: 2, frankreich: 2, koalition: -2 } },
+      { text: 'Die Entflechtung unterstützen.', ergebnis: 'Die Alliierten sind zufrieden, die Ruhrindustrie nicht.', w: { usa: 2, frankreich: 2, rueckhalt: -2 } },
     ],
   }),
   akte({
@@ -90,8 +90,8 @@ export default [
     absender: 'Josef Kardinal Frings, Erzbischof von Köln',
     text: 'Die katholischen Bischöfe bitten, im neuen Kabinett ein Familienministerium einzurichten. Franz-Josef Wuermeling, ein streitbarer Katholik, steht bereit. Die FDP spottet über ein „Ministerium für Kinderreichtum“.',
     optionen: [
-      { text: 'Das Ministerium schaffen.', hist: true, ergebnis: 'Wuermeling wird Familienminister und kämpft für das Kindergeld.', w: { ansehen: 1, koalition: -1 }, setze: ['familienministerium'] },
-      { text: 'Ablehnen.', ergebnis: 'Die Bischöfe sind verstimmt.', w: { ansehen: -1, koalition: 1 } },
+      { text: 'Das Ministerium schaffen.', hist: true, ergebnis: 'Wuermeling wird Familienminister und kämpft für das Kindergeld.', w: { ansehen: 1, rueckhalt: -1 }, setze: ['familienministerium'] },
+      { text: 'Ablehnen.', ergebnis: 'Die Bischöfe sind verstimmt.', w: { ansehen: -1, rueckhalt: 1 } },
     ],
   }),
   akte({
@@ -112,7 +112,7 @@ export default [
     text: 'Für die neuen Streitkräfte hat Graf Baudissin das Konzept der „Inneren Führung“ entwickelt: Der Soldat bleibt Staatsbürger mit Grundrechten, Befehle finden ihre Grenze an der Menschenwürde. Ehemalige Wehrmachtsoffiziere halten das für „weiche Welle“.',
     optionen: [
       { text: 'Baudissin den Rücken stärken.', hist: true, ergebnis: 'Die Innere Führung wird Leitbild der Bundeswehr. Im Ausland wird das aufmerksam registriert.', w: { usa: 2, frankreich: 2, ansehen: 1 } },
-      { text: 'Den Traditionalisten freie Hand lassen.', ergebnis: 'Die neue Armee ähnelt der alten mehr, als vielen lieb ist.', w: { frankreich: -4, ansehen: -1, koalition: 1 } },
+      { text: 'Den Traditionalisten freie Hand lassen.', ergebnis: 'Die neue Armee ähnelt der alten mehr, als vielen lieb ist.', w: { frankreich: -4, ansehen: -1, rueckhalt: 1 } },
     ],
   }),
   akte({
@@ -137,7 +137,7 @@ export default [
     text: s => `Weil die Aufrüstung langsamer vorankommt als geplant, hat ${unionRegiert(s) ? 'Finanzminister Schäffer' : 'der Finanzminister'} Milliarden angespart. Die Presse nennt den Schatz nach dem Spandauer Turm, in dem das Kaiserreich seinen Kriegsschatz lagerte, den „Juliusturm“. Vor der Wahl wollen viele in der Fraktion das Geld ausgeben.`,
     optionen: [
       { text: 'Den Juliusturm öffnen: Steuersenkungen und Wohltaten.', hist: true, ergebnis: 'Die Kassen leeren sich, die Wähler freuen sich.', w: { haushalt: -10, ansehen: 4, impuls: 1 } },
-      { text: s => (unionRegiert(s) ? 'Schäffer schützen – das Geld ist für die Bundeswehr.' : 'Den Finanzminister schützen – das Geld ist für die Bundeswehr.'), ergebnis: 'Der Finanzminister bleibt eisern. Die Fraktion murrt.', w: { koalition: -3, haushalt: 1 } },
+      { text: s => (unionRegiert(s) ? 'Schäffer schützen – das Geld ist für die Bundeswehr.' : 'Den Finanzminister schützen – das Geld ist für die Bundeswehr.'), ergebnis: 'Der Finanzminister bleibt eisern. Die Fraktion murrt.', w: { rueckhalt: -3, haushalt: 1 } },
     ],
   }),
   akte({
@@ -145,7 +145,7 @@ export default [
     absender: 'Deutscher Gewerkschaftsbund',
     text: 'Der DGB fordert die Fünftagewoche mit 40 Stunden. Das Plakat mit einem Kind und dem Slogan „Samstags gehört Vati mir“ hängt überall. Die Arbeitgeber warnen vor dem Ende des Wirtschaftswunders.',
     optionen: [
-      { text: 'Die Forderung öffentlich unterstützen.', ergebnis: 'Ein Coup bei den Arbeitnehmern, die Arbeitgeber schäumen.', w: { ansehen: 2, impuls: -0.3, koalition: -2 } },
+      { text: 'Die Forderung öffentlich unterstützen.', ergebnis: 'Ein Coup bei den Arbeitnehmern, die Arbeitgeber schäumen.', w: { ansehen: 2, impuls: -0.3, rueckhalt: -2 } },
       { text: 'Auf die Tarifautonomie verweisen.', hist: true, ergebnis: 'Die Tarifparteien sollen es unter sich ausmachen. Die Metallindustrie beginnt schrittweise mit der Verkürzung.', w: {} },
     ],
   }),
@@ -194,7 +194,7 @@ export default [
     text: 'Die DDR führt eine Kampagne gegen Hans Globke, deinen Staatssekretär und engsten Mitarbeiter. Globke hat 1936 einen Kommentar zu den Nürnberger Rassegesetzen mitverfasst. In der westdeutschen Presse wächst die Kritik. Globke ist ein brillanter Verwaltungsmann und hält das Kanzleramt zusammen.',
     optionen: [
       { text: 'An Globke festhalten.', hist: true, ergebnis: 'Globke bleibt. Die Kampagne geht weiter, international wächst das Unbehagen.', w: { ansehen: -2, usa: -1 } },
-      { text: 'Globke in den Ruhestand schicken.', ergebnis: 'Ein Signal, das im Ausland gewürdigt wird. Das Kanzleramt verliert seinen Motor.', w: { usa: 2, ansehen: 1, koalition: -2 } },
+      { text: 'Globke in den Ruhestand schicken.', ergebnis: 'Ein Signal, das im Ausland gewürdigt wird. Das Kanzleramt verliert seinen Motor.', w: { usa: 2, ansehen: 1, rueckhalt: -2 } },
     ],
     historisch: 'Adenauer hielt bis zu seinem Rücktritt 1963 an Globke fest. Die DDR verurteilte Globke im Juli 1963 in einem Schauprozess in Abwesenheit zu lebenslanger Haft.',
   }),
@@ -204,7 +204,7 @@ export default [
     absender: 'Theodor Oberländer, Bundesminister für Vertriebene',
     text: 'Gegen deinen Vertriebenenminister erhebt die DDR schwere Vorwürfe: Er sei 1941 als Offizier des Bataillons „Nachtigall“ an Massakern in Lemberg beteiligt gewesen. Oberländer bestreitet das. Auch in der Koalition wird sein Rücktritt verlangt.',
     optionen: [
-      { text: 'Ihn zum Rücktritt bewegen.', hist: true, ergebnis: 'Oberländer tritt im Mai zurück. Die Vertriebenen sehen sich als Opfer einer Kampagne.', w: { usa: 1, koalition: -1 } },
+      { text: 'Ihn zum Rücktritt bewegen.', hist: true, ergebnis: 'Oberländer tritt im Mai zurück. Die Vertriebenen sehen sich als Opfer einer Kampagne.', w: { usa: 1, rueckhalt: -1 } },
       { text: 'An ihm festhalten.', ergebnis: 'Die Kritik im In- und Ausland nimmt zu.', w: { ansehen: -3, usa: -2 } },
     ],
   }),
@@ -215,7 +215,7 @@ export default [
     text: 'Erhard will Bundesunternehmen teilprivatisieren und die Aktien bevorzugt an Kleinsparer verkaufen: zuerst die Preussag, dann das Volkswagenwerk. Eigentum für alle, sagt Erhard. Die SPD spricht vom Ausverkauf des Volksvermögens.',
     optionen: [
       { text: 'Die Volksaktie einführen.', hist: true, ergebnis: 'Hunderttausende Kleinsparer werden Aktionäre. Der Bund nimmt Geld ein.', w: { haushalt: 5, ansehen: 2 } },
-      { text: 'Die Unternehmen in Bundesbesitz behalten.', ergebnis: 'Erhard ist gekränkt.', w: { koalition: -2 } },
+      { text: 'Die Unternehmen in Bundesbesitz behalten.', ergebnis: 'Erhard ist gekränkt.', w: { rueckhalt: -2 } },
     ],
   }),
   akte({
@@ -235,7 +235,7 @@ export default [
     text: 'Seit 1949 hat noch nie eine Frau einem Bundeskabinett angehört. Die Frauen der Fraktion haben dich in einer Sitzung zur Rede gestellt und kündigen an, nicht mehr zu weichen. Sie schlagen Elisabeth Schwarzhaupt als Gesundheitsministerin vor.',
     optionen: [
       { text: 'Schwarzhaupt ernennen.', hist: true, ergebnis: 'Die erste Bundesministerin. Ein neues Ministerium für Gesundheitswesen wird geschaffen.', w: { ansehen: 2 } },
-      { text: 'Vertrösten.', ergebnis: 'Die Frauen in der Fraktion vergessen es nicht.', w: { ansehen: -2, koalition: -1 } },
+      { text: 'Vertrösten.', ergebnis: 'Die Frauen in der Fraktion vergessen es nicht.', w: { ansehen: -2, rueckhalt: -1 } },
     ],
     historisch: 'Elisabeth Schwarzhaupt wurde im November 1961 erste Bundesministerin, zuständig für das neu geschaffene Gesundheitsministerium.',
   }),

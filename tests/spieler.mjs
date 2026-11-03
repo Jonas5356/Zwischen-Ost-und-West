@@ -14,7 +14,8 @@ const istOst = o => richtungen(o).some(r => ['ost', 'national', 'dekolonisation'
  * strategie: 'zufall' | 'historisch' | 'ost' | 'west' | 'einheit'; land: das gespielte Land;
  * vorgabe: { ereignisId: Optionsindex } – feste Entscheidungen, z. B. um seltene Wege zu prüfen
  */
-export function spiele(seed, strategie = 'zufall', log = null, { geschichtstreue = 1, land = 'brd', vorgabe = null } = {}) {
+/** eingriff(welt): wird vor jedem Schritt aufgerufen – um in Tests seltene Lagen herzustellen */
+export function spiele(seed, strategie = 'zufall', log = null, { geschichtstreue = 1, land = 'brd', vorgabe = null, entscheiden = true, eingriff = null } = {}) {
   const welt = E.neueWelt(W, { spieler: [land], seed, geschichtstreue });
   const s = E.sicht(W, welt, land);
   let schritte = 0;
@@ -23,6 +24,7 @@ export function spiele(seed, strategie = 'zufall', log = null, { geschichtstreue
   const r = () => E.zufall(eigenerZufall);
   while (!welt.ende && schritte < 2000) {
     schritte++;
+    eingriff?.(welt);
     const a = E.aktuelles(W, welt);
     if (a.typ === 'lage') { E.lageGesehen(W, welt); continue; }
     if (a.typ === 'ergebnis' || a.typ === 'telegramm') {
@@ -35,6 +37,19 @@ export function spiele(seed, strategie = 'zufall', log = null, { geschichtstreue
     }
     if (a.typ === 'ergebnis' || a.typ === 'wahl' || a.typ === 'telegramm') { E.weiter(W, welt); continue; }
     if (a.typ === 'rundenende') { E.weiter(W, welt); continue; }
+    // Entscheidungen: historisch zu den überlieferten Zeitpunkten, sonst ab und zu eine zufällige
+    if ((a.typ === 'vorhaben' || a.typ === 'ereignis') && entscheiden && E.entscheidungMoeglich(W, welt)) {
+      const liste = E.entscheidungen(W, welt, land).filter(e => e.verfuegbar);
+      let e = null;
+      if (strategie === 'historisch') e = liste.find(x => (x.historisch || []).some(z => E.zeitIndex(z) === E.zeitIndex(welt.zeit)));
+      else if (liste.length && r() < 0.12) e = liste[Math.floor(r() * liste.length)];
+      if (e) {
+        if (log) log(`${E.zeitText(s.zeit)} Entscheidung: ${e.titel}`);
+        gesehen.push('entscheidung:' + e.id);
+        E.triffEntscheidung(W, welt, e.id);
+        continue;
+      }
+    }
     if (a.typ === 'vorhaben') {
       const l = a.liste.filter(v => v.leistbar);
       let v = null;

@@ -15,7 +15,7 @@
 
 const WERTE = {
   usa: 1.0, frankreich: 0.7, grossbritannien: 0.4, moskau: 0.4, souveraenitaet: 1.0, einheit: 0.6, europa: 0.7,
-  ansehen: 0.9, koalition: 0.6, haushalt: 0.5, impuls: 0.8, kanzlerbonus: 0.3,
+  ansehen: 0.9, rueckhalt: 0.6, haushalt: 0.5, impuls: 0.8, kanzlerbonus: 0.3,
 };
 
 export const REGIERUNGEN = {

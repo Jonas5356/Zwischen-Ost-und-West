@@ -5,6 +5,7 @@ import su from './su.js';
 import frankreich from './frankreich/index.js';
 import grossbritannien from './grossbritannien.js';
 import weltereignisse from './weltereignisse.js';
+import { BLOECKE, STANDARD, BEZIEHUNGSREIHE } from './werte.js';
 
 export default {
   id: 'kalter_krieg',
@@ -26,6 +27,9 @@ export default {
     su: { brd: 50, usa: 40, frankreich: 50 },
   },
   weltereignisse,
+  // Lagebild: in jedem Land dieselben Blöcke; Standardwerte und Beziehungen in fester Reihenfolge
+  bloecke: BLOECKE,
+  werteReihe: [...Object.keys(STANDARD), ...BEZIEHUNGSREIHE],
   // Enden, die jedes Land auslösen kann – auch ein vom Spiel gesteuertes
   weltenden: ['krieg'],
 };

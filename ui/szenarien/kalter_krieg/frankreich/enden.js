@@ -30,10 +30,19 @@ function bericht(s) {
   absaetze.push(`Seit 1946 hatte Frankreich ${anzahl} Regierungschefs; ${stuerze ? `${stuerze}-mal ist eine Regierung gestürzt` : 'keine Regierung ist gestürzt'}. Zum Vergleich: In der Geschichte zählte Frankreich zwischen 1946 und 1958 mehr als zwanzig Regierungen.${f.praesidialverfassung ? ' Die Präsidialverfassung von 1946 hat die Regierungen gestützt.' : ''}\n\nRegierungschefs: ${chefText(s)}.`);
 
   const kolonien = [];
-  if (f.indochina_ausgleich) kolonien.push('Vietnam wurde ohne Krieg unabhängig');
-  else if (f.indochina_beendet) kolonien.push(f.dien_bien_phu ? 'Indochina ging nach Điện Biên Phủ verloren' : 'der Indochina-Krieg wurde beendet');
+  const indochina = {
+    ausgleich: 'Vietnam wurde ohne Krieg unabhängig',
+    gehalten: 'Vietnam ist unter Bao Dai unabhängig und mit Frankreich verbündet',
+    genf: f.dien_bien_phu ? 'nach Điện Biên Phủ wurde Vietnam in Genf geteilt' : 'Vietnam wurde in Genf geteilt',
+    frieden: 'Vietnam wurde nach einem Frieden mit Ho Chi Minh unabhängig',
+    rueckzug: 'Frankreich hat Indochina aufgegeben',
+    niederlage: 'der Krieg in Indochina ging verloren',
+  }[f.indochina_ende];
+  if (indochina) kolonien.push(indochina);
+  else if (f.indochina_beendet) kolonien.push('der Indochina-Krieg wurde beendet');
   else if (f.indochinakrieg) kolonien.push('in Indochina wird noch immer gekämpft');
   if (f.algerien_unabhaengig) kolonien.push('Algerien ist unabhängig');
+  else if (f.algerien_integration && f.algerien_frieden) kolonien.push('Algerien ist französisch geblieben, mit gleichen Rechten für alle');
   else if (f.algerien_autonomie) kolonien.push('Algerien hat Autonomie innerhalb Frankreichs, ohne Krieg');
   else if (f.algerienkrieg) kolonien.push('der Algerienkrieg dauert an');
   if (f.maghreb_unabhaengig) kolonien.push('Marokko und Tunesien sind unabhängig');
@@ -49,7 +58,7 @@ function bericht(s) {
     ? ' Einen deutschen Staat gibt es nicht; Deutschland ist noch immer besetzt.'
     : ` Das Verhältnis zur Bundesrepublik ist ${w.brd >= 70 ? 'eng wie nie' : w.brd >= 50 ? 'gut' : w.brd >= 30 ? 'kühl' : 'zerrüttet'}.`;
   absaetze.push(europa.length ? `Europa: Frankreich hat ${europa.join(', ').replace(/, ([^,]*)$/, ' und $1')} mitgetragen.${nachbar}` : `Europa: Frankreich ist allen Plänen einer europäischen Einigung ferngeblieben.${nachbar}`);
-  absaetze.push(`Die Bombe: ${f.atomtest ? 'Frankreich ist Atommacht.' : f.atombombe ? 'Frankreich arbeitet an einer eigenen Bombe.' : 'Frankreich hat keine eigenen Atomwaffen.'} Rang in der Welt: ${Math.round(w.rang)} von 100.`);
+  absaetze.push(`Die Bombe: ${f.atomtest ? 'Frankreich ist Atommacht.' : f.atombombe ? 'Frankreich arbeitet an einer eigenen Bombe.' : 'Frankreich hat keine eigenen Atomwaffen.'}`);
   absaetze.push(`Wirtschaft: zuletzt ${pct(w.wachstum)} Wachstum bei ${pct(w.inflation)} Inflation; der Franc ${w.franc >= 60 ? 'ist stabil' : w.franc >= 30 ? 'hält' : 'ist schwach'}${f.neuer_franc ? ', seit 1960 als Neuer Franc' : ''}.`);
   const a = aufloesung(s, 'Paris');
   if (a) absaetze.push(a);
@@ -73,7 +82,7 @@ Das Spiel endet ${zeitText(s.zeit)}.`,
   },
   staatsbankrott: {
     titel: 'Der Staatsbankrott',
-    ascii: 'presse',
+    ascii: 'presse_fr',
     text: s => `Zum dritten Mal sind die Kassen leer. Die Banque de France verweigert weitere Vorschüsse, Washington jede weitere Hilfe. Der Franc stürzt ab, die Franzosen tauschen ihr Geld in Gold und Napoléons. Die Regierung tritt zurück; niemand will ihre Nachfolge antreten.
 
 Das Spiel endet ${zeitText(s.zeit)}.`,

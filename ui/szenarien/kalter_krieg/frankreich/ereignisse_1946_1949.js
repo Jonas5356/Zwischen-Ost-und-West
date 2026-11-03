@@ -23,7 +23,7 @@ function ohneKommunisten(s) {
   s.f.pcf_raus = true;
   s.lager = 'dritte_kraft';
   s.regierung = [...LAGER.dritte_kraft.parteien];
-  s.w.mehrheit = Math.min(s.w.mehrheit, startMehrheit(s, 'dritte_kraft'));
+  s.w.rueckhalt = Math.min(s.w.rueckhalt, startMehrheit(s, 'dritte_kraft'));
   notiereChef(s);
 }
 
@@ -48,7 +48,7 @@ Sainteny hat mit Ho Chi Minh ein Abkommen ausgehandelt: Frankreich erkennt Vietn
         w: { indochina: 5, armee: 3, haushalt: -4, kriegsmuede: 2, moskau: -3, usa: -2 }, setze: ['indochinakrieg'], dient: { kolonien: 0.9, frieden_kolonien: -1 } },
       { text: 'Weiter gehen: Ein vereintes, unabhängiges Vietnam, verbunden mit Frankreich nur durch Verträge.', richtung: 'dekolonisation',
         ergebnis: 'Paris erkennt die Unabhängigkeit Vietnams an. Ho Chi Minh reist als Staatsgast nach Paris; d’Argenlieu tritt aus Protest zurück, die Kolonialoffiziere sprechen von Verrat. (Fiktion)',
-        w: { rang: -4, armee: -8, moskau: 4, usa: 2, kriegsmuede: -1 }, setze: ['indochina_beendet', 'indochina_ausgleich'], dient: { frieden_kolonien: 1.4, kolonien: -1.3 } },
+        w: { armee: -8, moskau: 4, usa: 2, kriegsmuede: -1 }, setze: ['indochina_beendet', 'indochina_ausgleich'], dient: { frieden_kolonien: 1.4, kolonien: -1.3 } },
     ],
     historisch: 'Das Abkommen Ho–Sainteny wurde am 6. März 1946 unterzeichnet. Am 18. März zogen französische Truppen in Hanoi ein. Die vereinbarte Volksabstimmung fand nie statt.',
   },
@@ -59,7 +59,7 @@ Sainteny hat mit Ho Chi Minh ein Abkommen ausgehandelt: Frankreich erkennt Vietn
     ab: 1946.1, bis: 1946.1, ordnung: 4.9,
     wenn: s => !!s.f.provisorisch,
     absender: 'Präsident der Verfassunggebenden Versammlung Vincent Auriol',
-    ascii: 'urne',
+    ascii: 'urne_fr',
     text: `Die Verfassunggebende Versammlung hat mit den Stimmen der Kommunisten und Sozialisten einen Entwurf beschlossen: eine einzige, allmächtige Kammer, ein schwacher Präsident, kein Senat. Die Volksrepublikaner sind dagegen, weil sie eine „Diktatur der Versammlung“ fürchten – und die Herrschaft der Kommunisten, der stärksten Partei. Am 5. Mai stimmt das Volk ab.
 
 Die Regierung kann für den Entwurf werben, ihn zurückziehen und neu verhandeln lassen oder sich heraushalten. Scheitert er, muss eine neue Versammlung gewählt werden.`,
@@ -74,7 +74,7 @@ Die Regierung kann für den Entwurf werben, ihn zurückziehen und neu verhandeln
         dient: { sozial: 0.4, stabilitaet: 0.3 } },
       { text: 'Den Entwurf zurückziehen und einen Kompromiss mit den Volksrepublikanern suchen.', richtung: 'kirche',
         ergebnis: 'Die Regierung zieht den Entwurf zurück. Die Kommunisten sind empört; im Juni wird eine neue Versammlung gewählt, die einen Kompromiss finden soll.',
-        w: { mehrheit: -8, ansehen: -1 }, aktion: s => { s.f.verfassung1 = 'zurueck'; }, dient: { stabilitaet: 0.2 } },
+        w: { rueckhalt: -8, ansehen: -1 }, aktion: s => { s.f.verfassung1 = 'zurueck'; }, dient: { stabilitaet: 0.2 } },
       { text: 'Sich heraushalten – das Volk soll frei entscheiden.',
         zufall: [
           { p: 0.25, ergebnis: 'Die Franzosen nehmen die Verfassung an. Im Juni wird die erste Nationalversammlung gewählt. (Fiktion)',
@@ -101,10 +101,10 @@ Die Kommunisten sprechen von einem „Ausverkauf“, die Filmschaffenden gehen a
         w: { usa: 6, haushalt: 7, franc: 4, impuls: 0.6, moskau: -2 }, dient: { westbindung: 0.6, modernisierung: 0.6 } },
       { text: 'Annehmen, aber über die Filmquote neu verhandeln.', richtung: 'national',
         ergebnis: 'Paris verhandelt nach. Die Kredite fallen kleiner aus, die französischen Filme behalten ihren Schutz.',
-        w: { usa: 2, haushalt: 4, franc: 2, rang: 1 }, dient: { unabhaengigkeit: 0.3, westbindung: 0.1 } },
+        w: { usa: 2, haushalt: 4, franc: 2 }, dient: { unabhaengigkeit: 0.3, westbindung: 0.1 } },
       { text: 'Ablehnen. Frankreich lässt sich nicht kaufen.', richtung: 'ost',
         ergebnis: 'Paris lehnt die amerikanischen Bedingungen ab. Die Kommunisten jubeln, die Kassen bleiben leer.',
-        w: { usa: -8, haushalt: -3, franc: -4, moskau: 4, rang: 1 }, dient: { unabhaengigkeit: 1, westbindung: -0.8 } },
+        w: { usa: -8, haushalt: -3, franc: -4, moskau: 4 }, dient: { unabhaengigkeit: 1, westbindung: -0.8 } },
     ],
     historisch: 'Die Blum-Byrnes-Abkommen vom 28. Mai 1946 erließen Frankreich rund zwei Milliarden Dollar Schulden und brachten neue Kredite. Die Filmklausel löste heftige Proteste aus und wurde 1948 zugunsten des französischen Films geändert.',
   },
@@ -115,18 +115,18 @@ Die Kommunisten sprechen von einem „Ausverkauf“, die Filmschaffenden gehen a
     ab: 1946.2, bis: 1947.1, ordnung: 12.5,
     wenn: s => s.regierung.includes('PCF') && !s.f.pcf_raus,
     absender: 'Maurice Thorez, Generalsekretär der PCF',
-    ascii: 'plakat',
+    ascii: 'plakat_fr',
     text: s => `Die Kommunisten sind die stärkste Partei. Thorez verlangt für sie eines der drei Schlüsselministerien: Inneres, Äußeres oder Verteidigung. ${s.regierungschef} weiß, was Washington und London davon halten würden – und was die Armee dazu sagt. Ohne die Kommunisten gibt es aber keine Mehrheit.`,
     optionen: [
       { text: 'Den Kommunisten das Verteidigungsministerium geben, aber Heer, Marine und Luftwaffe eigenen Ministern unterstellen.', hist: true,
         ergebnis: 'François Billoux wird Verteidigungsminister – ohne Befehlsgewalt über die Teilstreitkräfte. Thorez ist verärgert, aber die Koalition hält.',
-        w: { mehrheit: 2, armee: -2, usa: -2 }, setze: ['pcf_verteidigung'], dient: { stabilitaet: 0.6 } },
+        w: { rueckhalt: 2, armee: -2, usa: -2 }, setze: ['pcf_verteidigung'], dient: { stabilitaet: 0.6 } },
       { text: 'Ihnen das Innenministerium mit der Polizei überlassen.', richtung: 'ost',
         ergebnis: 'Ein Kommunist wird Innenminister. In Washington und bei der Armee wächst das Misstrauen; die Partei besetzt Präfekturen mit ihren Leuten.',
-        w: { mehrheit: 6, armee: -6, usa: -8, moskau: 6 }, setze: ['pcf_inneres'], dient: { stabilitaet: 0.4, westbindung: -1 } },
+        w: { rueckhalt: 6, armee: -6, usa: -8, moskau: 6 }, setze: ['pcf_inneres'], dient: { stabilitaet: 0.4, westbindung: -1 } },
       { text: 'Kein Schlüsselministerium für die Kommunisten.', richtung: 'atlantisch',
         ergebnis: 'Die Regierung verweigert den Kommunisten jedes Schlüsselministerium. Thorez droht mit dem Auszug.',
-        w: { mehrheit: -8, usa: 3, armee: 2 }, dient: { westbindung: 0.5, stabilitaet: -0.5 } },
+        w: { rueckhalt: -8, usa: 3, armee: 2 }, dient: { westbindung: 0.5, stabilitaet: -0.5 } },
     ],
     historisch: 'Im Januar 1947 wurde der Kommunist François Billoux Verteidigungsminister. Die drei Teilstreitkräfte wurden eigenen Ministern unterstellt, damit er keinen Zugriff auf die Truppe bekam.',
   },
@@ -149,7 +149,7 @@ Die Konferenz steht vor dem Scheitern. Ho Chi Minh bittet um ein Zwischenabkomme
         w: { indochina: -2 }, setze: ['modus_vivendi'], dient: { kolonien: 0.6, frieden_kolonien: 0.4, stabilitaet: 0.3 } },
       { text: 'Die Einheit Vietnams zusagen und d’Argenlieu abberufen.', richtung: 'dekolonisation',
         ergebnis: 'Paris sagt die Volksabstimmung über die Einheit Vietnams zu und ruft d’Argenlieu ab. Ho Chi Minh kehrt als Partner nach Hanoi zurück; die Siedler in Saigon sprechen von Verrat. (Fiktion)',
-        w: { armee: -6, rang: -2, moskau: 3, indochina: 2 }, setze: ['indochina_beendet', 'indochina_ausgleich'], dient: { frieden_kolonien: 1.3, kolonien: -1 } },
+        w: { armee: -6, moskau: 3, indochina: 2 }, setze: ['indochina_beendet', 'indochina_ausgleich'], dient: { frieden_kolonien: 1.3, kolonien: -1 } },
       { text: 'Die Konferenz abbrechen. D’Argenlieu soll durchgreifen.', richtung: 'kolonial',
         ergebnis: 'Die Konferenz von Fontainebleau scheitert. Ho Chi Minh fährt mit leeren Händen nach Hause; in Tonkin bereiten sich beide Seiten auf den Krieg vor.',
         w: { armee: 2, indochina: 2, moskau: -2 }, setze: ['argenlieu'], dient: { kolonien: 0.7, frieden_kolonien: -0.8, stabilitaet: -0.3 } },
@@ -163,7 +163,7 @@ Die Konferenz steht vor dem Scheitern. Ho Chi Minh bittet um ein Zwischenabkomme
     ab: 1946.2, bis: 1946.2, ordnung: 10,
     wenn: s => !!s.f.provisorisch,
     absender: 'Präsident der Verfassunggebenden Versammlung Vincent Auriol',
-    ascii: 'urne',
+    ascii: 'urne_fr',
     text: `Die neue Versammlung hat einen Kompromiss ausgearbeitet: eine starke Nationalversammlung, daneben ein schwacher „Rat der Republik“, ein Präsident mit wenig Macht. Die Regierung hängt am Vertrauen der Abgeordneten.
 
 General de Gaulle hat in Bayeux und Épinal ein anderes Modell vorgestellt: einen Präsidenten über den Parteien, der die Regierung ernennt und die Kammer auflösen kann. Den Entwurf der Versammlung nennt er ein Rezept für Ohnmacht. Die Kommunisten und Sozialisten wollen von einer Präsidialverfassung nichts wissen; die Volksrepublikaner schwanken.
@@ -175,17 +175,17 @@ Welche Verfassung legst du dem Volk vor?`,
           { p: 0.75, ergebnis: 'Die Franzosen nehmen die Verfassung mit 53 Prozent an – bei einem Drittel Enthaltungen. Die Vierte Republik ist gegründet; im November wird die erste Nationalversammlung gewählt.',
             aktion: s => verfassungInKraft(s) },
           { ergebnis: 'Auch der zweite Entwurf scheitert. Im November wird zum dritten Mal eine Verfassunggebende Versammlung gewählt. (Fiktion)',
-            w: { ansehen: -3, mehrheit: -4 }, aktion: s => neueVersammlung(s) },
+            w: { ansehen: -3, rueckhalt: -4 }, aktion: s => neueVersammlung(s) },
         ],
         dient: { stabilitaet: 0.5 } },
       { text: 'Eine Präsidialverfassung nach den Ideen von Bayeux.', richtung: 'national',
         zufall: [
           { p: 0.5, ergebnis: 'Gegen Kommunisten und Sozialisten nehmen die Franzosen eine Verfassung mit einem starken Präsidenten an. Er ernennt die Regierung und kann die Kammer auflösen. De Gaulle begrüßt den Entwurf, hält sich aber fern. (Fiktion)',
-            w: { mehrheit: -6, ansehen: 2 }, aktion: s => verfassungInKraft(s, { praesidial: true }) },
+            w: { rueckhalt: -6, ansehen: 2 }, aktion: s => verfassungInKraft(s, { praesidial: true }) },
           { ergebnis: 'Die Präsidialverfassung scheitert am Widerstand der Linken. Im November wird zum dritten Mal eine Verfassunggebende Versammlung gewählt. (Fiktion)',
-            w: { mehrheit: -10, ansehen: -3 }, aktion: s => neueVersammlung(s) },
+            w: { rueckhalt: -10, ansehen: -3 }, aktion: s => neueVersammlung(s) },
         ],
-        dient: { stabilitaet: 0.6, sozial: -0.7 } },
+        dient: { stabilitaet: 0.4, sozial: -0.8 } },
     ],
     historisch: 'Am 13. Oktober 1946 nahmen 53,5 Prozent der Abstimmenden die Verfassung der Vierten Republik an; fast ein Drittel der Wahlberechtigten blieb zu Hause. Am 10. November wurde die erste Nationalversammlung gewählt, die Kommunisten wurden stärkste Partei.',
   },
@@ -209,7 +209,7 @@ Der Befehl liegt auf deinem Tisch. Ho Chi Minh hat dem Hohen Kommissar telegrafi
           { p: 0.45, ergebnis: 'Paris befiehlt Zurückhaltung, doch die Lage ist nicht mehr zu beruhigen: Am 19. Dezember greifen die Viet Minh in Hanoi an. Der Indochinakrieg hat begonnen.',
             w: { armee: -2, indochina: -2 }, setze: ['indochinakrieg'] },
           { ergebnis: 'Paris befiehlt Zurückhaltung. Eine gemeinsame Kommission untersucht die Zwischenfälle; in Hanoi wird weiter verhandelt. Die Offiziere des Expeditionskorps murren. (Fiktion)',
-            w: { armee: -4, rang: -1 }, setze: ['indochina_waffenruhe'] },
+            w: { armee: -4 }, setze: ['indochina_waffenruhe'] },
         ],
         dient: { frieden_kolonien: 1, kolonien: -0.4 } },
     ],
@@ -227,7 +227,7 @@ Washington und London haben in Moskau signalisiert, dass sie nichts dagegen hät
     optionen: [
       { text: 'Die Saar wirtschaftlich an Frankreich anschließen.', hist: true, richtung: 'national',
         ergebnis: 'Zwischen der Saar und dem übrigen Deutschland entsteht eine Zollgrenze. Das Saarland bekommt eine eigene Verfassung und den Franc; die Gruben arbeiten für Frankreich.',
-        w: { haushalt: 3, impuls: 0.4, moskau: -3, rang: 1 }, setze: ['saar_zone'], dient: { saar: 1.4, deutschland_klein: 0.6 } },
+        w: { haushalt: 3, impuls: 0.4, moskau: -3 }, setze: ['saar_zone'], dient: { saar: 1.4, deutschland_klein: 0.6 } },
       { text: 'Die Saar bei Deutschland lassen und nur Kohlelieferungen verlangen.', richtung: 'europa',
         ergebnis: 'Paris verzichtet auf die Abtrennung der Saar. Die Kohle wird als Reparation geliefert; die Saarländer bleiben Teil der französischen Zone.',
         w: { usa: 2, haushalt: -1 }, setze: ['saar_verzicht'], dient: { deutschland_einbinden: 0.6, saar: -1.2 } },
@@ -243,7 +243,7 @@ Washington und London haben in Moskau signalisiert, dass sie nichts dagegen hät
     ab: 1947.1, ordnung: 1,
     wenn: s => !!s.f.provisorisch,
     absender: 'Präsident der Verfassunggebenden Versammlung Vincent Auriol',
-    ascii: 'urne',
+    ascii: 'urne_fr',
     text: `Zwei Verfassungsentwürfe sind gescheitert, das Land wird seit anderthalb Jahren provisorisch regiert. Die Parteien sind sich nur in einem einig: Ein drittes Scheitern darf es nicht geben.`,
     optionen: [
       { text: 'Die Versammlung soll den Kompromiss ohne weiteres Referendum beschließen.',
@@ -254,9 +254,9 @@ Washington und London haben in Moskau signalisiert, dass sie nichts dagegen hät
           { p: 0.6, ergebnis: 'Im dritten Anlauf nehmen die Franzosen eine Verfassung mit starkem Präsidenten an. (Fiktion)',
             aktion: s => verfassungInKraft(s, { praesidial: true }) },
           { ergebnis: 'Auch dieser Entwurf scheitert. Die Versammlung beschließt daraufhin den Kompromiss selbst. (Fiktion)',
-            w: { ansehen: -4, mehrheit: -6 }, aktion: s => verfassungInKraft(s) },
+            w: { ansehen: -4, rueckhalt: -6 }, aktion: s => verfassungInKraft(s) },
         ],
-        dient: { stabilitaet: 0.5, sozial: -0.7 } },
+        dient: { stabilitaet: 0.3, sozial: -0.8 } },
     ],
     historisch: 'In der Geschichte genügte der zweite Entwurf: Die Verfassung der Vierten Republik trat am 27. Oktober 1946 in Kraft.',
   },
@@ -270,7 +270,7 @@ Washington und London haben in Moskau signalisiert, dass sie nichts dagegen hät
     optionen: [
       { text: 'Den Vertrag von Dünkirchen schließen.', hist: true, richtung: 'atlantisch',
         ergebnis: 'In Dünkirchen unterzeichnen Bidault und Bevin einen Beistandsvertrag gegen eine erneute deutsche Aggression.',
-        w: { grossbritannien: 8, rang: 1 }, setze: ['duenkirchen'], dient: { deutschland_klein: 0.6, westbindung: 0.4 } },
+        w: { grossbritannien: 8 }, setze: ['duenkirchen'], dient: { deutschland_klein: 0.6, westbindung: 0.4 } },
       { text: 'Ablehnen – Frankreich will sich nicht binden, solange Deutschland nicht geregelt ist.', richtung: 'national',
         ergebnis: 'Paris lässt den britischen Vorschlag liegen. Bevin ist enttäuscht.',
         w: { grossbritannien: -5 }, dient: { unabhaengigkeit: 0.6 } },
@@ -287,10 +287,10 @@ Washington und London haben in Moskau signalisiert, dass sie nichts dagegen hät
     optionen: [
       { text: 'Truppen schicken und den Aufstand niederschlagen.', hist: true, richtung: 'kolonial',
         ergebnis: 'Kolonialtruppen schlagen den Aufstand nieder. Zehntausende Madagassen sterben, die Abgeordneten des MDRM werden verhaftet und zum Tode verurteilt.',
-        w: { armee: 2, rang: -2, kriegsmuede: 1, haushalt: -2 }, setze: ['madagaskar_repression'], dient: { kolonien: 1 } },
+        w: { armee: 2, kriegsmuede: 1, haushalt: -2 }, setze: ['madagaskar_repression'], dient: { kolonien: 1 } },
       { text: 'Den Aufstand eindämmen und mit dem MDRM über Autonomie verhandeln.', richtung: 'dekolonisation',
         ergebnis: 'Paris schickt Truppen, aber auch Unterhändler. Die Siedler toben; in Tananarive wird über ein Autonomiestatut gesprochen.',
-        w: { armee: -3, rang: 1 }, setze: ['madagaskar_autonomie'], dient: { frieden_kolonien: 1, kolonien: -0.5 } },
+        w: { armee: -3 }, setze: ['madagaskar_autonomie'], dient: { frieden_kolonien: 1, kolonien: -0.5 } },
     ],
     historisch: 'Der Aufstand auf Madagaskar wurde bis 1948 niedergeschlagen; die Zahl der Toten wird auf 30.000 bis 90.000 geschätzt. Die MDRM-Abgeordneten wurden verurteilt und später begnadigt. Madagaskar wurde 1960 unabhängig.',
   },
@@ -324,7 +324,7 @@ Frankreich hat bisher zwischen den Großmächten laviert. In Moskau muss es sich
     ab: 1947.1, bis: 1947.2, ordnung: 5,
     wenn: s => s.regierung.includes('PCF') && !s.f.pcf_raus && s.chefPartei !== 'PCF',
     absender: 'Generalsekretariat der Regierung',
-    ascii: 'plakat',
+    ascii: 'plakat_fr',
     text: s => `Bei Renault in Billancourt streiken die Arbeiter für höhere Löhne. Die kommunistischen Minister haben in der Nationalversammlung gegen die Lohnpolitik der eigenen Regierung gestimmt – und schon vorher gegen die Kredite für Indochina. Sie wollen in der Regierung bleiben und zugleich die Opposition anführen.
 
 Die Verfassung kennt keinen Weg, Minister zu entlassen. Aber ${s.regierungschef} könnte es per Dekret tun.`,
@@ -334,10 +334,10 @@ Die Verfassung kennt keinen Weg, Minister zu entlassen. Aber ${s.regierungschef}
         w: { usa: 8, moskau: -8, armee: 2 }, aktion: s => ohneKommunisten(s), dient: { westbindung: 1.4, stabilitaet: 0.4, sozial: -0.3 } },
       { text: 'Nachgeben und die Löhne erhöhen.', richtung: 'sozial',
         ergebnis: 'Die Regierung gibt den Lohnforderungen nach. Die Koalition hält – aber die Preise steigen weiter, und Washington ist besorgt.',
-        w: { usa: -5, haushalt: -4, preisdruck: 3, mehrheit: 3 }, dient: { sozial: 0.8, stabilitaet: 0.2, westbindung: -0.8 } },
+        w: { usa: -5, haushalt: -4, preisdruck: 3, rueckhalt: 3 }, dient: { sozial: 0.8, stabilitaet: 0.2, westbindung: -0.8 } },
       { text: 'Zurücktreten und eine neue Regierung bilden lassen.',
         ergebnis: 'Die Regierung tritt zurück. Die Parteien müssen eine neue Mehrheit suchen.',
-        w: { mehrheit: -60 }, dient: { stabilitaet: -0.6 } },
+        w: { rueckhalt: -60 }, dient: { stabilitaet: -0.6 } },
     ],
     historisch: 'Am 5. Mai 1947 entließ Paul Ramadier die kommunistischen Minister. Die PCF kehrte bis 1981 nicht mehr in eine Regierung zurück.',
   },
@@ -393,7 +393,7 @@ Monnet rechnet vor, dass sein Modernisierungsplan ohne amerikanische Dollar nich
     optionen: [
       { text: 'Die Unabhängigkeit Vietnams in der Französischen Union anerkennen.', richtung: 'dekolonisation',
         ergebnis: 'Paris und Hanoi einigen sich: Vietnam wird ein unabhängiger Staat, verbunden mit Frankreich durch die Französische Union. Die Armee ist verbittert. (Fiktion)',
-        w: { armee: -6, rang: -2, moskau: 3 }, setze: ['indochina_beendet', 'indochina_ausgleich'], dient: { frieden_kolonien: 1.3, kolonien: -1 } },
+        w: { armee: -6, moskau: 3 }, setze: ['indochina_beendet', 'indochina_ausgleich'], dient: { frieden_kolonien: 1.3, kolonien: -1 } },
       { text: 'Auf Bao Dai setzen – und notfalls kämpfen.', richtung: 'kolonial',
         ergebnis: 'Paris bricht die Gespräche mit Ho Chi Minh ab und verhandelt mit Bao Dai. Die Viet Minh greifen zu den Waffen; der Indochinakrieg beginnt. (Fiktion)',
         w: { armee: 2, kriegsmuede: 1 }, setze: ['indochinakrieg'], dient: { kolonien: 1.1, frieden_kolonien: -0.8 } },
@@ -417,7 +417,7 @@ Innenminister Moch will die Reservisten einberufen und mit der neuen Bereitschaf
         dient: { westbindung: 0.8, stabilitaet: 0.4, sozial: -0.5 } },
       { text: 'Verhandeln und die Löhne kräftig anheben.', richtung: 'sozial',
         ergebnis: 'Die Regierung gibt nach. Die Streikenden kehren an die Arbeit zurück; die Inflation bekommt neue Nahrung.',
-        w: { preisdruck: 4, haushalt: -5, franc: -4, usa: -3, mehrheit: -4 }, dient: { sozial: 1, stabilitaet: -0.3 } },
+        w: { preisdruck: 4, haushalt: -5, franc: -4, usa: -3, rueckhalt: -4 }, dient: { sozial: 1, stabilitaet: -0.3 } },
     ],
     historisch: 'Die Streiks vom November und Dezember 1947 brachen nach dem harten Durchgreifen Jules Mochs zusammen. Im Dezember spaltete sich die CGT; die Force ouvrière wurde mit amerikanischer Unterstützung gegründet.',
   },
@@ -433,10 +433,10 @@ Innenminister Moch will die Reservisten einberufen und mit der neuen Bereitschaf
     optionen: [
       { text: 'Den Brüsseler Pakt unterzeichnen.', hist: true, richtung: ['atlantisch', 'europa'],
         ergebnis: 'In Brüssel unterzeichnen fünf westeuropäische Staaten einen Beistandspakt für fünfzig Jahre. In Washington beginnen Gespräche über ein atlantisches Bündnis.',
-        w: { grossbritannien: 6, usa: 4, europa: 3, moskau: -5, rang: 1 }, setze: ['bruesseler_pakt'], dient: { westbindung: 1, europa: 0.6 } },
+        w: { grossbritannien: 6, usa: 4, europa: 3, moskau: -5 }, setze: ['bruesseler_pakt'], dient: { westbindung: 1, europa: 0.6 } },
       { text: 'Nur einen Pakt gegen Deutschland – kein Bündnis gegen Moskau.', richtung: 'ost',
         ergebnis: 'Paris will sich nicht gegen die Sowjetunion festlegen. Die Benelux-Staaten und London schließen ihren Pakt ohne Frankreich. (Fiktion)',
-        w: { grossbritannien: -6, usa: -6, moskau: 4, rang: -1 }, dient: { unabhaengigkeit: 1, deutschland_klein: 0.6, westbindung: -1 } },
+        w: { grossbritannien: -6, usa: -6, moskau: 4 }, dient: { unabhaengigkeit: 1, deutschland_klein: 0.6, westbindung: -1 } },
     ],
     historisch: 'Der Brüsseler Pakt wurde am 17. März 1948 unterzeichnet, drei Wochen nach dem kommunistischen Umsturz in Prag. Er war der Vorläufer der NATO und wurde 1954 zur Westeuropäischen Union.',
   },
@@ -464,7 +464,7 @@ Innenminister Moch will die Reservisten einberufen und mit der neuen Bereitschaf
     ab: 1948.1, bis: 1948.2, ordnung: 6,
     wenn: s => ['ja', 'nur_mit_paris'].includes(s.weltflags.weststaat_usa) && !s.weltflags.weststaat_paris,
     absender: 'Georges Bidault, Außenminister',
-    ascii: 'flagge',
+    ascii: 'trikolore',
     text: s => `Auf der Londoner Sechsmächtekonferenz haben die Westmächte und die Benelux-Länder beschlossen, aus den westlichen Besatzungszonen einen deutschen Staat zu machen. Eine verfassunggebende Versammlung soll gewählt werden; die Ruhr kommt unter eine internationale Behörde, an der Frankreich beteiligt ist. Die französische Zone soll mit der Bizone verschmelzen.
 
 ${s.weltflags.weststaat_usa === 'ja' ? 'Washington hat klargemacht, dass der Weststaat auch ohne die französische Zone entsteht.' : 'Washington will den Weststaat nur mit Frankreich gründen – Paris hat es in der Hand.'} Die Nationalversammlung muss zustimmen. Kommunisten und Gaullisten sind dagegen: Ein neuer deutscher Staat, drei Jahre nach dem Krieg!`,
@@ -483,7 +483,7 @@ ${s.weltflags.weststaat_usa === 'ja' ? 'Washington hat klargemacht, dass der Wes
         ergebnis: s.weltflags.weststaat_usa === 'ja'
           ? 'Die Nationalversammlung lehnt die Londoner Empfehlungen ab. Briten und Amerikaner wollen den Weststaat nun ohne die französische Zone gründen. (Fiktion)'
           : 'Die Nationalversammlung lehnt die Londoner Empfehlungen ab. Washington legt die Pläne für einen westdeutschen Staat auf Eis; Deutschland bleibt unter Besatzung. (Fiktion)',
-        w: { usa: -12, grossbritannien: -6, moskau: 6, rang: 1 }, aktion: (s2, a) => a.weltflag('weststaat_paris', 'nein'),
+        w: { usa: -12, grossbritannien: -6, moskau: 6 }, aktion: (s2, a) => a.weltflag('weststaat_paris', 'nein'),
         dient: { deutschland_klein: 1.6, westbindung: -1.2, unabhaengigkeit: 0.6 } },
     ],
     historisch: 'Die Londoner Empfehlungen vom 7. Juni 1948 wurden von der Nationalversammlung am 16. Juni nur knapp gebilligt. Im Juli bekamen die westdeutschen Ministerpräsidenten den Auftrag, eine Verfassung auszuarbeiten.',
@@ -504,7 +504,7 @@ Frankreich hat kaum Transportflugzeuge – sie fliegen in Indochina. Ganeval sch
     optionen: [
       { text: 'Den Flughafen in Tegel bauen und die Luftbrücke unterstützen.', hist: true, richtung: 'atlantisch',
         ergebnis: 'In neunzig Tagen bauen Berliner und französische Pioniere in Tegel die längste Landebahn Europas. Frankreich steht an der Seite der Westmächte.',
-        w: { usa: 5, grossbritannien: 3, moskau: -5, haushalt: -1, rang: 1 }, dient: { westbindung: 1 } },
+        w: { usa: 5, grossbritannien: 3, moskau: -5, haushalt: -1 }, dient: { westbindung: 1 } },
       { text: 'Eine Vermittlung zwischen Moskau und den Westmächten anbieten.', richtung: 'ost',
         ergebnis: 'Paris bietet an, zwischen Moskau und Washington zu vermitteln. Moskau lobt die „Vernunft“ Frankreichs, Washington ist verärgert.',
         w: { usa: -5, moskau: 5 }, dient: { unabhaengigkeit: 1, deutschland_klein: 0.4, westbindung: -0.6 } },
@@ -557,20 +557,20 @@ Frankreich hat kaum Transportflugzeuge – sie fliegen in Indochina. Ganeval sch
     ab: 1949.1, bis: 1949.1, ordnung: 4,
     wenn: s => !!s.weltflags.nato_angebot,
     absender: 'Robert Schuman, Außenminister',
-    ascii: 'flagge',
+    ascii: 'trikolore',
     text: s => `In Washington soll der Nordatlantikvertrag unterzeichnet werden: zwölf Staaten, ein Angriff auf einen gilt als Angriff auf alle. ${s.weltflags.nato_angebot === 'lose' ? 'Washington will sich allerdings nur zu Konsultationen verpflichten, nicht zu automatischem Beistand.' : 'Die Vereinigten Staaten binden sich zum ersten Mal in ihrer Geschichte in Friedenszeiten an ein Bündnis.'}
 
 Paris verlangt, dass auch die algerischen Departements unter den Schutz des Vertrags fallen und Frankreich mit Washington und London im obersten Militärausschuss sitzt. Die Kommunisten rufen zum Kampf gegen den „Kriegspakt“ auf.`,
     optionen: [
       { text: 'Unterzeichnen – mit Algerien und einem Sitz in der Führung.', hist: true, richtung: 'atlantisch',
         ergebnis: 'Schuman unterzeichnet in Washington den Nordatlantikvertrag. Algerien steht unter dem Schutz des Bündnisses; Frankreich sitzt mit den USA und Großbritannien in der „Standing Group“.',
-        w: { usa: 8, grossbritannien: 4, moskau: -8, rang: 3 }, setze: ['nato_mitglied'], dient: { westbindung: 1.4, kolonien: 0.3 } },
+        w: { usa: 8, grossbritannien: 4, moskau: -8 }, setze: ['nato_mitglied'], dient: { westbindung: 1.4, kolonien: 0.3 } },
       { text: 'Beitreten, aber keine fremden Truppen und Stützpunkte in Frankreich zulassen.', richtung: 'national',
         ergebnis: 'Frankreich tritt dem Bündnis bei, lehnt aber amerikanische Stützpunkte auf seinem Boden ab. Washington ist irritiert. (Fiktion)',
-        w: { usa: -2, moskau: -4, rang: 2 }, setze: ['nato_mitglied', 'nato_lose'], dient: { unabhaengigkeit: 1, westbindung: 0.6 } },
+        w: { usa: -2, moskau: -4 }, setze: ['nato_mitglied', 'nato_lose'], dient: { unabhaengigkeit: 1, westbindung: 0.6 } },
       { text: 'Neutral bleiben – Frankreich als Brücke zwischen den Blöcken.', richtung: 'ost',
         ergebnis: 'Frankreich unterzeichnet den Nordatlantikvertrag nicht. Washington und London sind fassungslos; Moskau lobt die „Unabhängigkeit“ von Paris. (Fiktion)',
-        w: { usa: -16, grossbritannien: -8, moskau: 10, rang: -3 }, setze: ['nato_fern'], dient: { unabhaengigkeit: 1.6, westbindung: -1.6 } },
+        w: { usa: -16, grossbritannien: -8, moskau: 10 }, setze: ['nato_fern'], dient: { unabhaengigkeit: 1.6, westbindung: -1.6 } },
     ],
     historisch: 'Der Nordatlantikvertrag wurde am 4. April 1949 in Washington unterzeichnet. Auf französisches Drängen galt er nach Artikel 6 auch für die algerischen Departements.',
   },

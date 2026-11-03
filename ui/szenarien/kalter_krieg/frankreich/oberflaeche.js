@@ -1,6 +1,10 @@
 // Was die Oberfläche über Frankreich wissen muss: Titel, Nationalversammlung, Zeitung, Wahlabend
 import { PARTEIEN, LAGER, parteiKurz } from './modell.js';
 import { jahrVon } from '../../../engine.js';
+import { ENDEN as KRIEGSENDEN } from './kolonialkriege.js';
+
+/** Wie ein Kolonialkrieg ausgegangen ist, kurz fürs Lagebild: „geteilt (1954)“ */
+const kriegsausgang = (s, krieg) => (s.f[krieg + '_ende'] ? `${KRIEGSENDEN[krieg][s.f[krieg + '_ende']][0]} (${jahrVon(s.f[krieg + '_ende_zeit'])})` : null);
 
 const zahl = (x, d = 1) => Number(x).toLocaleString('de-DE', { minimumFractionDigits: d, maximumFractionDigits: d });
 const REIHENFOLGE = ['PCF', 'SFIO', 'RAD', 'MRP', 'UNAB', 'GAUL', 'POUJ'];
@@ -22,19 +26,32 @@ export default {
   paraphe: s => s.regierungschef.replace(/^(General|Charles) /, '').split(' ').map(x => x[0]).join('.') + '.',
   kurzinfo: L => (L.regierungschef ? `${L.republik === 5 ? 'Premierminister' : 'Ministerpräsident'} ${L.regierungschef}` : ''),
 
-  skala: { zustimmung: [10, 70], wachstum: [-2, 12], inflation: [0, 20], ansehen: [-30, 30], haushalt: [0, 100] },
   zeile(s, k) {
-    if (k === 'indochina' && s.f.indochina_beendet) return 'beendet';
-    // Die Bundesrepublik gibt es erst ab 1949 – oder nie
-    if (k === 'brd' && s.welt.laender.brd?.nie) return 'Deutschland besetzt';
-    if (k === 'brd' && s.welt.laender.brd?.aktiv === false) return 'noch kein Staat';
-    if (k === 'algerien' && s.f.algerien_unabhaengig) return 'unabhängig';
-    if (k === 'mehrheit' && s.lager === 'militaer') return 'aufgelöst';
+    if (k === 'indochina' && s.f.indochina_beendet) return kriegsausgang(s, 'indochina') || 'beendet';
+    if (k === 'algerien' && (s.f.algerien_unabhaengig || (s.f.algerien_frieden && s.f.algerien_integration) || (s.f.algerien_autonomie && !s.f.algerienkrieg))) return kriegsausgang(s, 'algerien') || 'Krieg beendet';
+    if (k === 'rueckhalt' && s.lager === 'militaer') return 'aufgelöst';
     return null;
   },
-  warnung: (s, k, v) => (k === 'mehrheit' && v <= 15 && s.republik === 4) || (k === 'armee' && v <= 25) || (k === 'haushalt' && v <= 10)
-    || (k === 'franc' && v <= 15) || (k === 'indochina' && v <= 15) || (k === 'algerien' && v <= 20 && s.f.algerienkrieg) || (k === 'moskau' && v <= 10),
-  wertTitel: (s, k) => (k === 'mehrheit' && s.republik === 4 ? 'Rückhalt in der Nationalversammlung – je geringer, desto eher stürzt die Regierung' : null),
+  warnung: (s, k, v) => (k === 'armee' && v <= 25) || (k === 'franc' && v <= 15) || (k === 'indochina' && v <= 15) || (k === 'algerien' && v <= 20 && s.f.algerienkrieg),
+  // Was die Standardwerte in Frankreich genau messen und bewirken (ergänzt den Katalog in werte.js)
+  erklaerung: s => ({
+    zustimmung: {
+      was: 'Wie viele Franzosen mit der Regierung zufrieden sind, in Prozent.',
+      wirkt: 'Hebt oder senkt das Zielniveau des Rückhalts und entscheidet bei Wahlen über Gewinne und Verluste der Regierungsparteien.',
+    },
+    rueckhalt: s.republik === 5 ? {
+      was: 'Rückhalt der Regierung in der Nationalversammlung, von 0 bis 100.',
+      wirkt: 'In der Fünften Republik stützt der Präsident die Regierung; der Rückhalt strebt von selbst gegen 70. Sinkt er auf 0, droht ein Misstrauensvotum.',
+    } : {
+      was: 'Rückhalt der Regierung in der Nationalversammlung, von 0 bis 100.',
+      hebt: 'Ein breites Regierungslager, zufriedene Bürger, Verfassungsreformen, Frieden in den Kolonien.',
+      senkt: 'Kolonialkriege mit schlechter Lage, Inflation über 8 %, Entscheidungen, die Regierungsparteien verprellen.',
+      wirkt: 'Am Ende jedes Halbjahrs stürzt die Regierung mit der Wahrscheinlichkeit (50 − Rückhalt)/30: unter 50 wird es gefährlich, unter 23 fast sicher; bei 0 stürzt sie sofort. Jedes Halbjahr rückt der Wert halb an ein Zielniveau heran, das von der Lage abhängt.',
+    },
+    inflation: { hebt: 'Haushaltsdefizite, Lohnerhöhungen, der Algerienkrieg; nach dem Krieg die Knappheit.', wirkt: 'Drückt auf die Umfrage (bis zu gut 11 Punkte); über 8 % senkt sie das Zielniveau des Rückhalts, über 12 % bremst sie das Wachstum und schwächt den Franc.' },
+    arbeitslosigkeit: { hebt: 'Schwaches Wachstum; 1962 die Heimkehrer aus Algerien.', wirkt: 'Über 2 % drückt sie auf die Umfrage.' },
+    haushalt: { wirkt: 'Vorhaben kosten Haushaltspunkte. Unter 25 treibt er die Inflation, unter 15 bremst er das Wachstum; unter 0 kommt ein Haushaltsnotstand, beim dritten der Staatsbankrott.' },
+  }),
   parlament: s => ({
     titel: 'Nationalversammlung',
     reihenfolge: REIHENFOLGE,

@@ -17,8 +17,8 @@
 //   stabilitaet            stabile Institutionen
 
 const WERTE = {
-  usa: 0.5, brd: 0.3, grossbritannien: 0.3, moskau: 0.15, rang: 1.0, europa: 0.4, atom: 0.3,
-  indochina: 0.6, algerien: 0.8, armee: 0.6, ansehen: 0.8, mehrheit: 0.9, haushalt: 0.4, franc: 0.4,
+  usa: 0.5, brd: 0.3, grossbritannien: 0.3, moskau: 0.15, europa: 0.4, atom: 0.3,
+  indochina: 0.6, algerien: 0.8, armee: 0.6, ansehen: 0.8, rueckhalt: 0.9, haushalt: 0.4, franc: 0.4,
   impuls: 0.8, preisdruck: -0.6, inflation: -0.5, wachstum: 0.4, kriegsmuede: -0.5, bonus: 0.3,
 };
 const BASIS = {
@@ -74,7 +74,7 @@ export const REGIERUNGEN = {
   },
   mendes: {
     name: 'Pierre Mendès France', kurz: 'Mendès France', titel: 'Regierung Mendès France',
-    lambda: 1.9, werte: { ...WERTE, indochina: 0.3, rang: 1.2 }, ziele: { ...BASIS, frieden_kolonien: 1.6, modernisierung: 1.3, kolonien: 0.5 },
+    lambda: 1.9, werte: { ...WERTE, indochina: 0.3 }, ziele: { ...BASIS, frieden_kolonien: 1.6, modernisierung: 1.3, kolonien: 0.5 },
     frage: 'Steht Mendès France hinter der EVG?',
     typen: {
       neutral: { p: 0.7, name: 'Gleichgültig', kurz: 'nein – er lässt die Abstimmung laufen',
@@ -119,7 +119,7 @@ export const REGIERUNGEN = {
   },
   de_gaulle: {
     name: 'Charles de Gaulle', kurz: 'de Gaulle', titel: 'General de Gaulle',
-    lambda: 2.2, werte: { ...WERTE, rang: 1.6, mehrheit: 0.4, atom: 0.6 }, ziele: { ...BASIS, unabhaengigkeit: 1.6, atom: 1.6, westbindung: 0.6, frieden_kolonien: 1.1, kolonien: 0.6, europa: 0.6, stabilitaet: 1.2 },
+    lambda: 2.2, werte: { ...WERTE, rueckhalt: 0.4, atom: 0.6 }, ziele: { ...BASIS, unabhaengigkeit: 1.6, atom: 1.6, westbindung: 0.6, frieden_kolonien: 1.1, kolonien: 0.6, europa: 0.6, stabilitaet: 1.2 },
     frage: 'Sucht de Gaulle Bonn als Partner gegen Washington?',
     typen: {
       achse: { p: 0.55, name: 'Achse Paris–Bonn', kurz: 'ja – ein Europa der Vaterländer ohne die Angelsachsen',
@@ -134,7 +134,7 @@ export const REGIERUNGEN = {
   },
   militaer: {
     name: 'Militärregierung', kurz: 'Generäle', titel: 'Militärregierung (Fiktion)',
-    lambda: 1.6, werte: { ...WERTE, armee: 1.2, algerien: 1.4, mehrheit: 0.1 }, ziele: { ...BASIS, kolonien: 2.2, frieden_kolonien: 0.1, sozial: 0.1, europa: 0.3 },
+    lambda: 1.6, werte: { ...WERTE, armee: 1.2, algerien: 1.4, rueckhalt: 0.1 }, ziele: { ...BASIS, kolonien: 2.2, frieden_kolonien: 0.1, sozial: 0.1, europa: 0.3 },
     frage: 'Wie weit wollen die Generäle gehen?',
     typen: {
       algerie_francaise: { p: 0.7, name: 'Französisches Algerien', kurz: 'bis zum Ende – Algerien bleibt französisch',

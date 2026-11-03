@@ -6,6 +6,7 @@ import teil3 from './ereignisse_1959_1964.js';
 import einheit from './einheit.js';
 import akten from './akten.js';
 import vorhaben from './vorhaben.js';
+import entscheidungen from './entscheidungen.js';
 import zeitgeschehen from './zeitgeschehen.js';
 import { ENDEN } from './enden.js';
 import oberflaeche from './oberflaeche.js';
@@ -72,12 +73,9 @@ export default {
   dynamisch: modell.dynamisch,
   ereignisse: [...teil1, ...teil2, ...teil3, ...einheit, ...akten],
   vorhaben,
+  entscheidungen,
   enden: ENDEN,
   oberflaeche,
-  // Anzeigegruppen im Lagebild
-  anzeige: [
-    { titel: 'Außenpolitik', werte: ['usa', 'frankreich', 'grossbritannien', 'moskau', 'souveraenitaet', 'einheit', 'europa'] },
-    { titel: 'Innenpolitik', werte: ['zustimmung', 'ansehen', 'koalition'] },
-    { titel: 'Wirtschaft', werte: ['wachstum', 'arbeitslosigkeit', 'haushalt', 'flucht'] },
-  ],
+  // Landesspezifischer Block im Lagebild (Reihenfolge)
+  landesspezifisch: ['souveraenitaet', 'einheit', 'flucht', 'europa'],
 };

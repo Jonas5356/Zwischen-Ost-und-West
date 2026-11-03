@@ -37,6 +37,7 @@
       <div class="eingang" id="eingang" aria-live="polite"></div>
       <div class="kopf-mitte" id="kopf-regierung"></div>
       <nav class="kopf-knoepfe">
+        <button class="knopf klein" id="k-entscheidungen" title="Entscheidungen, die du jederzeit treffen kannst (E)">Entscheidungen<span class="zaehler" id="entscheidungen-zahl" hidden></span></button>
         <button class="knopf klein" id="k-zeitung" title="Die Zeitung zum Halbjahr (Z)">Zeitung<span class="neu-punkt" id="zeitung-neu" hidden aria-label="neue Ausgabe"></span></button>
         <button class="knopf klein" id="k-dossier" title="Was die anderen Regierungen vermutlich wollen (D)">Dossier</button>
         <button class="knopf klein" id="k-chronik" title="Alle bisherigen Entscheidungen (C)">Chronik</button>
@@ -79,6 +80,12 @@
   <dialog id="d-dossier" class="dialog breit">
     <div class="dialog-kopf"><h2 id="dossier-titel">Dossier</h2><button class="knopf klein" data-schliessen>Schließen</button></div>
     <div class="dossier" id="dossier"></div>
+  </dialog>
+
+  <dialog id="d-entscheidungen" class="dialog breit">
+    <div class="dialog-kopf"><h2>Entscheidungen</h2><button class="knopf klein" data-schliessen>Schließen</button></div>
+    <p class="hinweis">Diese Entscheidungen kannst du jederzeit im Halbjahr treffen, zusätzlich zu den Vorgängen auf deinem Schreibtisch. Jede kostet etwas und lässt sich erst nach einer Weile wiederholen. Bittest du ein anderes Land um etwas, antwortet es nach seinen Zielen – und danach, wie es dein Land sieht.</p>
+    <ul class="entscheidungen" id="entscheidungen-liste"></ul>
   </dialog>
 
   <dialog id="d-chronik" class="dialog breit">

@@ -46,7 +46,7 @@ function stabilSpielen(seed) {
       const probe = JSON.parse(JSON.stringify(welt));
       E.waehle(W, probe, o.index);
       const p = E.sicht(W, probe, 'frankreich');
-      const v = p.w.mehrheit + 0.5 * p.w.zustimmung + (p.f.indochina_beendet ? 15 : 0) - (p.f.algerienkrieg && !p.f.algerien_frieden ? 15 : 0) + (p.f.algerien_verhandlung ? 8 : 0) - (probe.ende ? 1000 : 0);
+      const v = p.w.rueckhalt + 0.5 * p.w.zustimmung + (p.f.indochina_beendet ? 15 : 0) - (p.f.algerienkrieg && !p.f.algerien_frieden ? 15 : 0) + (p.f.algerien_verhandlung ? 8 : 0) - (probe.ende ? 1000 : 0);
       if (v > wert) { wert = v; beste = o; }
     }
     E.waehle(W, welt, beste.index);
@@ -70,6 +70,12 @@ test('Jedes Ereignis und jedes Vorhaben Frankreichs kommt vor', () => {
   for (let seed = 1; seed <= 20; seed++) {
     spiele(seed, 'historisch', null, { land: 'frankreich', vorgabe: { fr_ho_sainteny: 0, fr_fontainebleau: 0, fr_haiphong: 1 } }).gesehen.forEach(x => gesehen.add(x));
     if (gesehen.has('fr_indochina1947')) break;
+  }
+  // Zusammenbruch in Algerien: Lage künstlich auf 5 setzen, sobald der Krieg läuft
+  for (let seed = 1; seed <= 5 && !gesehen.has('fr_algerien_zusammenbruch'); seed++) {
+    // vom ersten Halbjahr 1956 an die Lage niedrig halten, bis die Front zusammenbricht
+    const eingriff = welt => { const F = welt.laender.frankreich; if (F.f.algerienkrieg && welt.zeit >= 1956.1 && !F.erledigt.fr_algerien_zusammenbruch && F.erledigt.fr_algerien_zusammenbruch !== 0) F.w.algerien = Math.min(F.w.algerien, 5); };
+    spiele(seed, 'historisch', null, { land: 'frankreich', eingriff }).gesehen.forEach(x => gesehen.add(x));
   }
   for (let seed = 1; seed <= 300; seed++) {
     const r = spiele(seed, 'historisch', null, { land: 'frankreich', vorgabe: { fr_london1948: 2 } });

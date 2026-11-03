@@ -191,13 +191,14 @@ let angezeigteZeit = null;
 function zeichne() {
   stoppSzene();
   tippAbbruch = null;
+  // zuerst vorrücken: Wer ein spät entstehendes Land spielt, beginnt erst nach dem Vorlauf
+  const a = E.aktuelles(W, welt);
   if (angezeigteZeit !== null && angezeigteZeit !== s.zeit && !s.ende) {
     meldung(`${E.zeitLang(s.zeit)}: Die neue Ausgabe von „${ui.zeitung.titel}“ liegt bereit.`);
   }
   angezeigteZeit = s.zeit;
   zeichneKopf();
   zeichneLage();
-  const a = E.aktuelles(W, welt);
   const blatt = $('blatt');
   blatt.className = 'blatt';
   blatt.scrollTop = 0;
@@ -223,40 +224,97 @@ function zeichneKopf() {
   const k = ui.kopf(s);
   $('kopf-regierung').innerHTML = `<strong>${esc(k.titel)}</strong>${k.text ? `, ${esc(k.text)}` : ''}`;
   $('zeitung-neu').hidden = s.zeitungGelesen === s.zeit;
+  zeichneEntscheidungsZahl();
+}
+
+/** Die Werte eines Blocks in fester Reihenfolge (Standardwerte und Beziehungen nach dem Katalog) */
+function werteImBlock(block) {
+  const reihe = block === 'land' ? (sz.landesspezifisch || []) : W.werteReihe;
+  const pos = k => { const i = reihe.indexOf(k); return i < 0 ? 999 : i; };
+  return Object.keys(sz.werte).filter(k => sz.werte[k].block === block && !sz.werte[k].versteckt).sort((a, b) => pos(a) - pos(b));
+}
+
+/** Besondere Anzeige statt eines Balkens: ein Land, das es (noch) nicht gibt, oder Angaben des Landes */
+function besondereZeile(k, d) {
+  if (d.beziehung && welt.laender[d.beziehung] && !E.istAktiv(welt, d.beziehung)) return welt.laender[d.beziehung].nie ? 'kein Staat' : 'noch kein Staat';
+  return ui.zeile?.(s, k) || null;
+}
+
+function wertZeile(k, basis) {
+  const d = sz.werte[k];
+  const besonders = besondereZeile(k, d);
+  if (besonders === 'aus') return '';
+  if (besonders) return `<div class="zeile" data-wert="${k}" tabindex="0"><span>${esc(d.kurz)}</span><span class="balken">${esc(besonders)}</span><span class="wert"></span><span></span></div>`;
+  const v = s.w[k];
+  const [lo, hi] = d.skala || ui.skala?.[k] || [d.min, d.max];
+  const n = Math.max(0, Math.min(10, Math.round(10 * (v - lo) / (hi - lo))));
+  const balken = '█'.repeat(n) + '░'.repeat(10 - n);
+  const wert = d.einheit === '%' ? zahl(v, 1) : (k === 'ansehen' && v > 0 ? '+' : '') + Math.round(v);
+  let trend = '';
+  if (basis && basis[k] !== undefined) {
+    const delta = v - basis[k];
+    if (Math.abs(delta) >= 0.5) {
+      const hoch = delta > 0;
+      const gut = d.neutral ? null : (d.invertiert ? !hoch : hoch);
+      trend = `<span class="trend ${gut === null ? '' : gut ? 'gut' : 'schlecht'}">${hoch ? '▲' : '▼'}</span>`;
+    }
+  }
+  const warn = !!(d.warnung?.(v) || ui.warnung?.(s, k, v));
+  return `<div class="zeile${warn ? ' warnung' : ''}" data-wert="${k}" tabindex="0" aria-label="${esc(d.name)}: ${esc(wert)}"><span>${esc(d.kurz)}</span><span class="balken" aria-hidden="true">${balken}</span><span class="wert">${wert}</span>${trend || '<span></span>'}</div>`;
+}
+
+/** Erklärung eines Werts: Katalog, ergänzt um die Angaben des Landes */
+function erklaerung(k) {
+  const d = sz.werte[k];
+  const eigen = typeof ui.erklaerung === 'function' ? ui.erklaerung(s)?.[k] : ui.erklaerung?.[k];
+  const e = { ...(d.erklaerung || {}), ...(eigen || {}) };
+  for (const f of Object.keys(e)) e[f] = E.txt(e[f], s);
+  return e;
+}
+
+/** Hinweiskärtchen: was der Wert ist, was ihn bewegt, was er bewirkt – und was ihn zuletzt bewegt hat */
+function hinweisHtml(k) {
+  const d = sz.werte[k];
+  const e = erklaerung(k);
+  let html = `<h4>${esc(d.name)}</h4>`;
+  if (e.was) html += `<p>${esc(e.was)}</p>`;
+  html += '<dl>';
+  if (e.hebt) html += `<dt>Hebt ihn</dt><dd>${esc(e.hebt)}</dd>`;
+  if (e.senkt) html += `<dt>Senkt ihn</dt><dd>${esc(e.senkt)}</dd>`;
+  if (e.wirkt) html += `<dt>Bewirkt</dt><dd>${esc(e.wirkt)}</dd>`;
+  html += '</dl>';
+  if (d.beziehung && !E.istAktiv(welt, d.beziehung)) return html;
+  // Was den Wert zuletzt bewegt hat: Entscheidungen dieses Halbjahrs und das letzte Halbjahresende
+  const fmt = x => `${x > 0 ? '+' : '−'}${zahl(Math.abs(x), Number.isInteger(x) ? 0 : 1)}`;
+  const posten = [];
+  for (const c of s.chronik || []) {
+    if (E.zeitIndex(c.zeit) !== E.zeitIndex(s.zeit)) continue;
+    const a = (c.aenderungen || []).find(x => x.key === k);
+    if (a) posten.push([a.delta, c.titel]);
+  }
+  const basis = s.verlauf.length ? s.verlauf[s.verlauf.length - 1] : null;
+  if (basis && basis[k] !== undefined) {
+    const gesamt = E.runde1(s.w[k] - basis[k]);
+    const erklaert = E.runde1(posten.reduce((x, [dd]) => x + dd, 0));
+    if (Math.abs(gesamt - erklaert) >= 0.5) posten.push([E.runde1(gesamt - erklaert), 'andere Länder und Folgen']);
+  }
+  const ende = (s.letzteAenderung || []).find(x => x.key === k);
+  if (posten.length || ende) {
+    html += '<p class="hinweis-kopf">Zuletzt</p><ul>';
+    for (const [dd, t] of posten) html += `<li><b>${fmt(dd)}</b> ${esc(t)}</li>`;
+    if (ende) html += `<li><b>${fmt(ende.delta)}</b> am Ende des letzten Halbjahrs</li>`;
+    html += '</ul>';
+  }
+  return html;
 }
 
 function zeichneLage() {
   const basis = s.verlauf.length ? s.verlauf[s.verlauf.length - 1] : null;
   let html = '';
-  for (const gruppe of sz.anzeige) {
-    html += `<section class="karte"><h3>${esc(gruppe.titel)}</h3>`;
-    for (const k of gruppe.werte) {
-      const d = sz.werte[k];
-      const besonders = ui.zeile?.(s, k);
-      if (besonders === 'aus') continue;
-      if (besonders) {
-        html += `<div class="zeile"><span>${esc(d.kurz)}</span><span class="balken">${esc(besonders)}</span><span class="wert"></span><span></span></div>`;
-        continue;
-      }
-      const v = s.w[k];
-      const [lo, hi] = ui.skala?.[k] || [d.min, d.max];
-      const n = Math.max(0, Math.min(10, Math.round(10 * (v - lo) / (hi - lo))));
-      const balken = '█'.repeat(n) + '░'.repeat(10 - n);
-      const wert = d.einheit === '%' ? zahl(v, 1) : (k === 'ansehen' && v > 0 ? '+' : '') + Math.round(v);
-      let trend = '';
-      if (basis && basis[k] !== undefined) {
-        const delta = v - basis[k];
-        if (Math.abs(delta) >= 0.5) {
-          const hoch = delta > 0;
-          const gut = d.neutral ? null : (d.invertiert ? !hoch : hoch);
-          trend = `<span class="trend ${gut === null ? '' : gut ? 'gut' : 'schlecht'}" title="seit Ende des letzten Halbjahrs: ${delta > 0 ? '+' : ''}${zahl(delta, 1)}">${hoch ? '▲' : '▼'}</span>`;
-        }
-      }
-      const warn = !!ui.warnung?.(s, k, v);
-      const titel = ui.wertTitel?.(s, k) || d.name;
-      html += `<div class="zeile${warn ? ' warnung' : ''}" title="${esc(titel)}"><span>${esc(d.kurz)}</span><span class="balken" aria-hidden="true">${balken}</span><span class="wert">${wert}</span>${trend || '<span></span>'}</div>`;
-    }
-    html += '</section>';
+  for (const block of W.bloecke) {
+    const zeilen = werteImBlock(block.id).map(k => wertZeile(k, basis)).join('');
+    if (!zeilen) continue;
+    html += `<section class="karte"><h3>${esc(block.titel)}</h3>${zeilen}</section>`;
   }
   html += weltKarte();
   // Parlament
@@ -271,6 +329,68 @@ function zeichneLage() {
     <div class="legende">${esc(P.hinweis ?? (naechste ? `Nächste Wahl: ${E.zeitText(naechste)}` : `Bis ${E.jahrVon(W.ende)} keine Wahl mehr`))}</div></section>`;
   $('lage').innerHTML = html;
   $('k-dossier-lage')?.addEventListener('click', zeigeDossier);
+  for (const z of $('lage').querySelectorAll('.zeile[data-wert]')) {
+    z.addEventListener('mouseenter', () => zeigeHinweis(z));
+    z.addEventListener('focus', () => zeigeHinweis(z));
+    z.addEventListener('click', () => zeigeHinweis(z, true));
+    z.addEventListener('mouseleave', () => versteckeHinweis());
+    z.addEventListener('blur', () => versteckeHinweis());
+  }
+}
+
+// ---------------------------------------------------------------- Hinweiskärtchen zu den Werten
+
+/** Abschnitt „Die Werte“ der Hilfe – aus denselben Erklärungen wie die Hinweiskärtchen */
+function werteHilfe() {
+  let html = '<h3 class="hilfe-werte">Die Werte</h3><p>Das Lagebild hat in jedem Land dieselben Blöcke: Regierung, Wirtschaft und Beziehungen sind überall gleich, zuletzt kommt ein Block mit den Werten, die es nur in diesem Land gibt. Zeigst du im Lagebild auf einen Wert, erscheint seine Erklärung samt dem, was ihn zuletzt bewegt hat.</p>';
+  for (const block of W.bloecke) {
+    const keys = werteImBlock(block.id);
+    if (!keys.length) continue;
+    html += `<h4>${esc(block.titel)}</h4><dl class="hilfe-werte">`;
+    for (const k of keys) {
+      const e = erklaerung(k);
+      html += `<dt>${esc(sz.werte[k].name)}</dt><dd>${esc([e.was, e.wirkt].filter(Boolean).join(' '))}</dd>`;
+    }
+    html += '</dl>';
+  }
+  return html;
+}
+
+let hinweisFest = null;
+function hinweisElement() {
+  let el = $('wert-hinweis');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'wert-hinweis';
+    el.className = 'wert-hinweis';
+    el.setAttribute('role', 'tooltip');
+    el.hidden = true;
+    document.body.appendChild(el);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') versteckeHinweis(true); });
+    window.addEventListener('scroll', () => versteckeHinweis(true), true);
+  }
+  return el;
+}
+function zeigeHinweis(zeile, fest = false) {
+  const el = hinweisElement();
+  if (fest && hinweisFest === zeile) { versteckeHinweis(true); return; }
+  if (fest) hinweisFest = zeile;
+  el.innerHTML = hinweisHtml(zeile.dataset.wert);
+  el.hidden = false;
+  const r = zeile.getBoundingClientRect();
+  const breite = el.offsetWidth, hoehe = el.offsetHeight;
+  // links neben dem Lagebild, sonst darunter
+  let links = r.left - breite - 14, oben = r.top - 8;
+  if (links < 8) { links = Math.max(8, r.right - breite); oben = r.bottom + 6; }
+  oben = Math.max(8, Math.min(oben, window.innerHeight - hoehe - 8));
+  el.style.left = `${links}px`;
+  el.style.top = `${oben}px`;
+}
+function versteckeHinweis(auchFest = false) {
+  if (hinweisFest && !auchFest) return;
+  hinweisFest = null;
+  const el = $('wert-hinweis');
+  if (el) el.hidden = true;
 }
 
 function briefkopf(art, absender) {
@@ -612,6 +732,46 @@ function zeichneEnde(blatt) {
 
 // ---------------------------------------------------------------- Dialoge
 
+// ---------------------------------------------------------------- Entscheidungen
+
+const ORT = { usa: 'Washington', su: 'Moskau', grossbritannien: 'London', frankreich: 'Paris', brd: 'Bonn' };
+
+function kostenText(kosten) {
+  return Object.entries(kosten || {}).map(([k, v]) => `${sz.werte[k]?.kurz || k} ${v > 0 ? '+' : '−'}${zahl(Math.abs(v), Number.isInteger(v) ? 0 : 1)}`).join(', ');
+}
+
+function zeigeEntscheidungen() {
+  const moeglich = E.entscheidungMoeglich(W, welt);
+  const liste = E.entscheidungen(W, welt);
+  $('entscheidungen-liste').innerHTML = liste.map(e => {
+    const an = e.an ? E.txt(e.an, s) : null;
+    const kosten = kostenText(e.kosten);
+    const grund = !moeglich ? 'Erst wieder, wenn ein Vorgang auf deinem Schreibtisch liegt.' : e.grund;
+    return `<li class="${e.verfuegbar && moeglich ? '' : 'gesperrt'}">
+      <div class="e-kopf"><b>${esc(e.titel)}</b>${an ? `<span class="e-an">Anfrage an ${esc(ORT[an.land] || an.land)}</span>` : ''}</div>
+      <p>${esc(e.text)}</p>
+      <div class="e-fuss"><span class="e-kosten">${kosten ? `Kosten: ${esc(kosten)}` : 'Keine Kosten'} · danach ${e.einmalig ? 'nicht wiederholbar' : `${e.abklingzeit ?? 2} Halbjahre Pause`}</span>
+      ${grund ? `<span class="e-grund">${esc(grund)}</span>` : `<button class="knopf klein" data-entscheidung="${esc(e.id)}">Entscheiden</button>`}</div></li>`;
+  }).join('') || '<li>Im Moment stehen keine Entscheidungen an.</li>';
+  for (const b of $('entscheidungen-liste').querySelectorAll('[data-entscheidung]')) {
+    b.onclick = () => {
+      b.disabled = true;
+      $('d-entscheidungen').close();
+      try { E.triffEntscheidung(W, welt, b.dataset.entscheidung); } catch (err) { console.error(err); }
+      Ton.stempel?.();
+      zeichne();
+    };
+  }
+  $('d-entscheidungen').showModal();
+}
+
+/** Zahl der Entscheidungen, die gerade möglich sind, am Knopf in der Kopfleiste */
+function zeichneEntscheidungsZahl() {
+  const n = E.entscheidungMoeglich(W, welt) ? E.entscheidungen(W, welt).filter(e => e.verfuegbar).length : 0;
+  $('entscheidungen-zahl').hidden = !n;
+  $('entscheidungen-zahl').textContent = n;
+}
+
 function zeigeChronik() {
   const liste = $('chronik-liste');
   liste.innerHTML = s.chronik.map(c => `<li class="${c.art === 'vorhaben' ? 'vorhaben-eintrag' : ''}">
@@ -739,6 +899,7 @@ document.addEventListener('DOMContentLoaded', () => {
   $('k-fortsetzen').onclick = async () => { const st = await Sp.lade('auto'); if (ladbar(st)) { uebernehme(st); zeigeSpiel(); } };
   $('k-laden').onclick = () => zeigePlaetze('laden');
   $('k-chronik').onclick = zeigeChronik;
+  $('k-entscheidungen').onclick = zeigeEntscheidungen;
   $('k-dossier').onclick = zeigeDossier;
   $('n-treue').oninput = treueText;
   $('n-start').onclick = beginneSpiel;
@@ -749,7 +910,7 @@ document.addEventListener('DOMContentLoaded', () => {
   $('k-menue').onclick = () => $('d-menue').showModal();
   $('m-speichern').onclick = () => zeigePlaetze('speichern');
   $('m-laden').onclick = () => zeigePlaetze('laden');
-  $('m-hilfe').onclick = () => { $('hilfe-land').innerHTML = ui.hilfe; $('d-hilfe').showModal(); };
+  $('m-hilfe').onclick = () => { $('hilfe-land').innerHTML = ui.hilfe + werteHilfe(); $('d-hilfe').showModal(); };
   $('m-titel').onclick = () => { $('d-menue').close(); zeigeTitel(); };
   document.querySelectorAll('[data-schliessen]').forEach(b => { b.onclick = () => b.closest('dialog').close(); });
   einstellungenVerbinden();
@@ -771,6 +932,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (b && document.activeElement?.tagName !== 'BUTTON') { e.preventDefault(); b.click(); }
     } else if (e.key === 'c' || e.key === 'C') {
       zeigeChronik();
+    } else if (e.key === 'e' || e.key === 'E') {
+      zeigeEntscheidungen();
     } else if (e.key === 'd' || e.key === 'D') {
       zeigeDossier();
     } else if (e.key === 'z' || e.key === 'Z') {

@@ -211,6 +211,18 @@ button { font: inherit; color: inherit; }
 .trend.gut { color: var(--gruen); }
 .trend.schlecht { color: var(--stempel); }
 .zeile.warnung .wert { color: var(--stempel); }
+.zeile[data-wert] { cursor: help; }
+.zeile[data-wert]:focus-visible { outline: 2px solid var(--farbband); outline-offset: 2px; }
+.wert-hinweis { font-family: var(--din); position: fixed; z-index: 50; width: 330px; max-width: calc(100vw - 16px); background: #f4f1e6; color: var(--farbband);
+  border: 1px solid var(--linie); box-shadow: 0 10px 24px rgba(0,0,0,.35); padding: 12px 14px; font-size: 14px; line-height: 1.45; pointer-events: none; }
+.wert-hinweis h4 { font-family: var(--din); font-weight: 600; font-size: 15px; margin: 0 0 6px; }
+.wert-hinweis p { margin: 0 0 6px; }
+.wert-hinweis dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; }
+.wert-hinweis dt { font-family: var(--din); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--grau); padding-top: 2px; }
+.wert-hinweis dd { margin: 0; }
+.wert-hinweis .hinweis-kopf { font-family: var(--din); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--grau); margin: 8px 0 2px; }
+.wert-hinweis ul { margin: 0; padding-left: 0; list-style: none; }
+.wert-hinweis li b { display: inline-block; min-width: 3.2em; font-variant-numeric: tabular-nums; }
 .sitzbalken { display: flex; height: 12px; margin: 8px 0 4px; border: 1px solid var(--farbband); }
 .sitzbalken span { height: 100%; }
 .legende { font-size: 13px; color: var(--grau); line-height: 1.5; }
@@ -343,3 +355,17 @@ button { font: inherit; color: inherit; }
 .meldung-z p { margin: 0 0 6px; text-align: justify; hyphens: auto; }
 .kasten p { margin: 0 0 6px; }
 .kasten { border: 1px solid var(--druckschwarz); padding: 8px 10px; }
+
+dl.hilfe-werte { margin: 0 0 12px; }
+dl.hilfe-werte dt { font-weight: 600; margin-top: 6px; }
+dl.hilfe-werte dd { margin: 0 0 0 0; }
+
+.zaehler { display: inline-block; margin-left: 6px; min-width: 1.4em; padding: 0 4px; border-radius: 8px; background: var(--stempel); color: #fff; font-size: 11px; line-height: 1.5; text-align: center; }
+ul.entscheidungen { list-style: none; margin: 0; padding: 0; }
+ul.entscheidungen li { border-top: 1px solid var(--linie); padding: 10px 0; }
+ul.entscheidungen li.gesperrt { opacity: .6; }
+ul.entscheidungen .e-kopf { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+ul.entscheidungen .e-an { font-family: var(--din); font-size: 13px; color: var(--grau); }
+ul.entscheidungen p { margin: 4px 0 6px; }
+ul.entscheidungen .e-fuss { display: flex; justify-content: space-between; gap: 12px; align-items: center; font-family: var(--din); font-size: 13px; color: var(--grau); }
+ul.entscheidungen .e-grund { font-style: italic; }

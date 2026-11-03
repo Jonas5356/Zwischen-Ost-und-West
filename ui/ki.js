@@ -21,7 +21,7 @@
 // Verteilung der Typen = g · historische Einschätzung + (1−g) · Gleichverteilung,
 // Gewichte streuen um bis zu ±30 % · (1−g).
 
-import { zufall, txt, zeitIndex, sicht, api } from './engine.js';
+import { zufall, txt, zeitIndex, sicht, api, beziehung } from './engine.js';
 
 /** Wird das Land vom Spiel nach Zielen gesteuert? (hat Regierungen und wird nicht gespielt) */
 const istKI = (W, welt, land) => !!W.laender[land]?.regierungen && !welt.spieler.includes(land) && welt.laender[land]?.aktiv !== false;
@@ -55,6 +55,10 @@ export function nutzen(s, o, gew) {
   let u = 0;
   for (const [k, v] of Object.entries(w)) u += (gew.a[k] || 0) * v / 10;
   for (const [k, v] of Object.entries(d)) u += (gew.b[k] || 0) * v;
+  // Antwort auf eine Anfrage: Wer den Fragenden schätzt, kommt ihm eher entgegen
+  // (`gunst` an der Option; 10 Punkte Beziehung über 50 heben den Nutzen um `gunst`)
+  const anfrage = o.gunst && s.welt?.anfrage;
+  if (anfrage) u += o.gunst * (beziehung(s.welt, s.land, anfrage.von) - 50) / 10;
   return u;
 }
 
@@ -291,6 +295,57 @@ export function waehleVorhaben(W, welt, land, liste, anwenden) {
   for (; i < p.length - 1; i++) { if (r < p[i]) break; r -= p[i]; }
   return anwenden(opts[i].id);
 }
+/**
+ * Entscheidung eines gesteuerten Landes am Halbjahresende: keine oder eine der verfügbaren.
+ * Eine Entscheidung muss sich lohnen (Nutzen abzüglich einer Schwelle), Kosten zählen mit,
+ * und bei einer Anfrage an ein anderes Land geht dessen wahrscheinliche Antwort ein – berechnet
+ * mit den öffentlichen Zielen seiner Regierung, nicht mit seinem verborgenen Typ.
+ */
+export function waehleEntscheidung(W, welt, land, liste, anwenden) {
+  const M = W.laender[land];
+  const L = welt.laender[land];
+  const s = sicht(W, welt, land);
+  if (!M.regierungen || !L.gewichte) return anwenden(null);
+  const R = M.regierungen[L.regime];
+  const lambda = R.lambda ?? 1.5;
+  const opts = mitZielen(M, s, liste.map(e => ({ ...e, verfuegbar: true, w: mitKosten(s, e), zufall: antwortErwartung(W, welt, land, e) || e.zufall })));
+  const u = [0, ...opts.map(o => nutzen(s, o, L.gewichte) - SCHWELLE)];
+  const max = Math.max(...u);
+  const e = u.map(x => Math.exp(lambda * (x - max)));
+  const summe = e.reduce((a, b) => a + b, 0);
+  let r = zufall(welt) * summe, i = 0;
+  for (; i < e.length - 1; i++) { if (r < e[i]) break; r -= e[i]; }
+  return anwenden(i === 0 ? null : opts[i - 1].id);
+}
+const SCHWELLE = 0.4;
+
+/** Eigene Wirkung einer Entscheidung einschließlich ihrer Kosten */
+function mitKosten(s, e) {
+  const w = { ...(txt(e.w, s) || {}) };
+  for (const [k, v] of Object.entries(txt(e.kosten, s) || {})) w[k] = (w[k] || 0) + v;
+  return w;
+}
+
+/** Erwartete Antwort auf eine Anfrage als Zufallsausgänge mit den Wirkungen beim Fragenden */
+function antwortErwartung(W, welt, land, e) {
+  if (!e.an) return null;
+  const s = sicht(W, welt, land);
+  const an = txt(e.an, s);
+  const Mz = W.laender[an.land];
+  const Lz = welt.laender[an.land];
+  const ev = Mz?.ereignisse?.find(x => x.id === an.id);
+  const R = Mz?.regierungen?.[Lz?.regime];
+  if (!ev || !R) return null;
+  const sz = sicht(W, welt, an.land);
+  const vorher = welt.anfrage;
+  welt.anfrage = { von: land, ...(an.daten || {}) };
+  const optsZ = txt(ev.optionen, sz).map((o, i) => ({ ...o, index: i, verfuegbar: !o.wenn || o.wenn(sz) }));
+  const p = wahrscheinlichkeiten(sz, optsZ, gewichteVon(R, null), R.lambda ?? 1.5);
+  welt.anfrage = vorher;
+  const antworten = txt(e.antworten, s) || {};
+  return optsZ.map((o, i) => ({ ...(antworten[o.antwort] || {}), p: p[i] }));
+}
+
 /** Wirkung eines Vorhabens einschließlich seiner Kosten für den Haushalt */
 function kostenwirkung(s, v) {
   const w = { ...(txt(v.w, s) || {}) };

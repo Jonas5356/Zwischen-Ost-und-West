@@ -1,6 +1,6 @@
 # Plan: Mehrere Länder mit Regierungen und Zielen
 
-Stand: November 2026. Phase 1 ist umgesetzt (Version 0.2.0). Seit 0.3.0 kann in der BRD auch die SPD regieren, ohne dass das Spiel endet – Voraussetzung dafür, dass die BRD später vom Spiel gesteuert werden kann. Seit 0.4.0 handeln USA und Sowjetunion mit eigenen Regierungen und Zielen (erster Teil von Phase 2). Seit 0.5.0 ist Frankreich spielbar; wer Frankreich spielt, dem steht eine vom Spiel gesteuerte Bundesrepublik gegenüber (und umgekehrt). Seit 0.6.0 beginnt die Welt 1946; Länder steigen ein, wenn sie entstehen (Bundesrepublik 1949).
+Stand: November 2026. Phase 1 ist umgesetzt (Version 0.2.0). Seit 0.3.0 kann in der BRD auch die SPD regieren, ohne dass das Spiel endet – Voraussetzung dafür, dass die BRD später vom Spiel gesteuert werden kann. Seit 0.4.0 handeln USA und Sowjetunion mit eigenen Regierungen und Zielen (erster Teil von Phase 2). Seit 0.5.0 ist Frankreich spielbar; wer Frankreich spielt, dem steht eine vom Spiel gesteuerte Bundesrepublik gegenüber (und umgekehrt). Seit 0.6.0 beginnt die Welt 1946; Länder steigen ein, wenn sie entstehen (Bundesrepublik 1949). Seit 0.7.0 sind die Werte in allen Ländern einheitlich, es gibt Entscheidungen nach dem Vorbild von Hearts of Iron, und die Kolonialkriege sind ein eigener Strang.
 
 ## Ziel
 
@@ -15,6 +15,9 @@ Eine gemeinsame Welt 1946–1964, später erweiterbar, mit mehreren Ländern. Je
 - **Kein Bonus für historische Optionen;** Geschichtstreue entsteht allein über Ziele und Regierungswechsel.
 - **Zeitraum:** seit 0.6.0 1946–1964 (Beginn des Kalten Kriegs), mit dem Ziel späterer Erweiterung.
 - **Einstiege (0.6.0):** Die Welt beginnt für alle 1946/I. Ein Land, das es noch nicht gibt, steigt ein, wenn es entsteht (Bundesrepublik 1949/II; später Indien, Israel, Südkorea …). Länder können im Lauf einer Partie nicht gewechselt werden. Entsteht ein Land wegen der Entscheidungen der anderen nicht, gibt es es in dieser Partie nicht – in einer anderen kann man es wählen. Wird es gespielt, entsteht es immer: Optionen, die seine Gründung verhindern würden (`gegenGruendung`), sind dann gesperrt. Ohne Weststaat bleibt Deutschland vorerst einfach besetzt; später sollen die Kosten einer langen Besatzung steigen und einen Anreiz schaffen, Deutschland (in welcher Form auch immer) entstehen zu lassen.
+- **Einheitliche Werte (0.7.0):** Außerhalb des Blocks „Landesspezifisch“ sind die Werte in allen Ländern gleich (Regierung, Wirtschaft, Beziehungen); neue Länder bekommen sie aus dem Katalog `werte.js`. Der Rang entfällt (abgedeckt durch die Beziehungen).
+- **Entscheidungen (0.7.0):** jederzeit im Halbjahr, begrenzt über Kosten in vorhandenen Werten und eine Abklingzeit, ohne neue Ressource. Anfragen an andere Länder beantworten diese nach Zielen, Typ und Beziehung zum Fragenden. Gesteuerte Länder treffen nur Entscheidungen mit `ki: true`.
+- **Kolonialkriege (0.7.0):** Eine harte Linie kann einen Krieg als Fiktion halten, aber nur zu hohen Dauerkosten.
 - **Präsidialverfassung 1946 (Fiktion):** schlank – stützt den Rückhalt der Regierungen und erlaubt die Auflösung schon nach einem Sturz.
 - **Spielstände:** Beim Umbau dürfen alte Spielstände ungültig werden.
 - **Länderreihenfolge** nach Frankreich: entscheidet Jonas später.

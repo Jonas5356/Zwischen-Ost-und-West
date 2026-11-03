@@ -6,6 +6,8 @@ import teil2 from './ereignisse_1955_1958.js';
 import teil3 from './ereignisse_1959_1964.js';
 import akten from './akten.js';
 import vorhaben from './vorhaben.js';
+import entscheidungen from './entscheidungen.js';
+import * as kolonial from './kolonialkriege.js';
 import zeitgeschehen from './zeitgeschehen.js';
 import { ENDEN } from './enden.js';
 import oberflaeche from './oberflaeche.js';
@@ -45,16 +47,13 @@ export default {
     nachEntscheidung: s => { modell.notiereChef(s); s.w.zustimmung = modell.berechneUmfrage(s); },
   },
   dynamisch: modell.dynamisch,
-  ereignisse: [...teil0, ...teil1, ...teil2, ...teil3, ...akten],
+  ereignisse: [...teil0, ...teil1, ...teil2, ...teil3, ...kolonial.ereignisse, ...akten],
   vorhaben,
+  entscheidungen: [...entscheidungen, ...kolonial.entscheidungen],
   enden: ENDEN,
   oberflaeche,
   regierungen: REGIERUNGEN,
   regimeVon: modell.regimeVon,
-  anzeige: [
-    { titel: 'Außenpolitik', werte: ['usa', 'brd', 'grossbritannien', 'moskau', 'rang', 'europa', 'atom'] },
-    { titel: 'Kolonien und Armee', werte: ['indochina', 'algerien', 'armee'] },
-    { titel: 'Innenpolitik', werte: ['zustimmung', 'ansehen', 'mehrheit'] },
-    { titel: 'Wirtschaft', werte: ['wachstum', 'inflation', 'haushalt', 'franc'] },
-  ],
+  // Landesspezifischer Block im Lagebild (Reihenfolge)
+  landesspezifisch: ['indochina', 'algerien', 'armee', 'atom', 'europa', 'franc'],
 };

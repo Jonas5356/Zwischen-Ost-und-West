@@ -263,9 +263,59 @@ const eiffel = String.raw`
               /   /     \   \
          ____/___/_______\___\____`;
 
+
+// Französische Gegenstücke zu Urne, Plakat, Zeitung und Flagge
+const urne_fr = String.raw`
+                   _________________
+                  |   _____________ |
+                  |  |  BULLETIN   | |
+                  |  |  DE VOTE  X | |
+                   \_|_____________|/
+                 ____|___________|____
+                |        URNE         |
+                |_____________________|`;
+
+const plakat_fr = String.raw`
+       ___________________________________
+      |                                   |
+      |    PARTI COMMUNISTE FRANÇAIS      |
+      |   DU PAIN - LA PAIX - LA LIBERTÉ  |
+      |               ___                 |
+      |              (o o)    VOTEZ PCF   |
+      |___________________________________|
+                    ||        ||`;
+
+const presse_fr = String.raw`
+       .---------------------------------------.
+       |  LE MESSAGER                          |
+       |  =================================    |
+       |  LE FRANC S'EFFONDRE                  |
+       |  ---------------------                |
+       |  ~~~~~~~~~~ ~~~~~~~ ~~~~~~~~~~~~~     |
+       '---------------------------------------'`;
+
+const trikolore = {
+  ms: 320,
+  bilder: [String.raw`
+           |::::::      ######
+           |::::::      ######
+           |::::::      ######
+           |::::::      ######
+           |
+           |
+     ______|______`, String.raw`
+           |::::::      ######
+           | ::::::      ######
+           |  ::::::      ######
+           | ::::::      ######
+           |
+           |
+     ______|______`],
+};
+
 export const SZENEN = {
   dschungel, eiffel, bundeshaus, note, kreml, plakat, urne, flagge, sputnik, mauer, berlin, korea, schiff,
-  aufstand, presse, flut, rakete, alarm, pilz,
+  aufstand, presse, flut, rakete, alarm, pilz, urne_fr, plakat_fr, presse_fr, trikolore,
 };
 
 /** Spielt eine Szene in einem <pre> ab. Gibt eine Funktion zum Abbrechen zurück. */

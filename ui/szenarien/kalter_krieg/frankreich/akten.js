@@ -12,7 +12,7 @@ export default [
     text: 'Mauriac bittet im „Figaro“ um Milde: Die Säuberung nach der Befreiung habe genug Opfer gefordert, Tausende Kollaborateure säßen noch in den Gefängnissen, viele für Taten, die andere ungestraft begangen hätten. Die Kommunisten nennen ihn spöttisch „Saint François des Assises“ und verlangen weitere Prozesse.',
     optionen: [
       { text: 'Die Gerichte weiterarbeiten lassen – Gnade gibt es nur im Einzelfall.', hist: true, richtung: 'sozial', ergebnis: 'Die Säuberung geht weiter. Die Prozesse ziehen sich bis in die fünfziger Jahre.', w: { ansehen: 1 }, dient: { sozial: 0.2 } },
-      { text: 'Ein Amnestiegesetz für minder schwere Fälle vorbereiten.', richtung: 'kirche', ergebnis: 'Die Regierung kündigt eine Amnestie für minder schwere Fälle an. Die Résistance-Verbände sind empört.', w: { ansehen: -2, mehrheit: -2, armee: 1 }, dient: { stabilitaet: 0.3 } },
+      { text: 'Ein Amnestiegesetz für minder schwere Fälle vorbereiten.', richtung: 'kirche', ergebnis: 'Die Regierung kündigt eine Amnestie für minder schwere Fälle an. Die Résistance-Verbände sind empört.', w: { ansehen: -2, rueckhalt: -2, armee: 1 }, dient: { stabilitaet: 0.3 } },
     ],
     historisch: 'Die ersten Amnestiegesetze für Kollaborateure wurden erst 1951 und 1953 beschlossen.',
   }),
@@ -32,8 +32,8 @@ export default [
     absender: 'Präfekt der Alpes-Maritimes',
     text: 'Der Friedensvertrag mit Italien spricht Frankreich die Gemeinden Tende und La Brigue in den Seealpen zu. Der Präfekt schlägt vor, die Bewohner in einer Volksabstimmung zustimmen zu lassen – das Ergebnis sei sicher, und es mache sich gut vor der Welt.',
     optionen: [
-      { text: 'Die Volksabstimmung abhalten.', hist: true, ergebnis: 'Die Bewohner von Tende und La Brigue stimmen mit großer Mehrheit für Frankreich.', w: { rang: 1, ansehen: 1 }, dient: { unabhaengigkeit: 0.2 } },
-      { text: 'Die Grenzänderung ohne Abstimmung vollziehen.', ergebnis: 'Die Gemeinden werden ohne Abstimmung eingegliedert. In Rom ist man verstimmt.', w: { rang: -1 } },
+      { text: 'Die Volksabstimmung abhalten.', hist: true, ergebnis: 'Die Bewohner von Tende und La Brigue stimmen mit großer Mehrheit für Frankreich.', w: { ansehen: 1 }, dient: { unabhaengigkeit: 0.2 } },
+      { text: 'Die Grenzänderung ohne Abstimmung vollziehen.', ergebnis: 'Die Gemeinden werden ohne Abstimmung eingegliedert. In Rom ist man verstimmt.', w: {} },
     ],
     historisch: 'Tende und La Brigue kamen mit dem Pariser Friedensvertrag vom 10. Februar 1947 an Frankreich; im Oktober 1947 stimmten die Bewohner in einer Volksabstimmung zu.',
   }),
@@ -43,8 +43,8 @@ export default [
     absender: 'Albert Camus, Chefredakteur des „Combat“',
     text: 'Camus schreibt im „Combat“ über Madagaskar: Französische Polizisten foltern Verdächtige, Gefangene werden aus Flugzeugen geworfen. „Wir tun, was wir den Deutschen vorgeworfen haben“, schreibt er. Er verlangt Aufklärung.',
     optionen: [
-      { text: 'Eine Untersuchung anordnen.', richtung: 'dekolonisation', ergebnis: 'Die Regierung schickt Inspektoren nach Madagaskar. Die Kolonialverwaltung ist empört.', w: { rang: 1, armee: -2, ansehen: 1 }, dient: { frieden_kolonien: 0.4 } },
-      { text: 'Schweigen.', hist: true, ergebnis: 'Die Regierung antwortet nicht. Der Artikel wird bald vergessen.', w: { rang: -1 }, dient: { kolonien: 0.3 } },
+      { text: 'Eine Untersuchung anordnen.', richtung: 'dekolonisation', ergebnis: 'Die Regierung schickt Inspektoren nach Madagaskar. Die Kolonialverwaltung ist empört.', w: { armee: -2, ansehen: 1 }, dient: { frieden_kolonien: 0.4 } },
+      { text: 'Schweigen.', hist: true, ergebnis: 'Die Regierung antwortet nicht. Der Artikel wird bald vergessen.', w: {}, dient: { kolonien: 0.3 } },
     ],
     historisch: 'Camus veröffentlichte am 10. Mai 1947 den Leitartikel „La contagion“ über die Folter auf Madagaskar.',
   }),
@@ -65,7 +65,7 @@ export default [
     text: 'Maurice Thorez hat erklärt, die Werktätigen Frankreichs würden der Roten Armee nicht anders begegnen als die Werktätigen Polens und Rumäniens, falls sie Frankreich auf der Verfolgung eines Angreifers betreten müsse. Die Rechte verlangt ein Verbot der Kommunistischen Partei.',
     optionen: [
       { text: 'Kein Verbot – die Partei politisch bekämpfen.', hist: true, ergebnis: 'Die Regierung verzichtet auf ein Verbot. Die Kommunisten bleiben die stärkste Partei im Land, isoliert, aber legal.', w: { ansehen: 1 }, dient: { stabilitaet: 0.4 } },
-      { text: 'Ein Verfahren wegen Aufrufs zum Landesverrat einleiten.', richtung: 'atlantisch', ergebnis: 'Gegen Thorez wird ermittelt. Die Kommunisten rufen zu Massenkundgebungen auf.', w: { usa: 3, moskau: -4, mehrheit: -2, ansehen: -1 }, dient: { westbindung: 0.5, stabilitaet: -0.3 } },
+      { text: 'Ein Verfahren wegen Aufrufs zum Landesverrat einleiten.', richtung: 'atlantisch', ergebnis: 'Gegen Thorez wird ermittelt. Die Kommunisten rufen zu Massenkundgebungen auf.', w: { usa: 3, moskau: -4, rueckhalt: -2, ansehen: -1 }, dient: { westbindung: 0.5, stabilitaet: -0.3 } },
     ],
     historisch: 'Thorez gab seine Erklärung am 22. Februar 1949 ab. Die Regierung verzichtete auf ein Verbot der PCF.',
   }),
@@ -96,8 +96,8 @@ export default [
     absender: 'François Mauriac, Schriftsteller',
     text: 'Der Nobelpreisträger François Mauriac schreibt im „Express“ über Folter durch Polizei und Armee in Algerien: Elektroschocks, Ertränken, Verhöre, aus denen Menschen nicht zurückkehren. Er fragt, ob die Republik wisse, was in ihrem Namen geschehe, und verlangt eine Untersuchung.',
     optionen: [
-      { text: 'Eine Untersuchungskommission einsetzen.', richtung: 'dekolonisation', ergebnis: 'Die Regierung setzt eine Kommission ein. Die Armee ist verstimmt; die Intellektuellen sind es weniger.', w: { rang: 2, armee: -3, ansehen: 1 }, dient: { frieden_kolonien: 0.5 } },
-      { text: 'Die Berichte als Einzelfälle zurückweisen.', hist: true, ergebnis: 'Die Regierung spricht von „bedauerlichen Einzelfällen“.', w: { rang: -2, armee: 1 }, dient: { kolonien: 0.4 } },
+      { text: 'Eine Untersuchungskommission einsetzen.', richtung: 'dekolonisation', ergebnis: 'Die Regierung setzt eine Kommission ein. Die Armee ist verstimmt; die Intellektuellen sind es weniger.', w: { armee: -3, ansehen: 1 }, dient: { frieden_kolonien: 0.5 } },
+      { text: 'Die Berichte als Einzelfälle zurückweisen.', hist: true, ergebnis: 'Die Regierung spricht von „bedauerlichen Einzelfällen“.', w: { armee: 1 }, dient: { kolonien: 0.4 } },
     ],
     historisch: 'Mauriac berichtete ab Januar 1955 über Folter in Algerien. Eine Kommission zum Schutz der individuellen Rechte wurde erst 1957 eingesetzt; ihre Berichte blieben weitgehend folgenlos.',
   }),
@@ -107,7 +107,7 @@ export default [
     absender: 'Albert Camus, Schriftsteller',
     text: 'Albert Camus, in Algerien geboren, will in Algier für eine „Waffenruhe für die Zivilbevölkerung“ werben: Beide Seiten sollen sich verpflichten, keine Zivilisten mehr anzugreifen. Er bittet um die Unterstützung der Regierung. Draußen vor dem Saal rufen Ultras „Camus an den Galgen“.',
     optionen: [
-      { text: 'Den Appell unterstützen.', richtung: 'dekolonisation', ergebnis: 'Die Regierung unterstützt den Appell öffentlich. Die Siedler toben; die FLN schweigt.', w: { rang: 2, armee: -3, algerien: 1 }, dient: { frieden_kolonien: 0.6 } },
+      { text: 'Den Appell unterstützen.', richtung: 'dekolonisation', ergebnis: 'Die Regierung unterstützt den Appell öffentlich. Die Siedler toben; die FLN schweigt.', w: { armee: -3, algerien: 1 }, dient: { frieden_kolonien: 0.6 } },
       { text: 'Höflich schweigen.', hist: true, ergebnis: 'Die Regierung schweigt. Camus’ Appell verhallt.', dient: { stabilitaet: 0.2 } },
     ],
     historisch: 'Camus hielt seinen Appell am 22. Januar 1956 in Algier. Er blieb folgenlos; danach schwieg Camus weitgehend zu Algerien.',
@@ -128,7 +128,7 @@ export default [
     absender: 'Germaine Tillion, Ethnologin',
     text: 'Germaine Tillion, Widerstandskämpferin und Überlebende von Ravensbrück, kennt Algerien wie kaum jemand. Sie hat sich heimlich mit Yacef Saadi getroffen, dem Chef der FLN in Algier. Er sei bereit, Anschläge auf Zivilisten einzustellen, wenn die Hinrichtungen von FLN-Kämpfern aufhören.',
     optionen: [
-      { text: 'Auf das Angebot eingehen: Hinrichtungen aussetzen.', richtung: 'dekolonisation', ergebnis: 'Die Regierung setzt die Hinrichtungen aus. Für einige Wochen gibt es in Algier keine Bomben.', w: { algerien: 3, armee: -4, rang: 2 }, dient: { frieden_kolonien: 0.8 } },
+      { text: 'Auf das Angebot eingehen: Hinrichtungen aussetzen.', richtung: 'dekolonisation', ergebnis: 'Die Regierung setzt die Hinrichtungen aus. Für einige Wochen gibt es in Algier keine Bomben.', w: { algerien: 3, armee: -4 }, dient: { frieden_kolonien: 0.8 } },
       { text: 'Nicht mit Terroristen verhandeln.', hist: true, ergebnis: 'Die Regierung lehnt ab. Die Gewalt geht weiter.', w: { armee: 1 }, dient: { kolonien: 0.5 } },
     ],
     historisch: 'Tillions Treffen mit Yacef Saadi im Juli 1957 führte zu einer kurzen Unterbrechung der Anschläge in Algier. Im September wurde Yacef Saadi verhaftet.',
@@ -139,8 +139,8 @@ export default [
     absender: 'Éditions de Minuit',
     text: 'Henri Alleg, Chefredakteur einer kommunistischen Zeitung in Algier, beschreibt in seinem Buch „La Question“, wie er von Fallschirmjägern gefoltert wurde. Das Buch verkauft sich zehntausendfach. Die Armee verlangt die Beschlagnahme.',
     optionen: [
-      { text: 'Das Buch beschlagnahmen lassen.', hist: true, ergebnis: 'Das Buch wird beschlagnahmt – und in der Schweiz weiter gedruckt. Malraux, Mauriac, Sartre und Martin du Gard protestieren.', w: { armee: 2, rang: -3 }, dient: { kolonien: 0.4 } },
-      { text: 'Das Buch erscheinen lassen.', richtung: 'dekolonisation', ergebnis: 'Das Buch bleibt im Handel. Die Armee ist empört.', w: { armee: -4, rang: 2 }, dient: { frieden_kolonien: 0.4 } },
+      { text: 'Das Buch beschlagnahmen lassen.', hist: true, ergebnis: 'Das Buch wird beschlagnahmt – und in der Schweiz weiter gedruckt. Malraux, Mauriac, Sartre und Martin du Gard protestieren.', w: { armee: 2 }, dient: { kolonien: 0.4 } },
+      { text: 'Das Buch erscheinen lassen.', richtung: 'dekolonisation', ergebnis: 'Das Buch bleibt im Handel. Die Armee ist empört.', w: { armee: -4 }, dient: { frieden_kolonien: 0.4 } },
     ],
     historisch: '„La Question“ erschien im Februar 1958 und wurde im März beschlagnahmt – ein Vorgang, wie es ihn bei einem Buch in Frankreich seit langem nicht gegeben hatte. Es zirkulierte trotzdem in Zehntausenden Exemplaren.',
   }),
@@ -150,7 +150,7 @@ export default [
     absender: 'André Malraux, Minister für kulturelle Angelegenheiten',
     text: 'Der Schriftsteller André Malraux, Frankreichs erster Kulturminister, will in jeder größeren Stadt ein „Haus der Kultur“ bauen: Theater, Kino, Ausstellungen, für alle zugänglich. Er braucht Geld – und Rückendeckung gegen die Finanzbeamten.',
     optionen: [
-      { text: 'Die Häuser der Kultur finanzieren.', hist: true, richtung: 'sozial', ergebnis: 'In Le Havre, Bourges, Grenoble entstehen die ersten Häuser der Kultur.', w: { rang: 2, ansehen: 2, haushalt: -2 }, dient: { modernisierung: 0.4 } },
+      { text: 'Die Häuser der Kultur finanzieren.', hist: true, richtung: 'sozial', ergebnis: 'In Le Havre, Bourges, Grenoble entstehen die ersten Häuser der Kultur.', w: { ansehen: 2, haushalt: -2 }, dient: { modernisierung: 0.4 } },
       { text: 'Malraux auf später vertrösten.', ergebnis: 'Malraux ist verärgert. Die Häuser der Kultur müssen warten.', w: { ansehen: -1 } },
     ],
   }),
@@ -160,8 +160,8 @@ export default [
     absender: 'Justizministerium',
     text: '121 Schriftsteller, Künstler und Wissenschaftler – unter ihnen Jean-Paul Sartre, Simone de Beauvoir, Marguerite Duras und Alain Resnais – erklären in einem Manifest, die Weigerung, in Algerien zu kämpfen, sei gerechtfertigt. Der Justizminister will die Unterzeichner verfolgen, Sartre vorneweg.',
     optionen: [
-      { text: 'Die Unterzeichner aus Rundfunk und Staatsdienst ausschließen, Sartre aber nicht verhaften.', hist: true, ergebnis: 'Die Unterzeichner werden aus Rundfunk und Fernsehen verbannt. Sartre bleibt unbehelligt: „Man verhaftet Voltaire nicht.“', w: { armee: 2, rang: -1 }, dient: { stabilitaet: 0.4 } },
-      { text: 'Alle Unterzeichner anklagen, auch Sartre.', richtung: 'kolonial', ergebnis: 'Die Regierung lässt die Unterzeichner anklagen. Im Ausland ist von einem „Prozess gegen den Geist“ die Rede.', w: { armee: 4, rang: -5, ansehen: -3 }, dient: { kolonien: 0.5 } },
+      { text: 'Die Unterzeichner aus Rundfunk und Staatsdienst ausschließen, Sartre aber nicht verhaften.', hist: true, ergebnis: 'Die Unterzeichner werden aus Rundfunk und Fernsehen verbannt. Sartre bleibt unbehelligt: „Man verhaftet Voltaire nicht.“', w: { armee: 2 }, dient: { stabilitaet: 0.4 } },
+      { text: 'Alle Unterzeichner anklagen, auch Sartre.', richtung: 'kolonial', ergebnis: 'Die Regierung lässt die Unterzeichner anklagen. Im Ausland ist von einem „Prozess gegen den Geist“ die Rede.', w: { armee: 4, ansehen: -3 }, dient: { kolonien: 0.5 } },
       { text: 'Nichts tun.', richtung: 'dekolonisation', ergebnis: 'Die Regierung ignoriert das Manifest. Die Armee ist empört.', w: { armee: -4 }, dient: { frieden_kolonien: 0.3 } },
     ],
     historisch: 'Das Manifest erschien im September 1960. Die Unterzeichner wurden aus dem staatlichen Rundfunk verbannt; de Gaulle soll eine Anklage gegen Sartre mit dem Satz „On n’arrête pas Voltaire“ abgelehnt haben.',
@@ -172,8 +172,8 @@ export default [
     absender: 'Gisèle Halimi, Rechtsanwältin',
     text: 'Die junge Algerierin Djamila Boupacha, angeklagt eines Bombenanschlags, wurde nach ihrer Verhaftung wochenlang von Soldaten gefoltert und vergewaltigt. Ihre Anwältin Gisèle Halimi und Simone de Beauvoir machen den Fall öffentlich und verlangen, dass der Prozess nach Frankreich verlegt und die Folterer angeklagt werden.',
     optionen: [
-      { text: 'Den Prozess nach Frankreich verlegen und die Vorwürfe untersuchen lassen.', hist: true, richtung: 'dekolonisation', ergebnis: 'Der Prozess wird nach Caen verlegt. Die Täter werden nie verurteilt, doch der Fall erschüttert die Öffentlichkeit.', w: { rang: 2, armee: -3 }, dient: { frieden_kolonien: 0.5 } },
-      { text: 'Der Militärjustiz in Algerien freien Lauf lassen.', ergebnis: 'Die Militärjustiz verhandelt in Algier. Im Ausland wächst die Empörung.', w: { rang: -3, armee: 2 }, dient: { kolonien: 0.4 } },
+      { text: 'Den Prozess nach Frankreich verlegen und die Vorwürfe untersuchen lassen.', hist: true, richtung: 'dekolonisation', ergebnis: 'Der Prozess wird nach Caen verlegt. Die Täter werden nie verurteilt, doch der Fall erschüttert die Öffentlichkeit.', w: { armee: -3 }, dient: { frieden_kolonien: 0.5 } },
+      { text: 'Der Militärjustiz in Algerien freien Lauf lassen.', ergebnis: 'Die Militärjustiz verhandelt in Algier. Im Ausland wächst die Empörung.', w: { armee: 2 }, dient: { kolonien: 0.4 } },
     ],
     historisch: 'Der Fall Boupacha wurde 1960 zum Symbol der Folter in Algerien. Boupacha wurde zum Tode verurteilt und nach den Abkommen von Évian amnestiert.',
   }),
@@ -185,7 +185,7 @@ export default [
     optionen: [
       { text: 'Debré ignorieren.', hist: true, ergebnis: 'Die Regierung ignoriert Debré. In den Kasernen wird weiter gelesen.', w: { armee: -1 } },
       { text: 'Gegen die Zeitung vorgehen.', ergebnis: 'Die Regierung lässt einzelne Ausgaben beschlagnahmen. Debré wird zum Märtyrer der Pressefreiheit.', w: { armee: -3, ansehen: -2 } },
-      { text: 'Debré ins Gespräch ziehen und Reformen der Verfassung anbieten.', ergebnis: 'Debré nimmt das Gespräch an; die Gaullisten werden etwas milder.', w: { mehrheit: 4, armee: 2 }, dient: { stabilitaet: 0.5 } },
+      { text: 'Debré ins Gespräch ziehen und Reformen der Verfassung anbieten.', ergebnis: 'Debré nimmt das Gespräch an; die Gaullisten werden etwas milder.', w: { rueckhalt: 4, armee: 2 }, dient: { stabilitaet: 0.5 } },
     ],
   }),
   akte({
@@ -202,7 +202,7 @@ export default [
     absender: 'Citroën, Quai de Javel',
     text: 'Citroën hat auf dem Pariser Autosalon die DS vorgestellt – ein Auto wie aus der Zukunft, mit hydropneumatischer Federung. Am ersten Tag gingen 12.000 Bestellungen ein. Das Unternehmen bittet um staatliche Hilfe für neue Werke und um Bestellungen für den Fuhrpark der Ministerien.',
     optionen: [
-      { text: 'Die DS zum Dienstwagen der Republik machen.', hist: true, ergebnis: 'Die DS wird zum Wagen der Präsidenten und Minister. Ein Symbol des modernen Frankreich.', w: { rang: 1, impuls: 0.3, haushalt: -1 }, dient: { modernisierung: 0.4 } },
+      { text: 'Die DS zum Dienstwagen der Republik machen.', hist: true, ergebnis: 'Die DS wird zum Wagen der Präsidenten und Minister. Ein Symbol des modernen Frankreich.', w: { impuls: 0.3, haushalt: -1 }, dient: { modernisierung: 0.4 } },
       { text: 'Der Staat hält sich heraus.', ergebnis: 'Citroën baut auch ohne staatliche Hilfe.', w: {} },
     ],
   }),

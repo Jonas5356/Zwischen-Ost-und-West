@@ -275,6 +275,35 @@ const ereignisse = [
         ergebnis: 'Washington verzichtet darauf, Frankreich in der EVG-Frage unter Druck zu setzen.' },
     ],
   },
+  // Antworten auf Anfragen anderer Länder (Entscheidungen); `gunst`: Wer Washington nahesteht, bekommt eher ja
+  {
+    id: 'usa_hilfe_indochina', titel: 'Hilfe für Indochina?', nurRueckfrage: true, wiederholbar: true,
+    optionen: [
+      { text: 'Frankreich in Indochina mit Geld und Waffen unterstützen.', antwort: 'ja', hist: true, gunst: 0.6,
+        dient: { eindaemmung: 0.9, kosten_senken: -0.4 }, w: { kosten: -4 },
+        ergebnis: 'Washington übernimmt einen Teil der Kosten des französischen Kriegs in Indochina.' },
+      { text: 'Ablehnen – ein Kolonialkrieg ist nicht Amerikas Sache.', antwort: 'nein', dient: { kosten_senken: 0.6, entspannung: 0.2 },
+        ergebnis: 'Washington lehnt Hilfe für den französischen Krieg in Indochina ab.' },
+    ],
+  },
+  {
+    id: 'usa_hilfe_algerien', titel: 'Hilfe für Algerien?', nurRueckfrage: true, wiederholbar: true,
+    optionen: [
+      { text: 'Frankreich in Algerien unterstützen.', antwort: 'ja', gunst: 0.4, dient: { buendnis_fuehren: 0.3 }, w: { prestige: -5 },
+        ergebnis: 'Washington liefert Frankreich Ausrüstung für den Krieg in Algerien.' },
+      { text: 'Ablehnen – Washington will es sich mit der arabischen Welt nicht verderben.', antwort: 'nein', hist: true, dient: { entspannung: 0.4, kosten_senken: 0.4 }, w: { prestige: 1 },
+        ergebnis: 'Washington lehnt Hilfe für den französischen Krieg in Algerien ab.' },
+    ],
+  },
+  {
+    id: 'usa_kredit_brd', titel: 'Kredite für Bonn?', nurRueckfrage: true, wiederholbar: true,
+    optionen: [
+      { text: 'Der Bundesrepublik weitere Kredite gewähren.', antwort: 'ja', hist: true, gunst: 0.6, dient: { westbindung: 0.8, kosten_senken: -0.3 }, w: { kosten: -3 },
+        ergebnis: 'Washington gewährt der Bundesrepublik weitere Kredite.' },
+      { text: 'Ablehnen – Westdeutschland muss selbst zurechtkommen.', antwort: 'nein', dient: { kosten_senken: 0.7 },
+        ergebnis: 'Washington lehnt weitere Kredite für die Bundesrepublik ab.' },
+    ],
+  },
   {
     id: 'usa_vautour', titel: 'Luftangriffe für Điện Biên Phủ?', nurRueckfrage: true, wiederholbar: true,
     optionen: [

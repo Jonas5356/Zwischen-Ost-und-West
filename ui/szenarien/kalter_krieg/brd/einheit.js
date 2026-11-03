@@ -54,7 +54,7 @@ Der Kern des Streits ist die Reihenfolge. Der Westen verlangt zuerst freie, inte
             w: { einheit: -8, moskau: -3 }, aktion: s => scheitern(s) },
         } },
       { text: 'Den sowjetischen Weg akzeptieren: einen paritätischen Gesamtdeutschen Rat.', richtung: 'ost',
-        w: { usa: -10, koalition: -14, ansehen: -3 },
+        w: { usa: -10, rueckhalt: -14, ansehen: -3 },
         rueckfrage: { land: 'su', id: 'su_viermaechte_rat' },
         antworten: {
           ja: { ergebnis: 'Der Gesamtdeutsche Rat tritt zusammen. Ost-CDU, LDPD und SED sitzen neben Union, SPD und FDP. Ein Vertrag über die Einheit wird ausgehandelt.',
@@ -79,7 +79,7 @@ Der Kern des Streits ist die Reihenfolge. Der Westen verlangt zuerst freie, inte
 Offen ist ein Punkt, der alles entscheidet: die Grenze im Osten. Moskau verlangt die endgültige Anerkennung der Oder-Neiße-Linie. Für Millionen Vertriebene hieße das, dass Schlesien, Pommern und Ostpreußen für immer verloren sind. Der BHE droht mit dem Sturz der Regierung.`,
     optionen: [
       { text: 'Die Oder-Neiße-Grenze anerkennen. Die Einheit hat ihren Preis.',
-        w: { ansehen: -8, koalition: -15, einheit: 15 },
+        w: { ansehen: -8, rueckhalt: -15, einheit: 15 },
         rueckfrage: { land: 'su', id: 'su_abkommen', daten: { grenze: true } },
         antworten: {
           ja: { ergebnis: 'Der Vertrag wird unterzeichnet. In Vertriebenenversammlungen werden Bilder des Kanzlers verbrannt. Aber Deutschland wird eins sein.',
@@ -126,7 +126,7 @@ Die Union steht in Umfragen bei ${String(s.w.zustimmung).replace('.', ',')} Proz
     ] : [
       { text: 'Mit der Ost-CDU fusionieren und auf Jakob Kaiser setzen, den Gründer der Berliner CDU.',
         ergebnis: 'Kaiser zieht durch die Städte Sachsens und Thüringens. Die Union fasst im Osten Fuß.',
-        w: { ansehen: 4, koalition: -2 }, setze: ['ost_cdu'] },
+        w: { ansehen: 4, rueckhalt: -2 }, setze: ['ost_cdu'] },
       { text: '„Wohlstand für alle Deutschen“ – Erhard und das Wirtschaftswunder.',
         ergebnis: 'Die Menschen im Osten wollen die D-Mark und volle Schaufenster.',
         w: s => ({ ansehen: Math.max(1, Math.round(s.w.wachstum - 4)) }) },
@@ -214,13 +214,13 @@ Umstritten ist die Formulierung der Neutralität. Moskau will ein Verbot jeder �
     optionen: [
       { text: 'Rückgabe vor Entschädigung.',
         ergebnis: 'Die Alteigentümer jubeln. In den Dörfern Mecklenburgs herrscht Angst.',
-        w: { ansehen: -4, koalition: 4, impuls: -0.5 } },
+        w: { ansehen: -4, rueckhalt: 4, impuls: -0.5 } },
       { text: 'Die Bodenreform bestätigen, Betriebe gegen Entschädigung privatisieren.',
         ergebnis: 'Ein Lastenausgleich für die Enteigneten wird beschlossen. Teuer, aber befriedend.',
         w: { ansehen: 3, haushalt: -5, impuls: 0.5 } },
       { text: 'Alles bleibt, wie es ist.',
         ergebnis: 'Die Alteigentümer ziehen vor Gericht. Die Wirtschaft im Osten bleibt staatlich geprägt.',
-        w: { ansehen: 1, koalition: -6, impuls: -0.8 } },
+        w: { ansehen: 1, rueckhalt: -6, impuls: -0.8 } },
     ],
   },
   {
@@ -381,7 +381,7 @@ Für viele Ungarn war das neutrale Deutschland ein Versprechen. Nun richten sich
       { text: 'Klarstellen: Die Grenze ist endgültig.', ergebnis: 'Die Verbände toben, die Nachbarn sind beruhigt.', w: { ansehen: -3, moskau: 4 } },
       { text: 'Verständnis für die Vertriebenen zeigen.', ergebnis: 'Warschau und Moskau horchen auf.', w: { ansehen: 2, moskau: -8 } },
     ] : [
-      { text: 'Die Grenze jetzt anerkennen.', ergebnis: 'Ein schmerzhafter Schritt, den viele dem Kanzler nie verzeihen werden.', w: { ansehen: -5, moskau: 10, koalition: -6 }, setze: ['grenze_anerkannt'] },
+      { text: 'Die Grenze jetzt anerkennen.', ergebnis: 'Ein schmerzhafter Schritt, den viele dem Kanzler nie verzeihen werden.', w: { ansehen: -5, moskau: 10, rueckhalt: -6 }, setze: ['grenze_anerkannt'] },
       { text: 'Am Rechtsstandpunkt festhalten.', ergebnis: 'Moskau erhöht den Druck.', w: { ansehen: 2, moskau: -8 } },
     ]),
   },

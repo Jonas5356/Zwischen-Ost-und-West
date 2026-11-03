@@ -11,7 +11,7 @@
 
 import * as KI from './ki.js';
 
-export const VERSION = 4;
+export const VERSION = 5;
 
 // ---------- Zeit: Halbjahre als 1952.1 (I) und 1952.2 (II) ----------
 
@@ -621,6 +621,7 @@ function entscheide(W, welt, land, ev, index) {
   welt.letzteOrdnung = ev.dynamisch ? 99 : ordnungVon(ev);
   ev.nachher?.(s, api(W, welt, land));
   const hatHist = opts.some(x => x.hist);
+  const aenderungen = differenz(M, vorher, s);
   L.chronik.push({
     zeit: welt.zeit,
     id: ev.id,
@@ -634,6 +635,8 @@ function entscheide(W, welt, land, ev, index) {
     oeffentlich: !(o.still || ev.geheim || ev.nurRueckfrage),
     // innenpolitische Kleinigkeiten und Briefe stehen nicht in den Zeitungen anderer Länder
     ...(ev.inland || ev.art === 'akte' ? { inland: true } : {}),
+    // was die Entscheidung an den eigenen Werten verändert hat (für die Hinweise im Lagebild)
+    ...(aenderungen.length ? { aenderungen } : {}),
   });
 
   const ergebnis = {
@@ -641,7 +644,7 @@ function entscheide(W, welt, land, ev, index) {
     texte,
     historisch: txt(ev.historisch, s) || null,
     hist: hatHist ? !!o.hist : null,
-    aenderungen: differenz(M, vorher, s),
+    aenderungen,
     ascii: txt(o.ascii, s) || null,
   };
   M.modell?.pruefeKrise?.(s, api(W, welt, land));
@@ -661,6 +664,96 @@ export function waehle(W, welt, index) {
   welt.ergebnisVorhaben = false;
   welt.phase = 'ergebnis';
   return welt.ergebnis;
+}
+
+// ---------- Entscheidungen ----------
+//
+// Entscheidungen trifft ein Land aus eigenem Antrieb, jederzeit im Halbjahr (gesteuerte Länder
+// einmal am Halbjahresende). Sie kosten etwas (`kosten: { wert: Δ }`), haben eine Abklingzeit
+// in Halbjahren und können ein anderes Land um etwas bitten (`an: { land, id }`, Antwort nach
+// dessen Zielen, Typ und Meinung über den Fragenden; Wirkung je Antwort in `antworten`).
+
+/** Alle Entscheidungen eines Landes, die gerade sichtbar sind, mit Verfügbarkeit und Grund */
+export function entscheidungen(W, welt, land = welt.spieler[0]) {
+  const M = W.laender[land];
+  const L = welt.laender[land];
+  if (!M?.entscheidungen || !istAktiv(welt, land)) return [];
+  const s = sicht(W, welt, land);
+  const zuletzt = L.entscheidungZuletzt || {};
+  return M.entscheidungen
+    .filter(e => imFenster(e, welt.zeit) && (!e.wenn || e.wenn(s)) && !(e.einmalig && zuletzt[e.id] !== undefined))
+    .map(e => {
+      let grund = null;
+      const z = zuletzt[e.id];
+      const ab = z === undefined ? null : zeitPlus(z, e.abklingzeit ?? 2);
+      const kosten = txt(e.kosten, s) || {};
+      if (ab !== null && zeitIndex(welt.zeit) < zeitIndex(ab)) grund = `wieder möglich ab ${zeitText(ab)}`;
+      else if (kosten.haushalt && s.w.haushalt + kosten.haushalt < 0) grund = 'Der Haushalt reicht nicht.';
+      else if (e.moeglich) { const m = e.moeglich(s); if (m !== true) grund = typeof m === 'string' ? m : 'Im Moment nicht möglich.'; }
+      if (!grund && e.an && istMensch(welt, txt(e.an, s).land)) grund = 'Nicht möglich, solange dieses Land gespielt wird.';
+      return { ...e, titel: txt(e.titel, s), text: txt(e.text, s), kosten, verfuegbar: !grund, grund };
+    });
+}
+
+/** Eine Entscheidung ausführen – für Spieler und gesteuerte Länder gleich */
+function entscheidungAusfuehren(W, welt, land, e) {
+  const M = W.laender[land];
+  const L = welt.laender[land];
+  const s = sicht(W, welt, land);
+  const vorher = schnappschuss(M, s);
+  const texte = [];
+  const kosten = txt(e.kosten, s);
+  if (kosten) wende(W, welt, land, { w: kosten });
+  wende(W, welt, land, e);
+  M.modell?.nachOption?.(s, e, e, api(W, welt, land));
+  if (e.ergebnis) texte.push(txt(e.ergebnis, s));
+  if (e.an) rueckfrage(W, welt, land, { rueckfrage: e.an, antworten: e.antworten }, texte);
+  const getroffen = wendeZufall(W, welt, land, e, texte);
+  const pseudo = { id: 'entscheidung:' + e.id, titel: e.titel };
+  for (const quelle of [e, getroffen]) if (quelle?.bei) wendeBei(W, welt, land, pseudo, quelle, texte);
+  (L.entscheidungZuletzt ||= {})[e.id] = welt.zeit;
+  const aenderungen = differenz(M, vorher, s);
+  const titel = txt(e.titel, s);
+  L.chronik.push({
+    zeit: welt.zeit, id: 'entscheidung:' + e.id, titel, datum: null, art: 'entscheidung', wahl: 'Aus eigenem Antrieb', hist: null,
+    ergebnis: texte.join(' '), oeffentlich: !e.still, ...(e.inland ? { inland: true } : {}), ...(aenderungen.length ? { aenderungen } : {}),
+  });
+  M.modell?.pruefeKrise?.(s, api(W, welt, land));
+  M.modell?.nachEntscheidung?.(s);
+  KI.pruefeRegime(W, welt, land);
+  return { titel, texte, historisch: txt(e.historischText, s) || null, hist: null, aenderungen, ascii: txt(e.ascii, s) || null, entscheidung: true };
+}
+
+/** Der Spieler trifft eine Entscheidung – während ein eigener Vorgang oder das Vorhaben ansteht */
+export function triffEntscheidung(W, welt, id) {
+  const land = welt.spieler[0];
+  const item = welt.queue[welt.pos];
+  if (welt.phase !== 'spiel' || welt.ende) throw new Error('Gerade ist keine Entscheidung möglich');
+  if (!item || istTelegramm(item) || !istMensch(welt, item.land)) throw new Error('Gerade ist keine Entscheidung möglich');
+  const e = entscheidungen(W, welt, land).find(x => x.id === id);
+  if (!e || !e.verfuegbar) throw new Error('Entscheidung nicht verfügbar: ' + id);
+  welt.ergebnis = entscheidungAusfuehren(W, welt, land, W.laender[land].entscheidungen.find(x => x.id === id));
+  welt.ergebnisLand = land;
+  welt.ergebnisVorhaben = false;
+  welt.ergebnisEntscheidung = true;
+  welt.phase = 'ergebnis';
+  return welt.ergebnis;
+}
+
+/** Kann der Spieler gerade eine Entscheidung treffen? */
+export function entscheidungMoeglich(W, welt) {
+  const item = welt.queue[welt.pos];
+  return welt.phase === 'spiel' && !welt.ende && !!item && !istTelegramm(item) && istMensch(welt, item.land);
+}
+
+/** Gesteuerte Länder treffen am Halbjahresende höchstens eine Entscheidung */
+function kiEntscheidungen(W, welt) {
+  for (const land of aktiveLaender(W, welt)) {
+    if (istMensch(welt, land) || !W.laender[land].entscheidungen) continue;
+    const liste = entscheidungen(W, welt, land).filter(e => e.verfuegbar && e.ki);
+    if (!liste.length) continue;
+    KI.waehleEntscheidung(W, welt, land, liste, id => { if (id) entscheidungAusfuehren(W, welt, land, W.laender[land].entscheidungen.find(x => x.id === id)); });
+  }
 }
 
 /** Kostenlose Vorhaben gehen immer, auch bei leerer Kasse; sonst muss der Haushalt reichen */
@@ -713,7 +806,8 @@ function vorhabenAnwenden(W, welt, land, id) {
     titel = txt(v.titel, s);
     if (v.ergebnis) texte.push(txt(v.ergebnis, s));
     historisch = txt(v.historisch, s) || null;
-    L.chronik.push({ zeit: welt.zeit, id: 'vorhaben:' + v.id, titel, art: 'vorhaben', wahl: 'Regierungsvorhaben', hist: null, ergebnis: texte.join(' '), oeffentlich: false });
+    const aenderungen = differenz(M, vorher, s);
+    L.chronik.push({ zeit: welt.zeit, id: 'vorhaben:' + v.id, titel, art: 'vorhaben', wahl: 'Regierungsvorhaben', hist: null, ergebnis: texte.join(' '), oeffentlich: false, ...(aenderungen.length ? { aenderungen } : {}) });
   } else {
     texte.push('Die Regierung beschränkt sich in diesem Halbjahr auf die laufenden Geschäfte.');
   }
@@ -752,6 +846,13 @@ export function weiter(W, welt) {
     welt.pos++;
   } else if (welt.phase === 'wahl') {
     welt.phase = 'spiel';
+  } else if (welt.phase === 'ergebnis' && welt.ergebnisEntscheidung) {
+    // nach einer Entscheidung geht es mit demselben Vorgang weiter
+    welt.phase = 'spiel';
+    welt.ergebnisEntscheidung = false;
+    aktualisiereQueue(W, welt, welt.letzteOrdnung ?? 0);
+    const neu = einschuebe(welt);
+    if (neu.length) welt.queue.splice(welt.pos, 0, ...neu);
   } else if (welt.phase === 'ergebnis') {
     welt.phase = 'spiel';
     naechsterVorgang(W, welt, welt.ergebnisVorhaben);
@@ -762,6 +863,7 @@ export function weiter(W, welt) {
 }
 
 function rundenende(W, welt) {
+  kiEntscheidungen(W, welt);
   for (const land of aktiveLaender(W, welt)) {
     const M = W.laender[land];
     if (!M.modell?.rundenende) continue;

@@ -1,0 +1,69 @@
+// Frankreich: Entscheidungen, die die Regierung jederzeit treffen kann
+// (die Entscheidungen zu den Kolonialkriegen stehen in kolonialkriege.js)
+import { annaeherungen, konjunkturprogramm } from '../entscheidungen.js';
+import { indochinakrieg, algerienkrieg } from './modell.js';
+
+export default [
+  ...annaeherungen('frankreich', { usa: 'atlantisch', moskau: 'ost', grossbritannien: 'atlantisch', brd: 'europa' }),
+  konjunkturprogramm({ w: { preisdruck: 1 } }),
+  {
+    id: 'us_hilfe_indochina',
+    titel: 'Washington um Hilfe für Indochina bitten',
+    text: 'Der Krieg in Indochina kostet mehr, als Frankreich tragen kann. Seit Mao in China gesiegt hat, sieht man in Washington den Krieg als Teil des Kampfes gegen den Kommunismus. Paris könnte um Geld und Waffen bitten – und machte sich damit abhängig.',
+    ab: 1949.2, bis: 1964.1,
+    wenn: s => indochinakrieg(s) && !s.f.indochina_amerikahilfe,
+    kosten: { ansehen: -1 },
+    abklingzeit: 2,
+    an: { land: 'usa', id: 'usa_hilfe_indochina' },
+    antworten: {
+      ja: { w: { indochina: 4, haushalt: 4 }, setze: ['indochina_amerikahilfe'], ergebnis: 'Washington übernimmt einen wachsenden Teil der Kosten des Kriegs in Indochina.' },
+      nein: { w: { usa: -2, ansehen: -1 }, ergebnis: 'Washington lehnt es ab, Frankreich in Indochina zu helfen.' },
+    },
+    richtung: 'atlantisch',
+    ki: true,
+    dient: { kolonien: 0.5, westbindung: 0.3, unabhaengigkeit: -0.3 },
+    historisch: [1950.1],
+  },
+  {
+    id: 'us_hilfe_algerien',
+    titel: 'Washington um Unterstützung in Algerien bitten',
+    text: 'Die Armee braucht Hubschrauber und Geld für Algerien. Washington hält den Krieg für einen Fehler, der die arabische Welt Moskau zutreibt; die Bitte könnte abgelehnt werden.',
+    wenn: s => algerienkrieg(s) && !s.f.algerien_amerikahilfe,
+    kosten: { ansehen: -1 },
+    abklingzeit: 4,
+    an: { land: 'usa', id: 'usa_hilfe_algerien' },
+    antworten: {
+      ja: { w: { algerien: 4, haushalt: 2 }, setze: ['algerien_amerikahilfe'], ergebnis: 'Washington liefert Hubschrauber und Ausrüstung für den Krieg in Algerien.' },
+      nein: { w: { usa: -3, ansehen: -1 }, ergebnis: 'Washington lehnt jede Unterstützung für den Krieg in Algerien ab.' },
+    },
+    richtung: 'atlantisch',
+    // gesteuert nicht: Paris hat sich um amerikanische Hilfe in Algerien nie ernsthaft bemüht
+    dient: { kolonien: 0.4, westbindung: 0.2, unabhaengigkeit: -0.3 },
+  },
+  {
+    id: 'franc_abwertung',
+    titel: 'Den Franc abwerten',
+    text: 'Der Franc ist überbewertet; Ausfuhren lohnen sich nicht mehr, das Kapital flieht. Eine Abwertung würde Vertrauen zurückbringen und die Ausfuhr ankurbeln – aber die Einfuhren verteuern und das Ansehen der Regierung kosten.',
+    wenn: s => s.w.franc < 40,
+    kosten: { ansehen: -3 },
+    w: { franc: 15, inflation: 1.5, preisdruck: 1.5, impuls: 0.8, haushalt: 2 },
+    abklingzeit: 6,
+    richtung: 'sparen',
+    ergebnis: 'Paris wertet den Franc ab. Die Ausfuhren ziehen an, die Einfuhren werden teurer.',
+    ki: true,
+    dient: { modernisierung: 0.3, unabhaengigkeit: -0.2 },
+  },
+  {
+    id: 'atom_beschleunigen',
+    titel: 'Das Atomprogramm beschleunigen',
+    text: 'Mehr Geld für Marcoule und Pierrelatte, mehr Ingenieure für das Atomkommissariat: Die eigene Bombe käme früher. Die Sozialisten lehnen sie ab.',
+    wenn: s => !!s.f.atomprogramm && s.w.atom < 80 && !s.f.atomtest,
+    kosten: { haushalt: -4 },
+    w: { atom: 8 },
+    abklingzeit: 2,
+    richtung: 'national',
+    ergebnis: 'Paris steckt zusätzliche Mittel in das Atomprogramm.',
+    ki: true,
+    dient: { atom: 0.6, unabhaengigkeit: 0.3 },
+  },
+];

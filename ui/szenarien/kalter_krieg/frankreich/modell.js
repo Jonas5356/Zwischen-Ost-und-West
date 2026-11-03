@@ -8,29 +8,33 @@
 // regiert lange. Gewählt wird regulär alle fünf Jahre (1951, 1956, 1961); vorzeitig nur
 // nach einer Auflösung, die die Verfassung erst nach zwei Stürzen binnen 18 Monaten erlaubt.
 
+import { STANDARD, BAUSTEINE, beziehungen } from '../werte.js';
+import { ENDEN as KRIEGSENDEN } from './kolonialkriege.js';
 import { jahrVon, zeitIndex, zeitPlus, zeitText, runde1 } from '../../../engine.js';
 
 export const WERTE = {
-  usa:             { name: 'Beziehung zu den USA', kurz: 'Washington', min: 0, max: 100, beziehung: 'usa' },
-  brd:             { name: 'Beziehung zur Bundesrepublik', kurz: 'Bonn', min: 0, max: 100, beziehung: 'brd' },
-  grossbritannien: { name: 'Beziehung zu Großbritannien', kurz: 'London', min: 0, max: 100, beziehung: 'grossbritannien' },
-  moskau:          { name: 'Beziehung zu Moskau', kurz: 'Moskau', min: 0, max: 100, beziehung: 'su' },
-  rang:            { name: 'Rang Frankreichs in der Welt', kurz: 'Rang', min: 0, max: 100 },
-  europa:          { name: 'Europäische Integration', kurz: 'Europa', min: 0, max: 100 },
-  atom:            { name: 'Atomprogramm', kurz: 'Atomprogramm', min: 0, max: 100 },
-  indochina:       { name: 'Lage in Indochina (100 = Lage unter Kontrolle)', kurz: 'Indochina', min: 0, max: 100 },
-  algerien:        { name: 'Lage in Algerien (100 = ruhig)', kurz: 'Algerien', min: 0, max: 100 },
-  armee:           { name: 'Loyalität der Armee', kurz: 'Armee', min: 0, max: 100 },
-  zustimmung:      { name: 'Zufriedenheit mit der Regierung', kurz: 'Umfrage', min: 5, max: 85, einheit: '%', keinHinweis: true },
-  ansehen:         { name: 'Ansehen der Regierung', kurz: 'Ansehen', min: -30, max: 30 },
-  mehrheit:        { name: 'Rückhalt in der Nationalversammlung', kurz: 'Mehrheit', min: 0, max: 100 },
-  wachstum:        { name: 'Wirtschaftswachstum', kurz: 'Wachstum', min: -10, max: 20, einheit: '%', keinHinweis: true },
-  inflation:       { name: 'Inflation', kurz: 'Inflation', min: -5, max: 70, einheit: '%', invertiert: true, keinHinweis: true },
-  haushalt:        { name: 'Haushaltslage', kurz: 'Haushalt', min: -20, max: 100 },
-  franc:           { name: 'Stabilität des Franc', kurz: 'Franc', min: 0, max: 100 },
-  impuls:          { name: 'Konjunkturimpuls', kurz: 'Konjunktur', min: -6, max: 6 },
-  preisdruck:      { name: 'Preisdruck', kurz: 'Preisdruck', min: -6, max: 12, invertiert: true },
+  // Beziehungen: wie Washington, Moskau, London und Bonn Frankreich sehen
+  ...beziehungen('frankreich'),
+  // Landesspezifisch
+  indochina:       BAUSTEINE.krieg('Indochina', 'Indochina'),
+  algerien:        BAUSTEINE.krieg('Algerien', 'Algerien'),
+  armee:           BAUSTEINE.armee,
+  atom:            BAUSTEINE.atom,
+  europa:          BAUSTEINE.europa,
+  franc:           BAUSTEINE.waehrung('Franc', 'des Franc'),
+  zustimmung:      STANDARD.zustimmung,
+  ansehen:         STANDARD.ansehen,
+  rueckhalt:       STANDARD.rueckhalt,
+  wachstum:        STANDARD.wachstum,
+  inflation:       STANDARD.inflation,
+  arbeitslosigkeit: STANDARD.arbeitslosigkeit,
+  haushalt:        STANDARD.haushalt,
+  impuls:          { name: 'Konjunkturimpuls', kurz: 'Konjunktur', min: -6, max: 6, versteckt: true },
+  preisdruck:      { name: 'Preisdruck', kurz: 'Preisdruck', min: -6, max: 12, invertiert: true, versteckt: true },
   kriegsmuede:     { name: 'Kriegsmüdigkeit', min: 0, max: 30, versteckt: true },
+  // Einsatz in den Kolonialkriegen: 0 = Truppenstärke wie in der Geschichte (kolonialkriege.js)
+  einsatz_indochina: { name: 'Einsatz in Indochina', min: -4, max: 6, versteckt: true },
+  einsatz_algerien: { name: 'Einsatz in Algerien', min: -4, max: 6, versteckt: true },
   bonus:           { name: 'Amtsbonus', min: -10, max: 25, versteckt: true },
 };
 
@@ -167,7 +171,7 @@ export function bildeRegierung(s, lager, chef = kandidatFuer(s, lager)) {
   s.chefPartei = chef.partei;
   s.regierung = [...L.parteien].filter(p => p !== 'GAUL' || s.republik === 5 || lager === 'de_gaulle');
   // Rückhalt zu Beginn: wie viele Stimmen das Lager hat, plus Schonfrist
-  s.w.mehrheit = startMehrheit(s, lager);
+  s.w.rueckhalt = startMehrheit(s, lager);
   s.w.ansehen = 0;
   s.w.bonus = s.republik === 5 ? s.w.bonus : 3;
   notiereChef(s);
@@ -197,9 +201,9 @@ export function startzustand() {
   // Januar 1946: De Gaulle ist als Chef der Provisorischen Regierung zurückgetreten.
   return {
     w: {
-      rang: 34, europa: 0, atom: 3, indochina: 52, algerien: 72, armee: 68,
-      zustimmung: 40, ansehen: 0, mehrheit: 55, wachstum: 10, inflation: 40, haushalt: 25, franc: 30,
-      impuls: 0, preisdruck: 3, kriegsmuede: 1, bonus: 0,
+      europa: 0, atom: 3, indochina: 52, algerien: 72, armee: 68,
+      zustimmung: 40, ansehen: 0, rueckhalt: 55, wachstum: 10, inflation: 40, arbeitslosigkeit: 1, haushalt: 25, franc: 30,
+      impuls: 0, preisdruck: 3, kriegsmuede: 1, bonus: 0, einsatz_indochina: 0, einsatz_algerien: 0,
     },
     f: { apparentements: false, provisorisch: true, 'gebildet_1946.1': true },
     republik: 4,
@@ -226,13 +230,52 @@ const BASIS = { 1946: 11, 1947: 7, 1948: 8, 1949: 7.0, 1950: 7.0, 1951: 6.0, 195
 const INFLATION = { 1946: 40, 1947: 42, 1948: 40, 1949: 9, 1950: 7, 1951: 9, 1952: 6, 1953: 1, 1954: 1, 1955: 1.5, 1956: 2.5, 1957: 3.5, 1958: 7, 1959: 4, 1960: 3.5, 1961: 3.3, 1962: 4.5, 1963: 4.5, 1964: 3.5 };
 
 export const algerienkrieg = s => !!s.f.algerienkrieg && !s.f.algerien_frieden;
+/**
+ * Kolonialkriege am Halbjahresende: kurze Meldungen zur Lage, Zähler für anhaltende Erfolge
+ * und – einmal – wie der Krieg ausgegangen ist (Texte in kolonialkriege.js).
+ */
+function kriegsbericht(s) {
+  const z = s.zeit;
+  const notiz = t => (s.notizen ||= []).push(t);
+  for (const [krieg, wo, laeuft] of [['indochina', 'Indochina', indochinakrieg], ['algerien', 'Algerien', algerienkrieg]]) {
+    if (laeuft(s)) {
+      const v = s.w[krieg];
+      // Halbjahre in Folge mit sehr guter Lage (negativ: Pause, nachdem Paris weiterkämpfen ließ)
+      const h = s.f[krieg + '_hoch'] || 0;
+      s.f[krieg + '_hoch'] = h < 0 ? h + 1 : v >= 80 ? h + 1 : 0;
+      const vorher = s.verlauf?.length ? s.verlauf[s.verlauf.length - 1][krieg] : undefined;
+      if (vorher !== undefined) {
+        const d = v - vorher;
+        if (d <= -3) notiz(`${wo}: ${krieg === 'indochina' ? 'Die Viet Minh' : 'Die FLN'} gewinnen an Boden. Die Lage ist ${v < 25 ? 'verzweifelt' : v < 50 ? 'ernst' : 'angespannt'}.`);
+        else if (d >= 3) notiz(`${wo}: Die Armee kommt voran. ${v >= 70 ? 'Der Gegner ist in die Defensive gedrängt.' : 'Die Lage hat sich gebessert.'}`);
+      }
+    }
+  }
+  // Ausgang erzählen, sobald ein Krieg vorbei ist
+  const ende = (krieg, art) => {
+    if (s.f[krieg + '_ende']) return;
+    s.f[krieg + '_ende'] = art;
+    s.f[krieg + '_ende_zeit'] = z;
+    notiz(KRIEGSENDEN[krieg][art][1]);
+  };
+  if (s.f.indochina_beendet) {
+    const f = s.f;
+    ende('indochina', f.indochina_ausgleich ? 'ausgleich' : f.indochina_gehalten ? 'gehalten' : f.indochina_niederlage ? 'niederlage'
+      : f.indochina_genf ? 'genf' : f.indochina_frieden_ho ? 'frieden' : 'rueckzug');
+  }
+  if (s.f.algerien_unabhaengig) ende('algerien', 'unabhaengig');
+  else if (s.f.algerien_integration && s.f.algerien_frieden) ende('algerien', 'integration');
+  else if (s.f.algerien_autonomie && !s.f.algerienkrieg) ende('algerien', 'autonomie');
+}
+
 /** Krieg in Indochina: seit Dezember 1946 (Haiphong), bis zu einem Frieden */
 export const indochinakrieg = s => !!s.f.indochinakrieg && !s.f.indochina_beendet;
 
 export function berechneUmfrage(s) {
   const w = s.w;
   // Hohe Inflation ärgert, aber an Nachkriegsraten gewöhnt man sich: der Abzug ist begrenzt
-  let u = 30 + 0.8 * (Math.min(w.wachstum, 10) - 4) - 0.7 * Math.min(w.inflation - 4, 16) + w.ansehen + w.bonus - w.kriegsmuede;
+  let u = 30 + 0.8 * (Math.min(w.wachstum, 10) - 4) - 0.7 * Math.min(w.inflation - 4, 16) - 0.6 * Math.max(0, (w.arbeitslosigkeit ?? 1.2) - 2)
+    + w.ansehen + w.bonus - w.kriegsmuede;
   if (s.lager === 'de_gaulle') u += 18;
   if (s.lager === 'militaer') u -= 10;
   return Math.max(5, Math.min(85, runde1(u)));
@@ -266,10 +309,17 @@ export function rundenende(s, a) {
   w.inflation = runde1(Math.max(-3, Math.min(65, inf)));
   w.preisdruck *= 0.5;
 
+  // --- Arbeitslosigkeit: in der Nachkriegszeit gering; steigt bei schwachem Wachstum,
+  // 1962 kurz mit den Heimkehrern aus Algerien
+  let al = (w.arbeitslosigkeit ?? 1.2) + 0.3 * (1.7 - (w.arbeitslosigkeit ?? 1.2)) - 0.08 * (w.wachstum - 5);
+  if (s.f.algerien_unabhaengig && j === 1962) al += 0.4;
+  if (s.lager === 'militaer') al += 0.5;
+  w.arbeitslosigkeit = runde1(Math.max(0.5, Math.min(15, al)));
+
   // --- Haushalt
   let lasten = 0;
-  if (indochinakrieg(s)) lasten += 1.6;
-  if (algerienkrieg(s)) lasten += 2.2 + (s.f.wehrpflicht_verlaengert ? 0.6 : 0);
+  if (indochinakrieg(s)) lasten += 1.6 + 0.35 * (w.einsatz_indochina || 0);
+  if (algerienkrieg(s)) lasten += 2.2 + (s.f.wehrpflicht_verlaengert ? 0.6 : 0) + 0.35 * (w.einsatz_algerien || 0);
   if (s.f.atomprogramm) lasten += 0.4;
   if (s.f.sozialprogramm) lasten += 0.4;
   // Wiederaufbau und Versorgung bis zum Marshallplan
@@ -281,15 +331,18 @@ export function rundenende(s, a) {
 
   // --- Kolonialkriege
   if (indochinakrieg(s)) {
-    let d = -2.5 + (s.f.de_lattre ? 1.5 : 0) + (s.f.indochina_amerikahilfe ? 1 : 0) + (s.weltflags.koreakrieg_ende ? -1.5 : 0) + 2 * a.normal();
+    const einsatz = w.einsatz_indochina || 0;
+    let d = -2.5 + 0.5 * einsatz + (s.f.de_lattre ? 1.5 : 0) + (s.f.indochina_amerikahilfe ? 1 : 0) + (s.weltflags.koreakrieg_ende ? -1.5 : 0) + 2 * a.normal();
     w.indochina += d;
-    w.kriegsmuede += 0.8;
+    w.kriegsmuede += 0.8 + 0.12 * einsatz;
+    w.armee += 0.15 * einsatz;
   }
   if (algerienkrieg(s)) {
-    let d = -2 + (s.f.algerien_truppen ? 2 : 0) + (s.f.challe_plan ? 1.5 : 0) + (s.f.algerien_verhandlung ? 1 : 0) + 2 * a.normal();
+    const einsatz = w.einsatz_algerien || 0;
+    let d = -2 + 0.5 * einsatz + (s.f.algerien_truppen ? 2 : 0) + (s.f.challe_plan ? 1.5 : 0) + (s.f.algerien_verhandlung ? 1 : 0) + (s.f.algerien_amerikahilfe ? 0.5 : 0) + 2 * a.normal();
     w.algerien += d;
-    w.kriegsmuede += 1;
-    w.rang -= 0.4;
+    w.kriegsmuede += 1 + 0.12 * einsatz;
+    w.armee += 0.15 * einsatz;
     // Verhandlungen mit der FLN kosten die Loyalität der Armee, harte Linie stärkt sie
     if (s.f.algerien_verhandlung) w.armee -= 3;
     else w.armee += 0.5;
@@ -300,12 +353,14 @@ export function rundenende(s, a) {
   if (s.f.algerien_frieden || s.f.indochina_beendet) w.kriegsmuede *= 0.85;
   w.kriegsmuede = runde1(Math.max(0, w.kriegsmuede - 0.3));
 
+  // --- Kolonialkriege in der Zeitung: Wie steht der Krieg, wie ist er ausgegangen?
+  kriegsbericht(s);
+
   // --- Atomprogramm
   if (s.f.atomprogramm && w.atom < 100) w.atom += 6 + (s.f.fig ? 3 : 0) + (s.lager === 'de_gaulle' ? 3 : 0);
 
   // --- Langsame Rückkehr zu Normalwerten
   w.armee += (60 - w.armee) * 0.06;
-  w.rang += (40 - w.rang) * 0.05;
   w.ansehen *= 0.75;
   w.bonus *= s.lager === 'de_gaulle' ? 0.95 : 0.7;
   for (const [k, ziel] of [['usa', 55], ['grossbritannien', 55], ['moskau', 35], ['brd', s.zeit >= 1955 ? 55 : 45]]) w[k] += (ziel - w[k]) * 0.08;
@@ -325,12 +380,12 @@ export function rundenende(s, a) {
     if (w.inflation > 8) ziel -= 4;
     if (indochinakrieg(s) && w.indochina < 30) ziel -= 5;
     if (algerienkrieg(s) && w.algerien < 40) ziel -= 5;
-    w.mehrheit += 0.5 * (ziel - w.mehrheit);
+    w.rueckhalt += 0.5 * (ziel - w.rueckhalt);
   } else if (fuenfte(s)) {
-    w.mehrheit += (70 - w.mehrheit) * 0.2;
+    w.rueckhalt += (70 - w.rueckhalt) * 0.2;
   }
 
-  for (const k of ['usa', 'grossbritannien', 'moskau', 'brd', 'rang', 'armee', 'ansehen', 'mehrheit', 'indochina', 'algerien', 'atom']) w[k] = runde1(w[k]);
+  for (const k of ['usa', 'grossbritannien', 'moskau', 'brd', 'armee', 'ansehen', 'rueckhalt', 'indochina', 'algerien', 'atom']) w[k] = runde1(w[k]);
   for (const k of Object.keys(WERTE)) {
     const d = WERTE[k];
     if (d.beziehung) continue;
@@ -341,7 +396,7 @@ export function rundenende(s, a) {
 
   // --- Regierungssturz in der Vierten Republik: je schwächer der Rückhalt, desto wahrscheinlicher
   if (vierte(s) && !istWahlHalbjahr(s) && !s.f['gebildet_' + s.zeit]) {
-    const p = Math.max(0, Math.min(0.9, (50 - w.mehrheit) / 30));
+    const p = Math.max(0, Math.min(0.9, (50 - w.rueckhalt) / 30));
     if (a.zufall() < p) sturz(s, 'misstrauen');
   }
 
@@ -431,7 +486,7 @@ export function wahl(s, a) {
   for (const p of reg) st[p] += bilanz / Math.max(1, reg.length);
   if (s.republik === 5) st.GAUL += 0.35 * (s.w.zustimmung - 45) + (j >= 1962 ? 6 : 0);
   // Instabilität treibt Wähler zu den Gaullisten, Inflation und Steuern zu Poujade
-  if (s.republik === 4) st.GAUL += Math.max(0, (35 - s.w.mehrheit) / 10);
+  if (s.republik === 4) st.GAUL += Math.max(0, (35 - s.w.rueckhalt) / 10);
   if (s.f.algerien_frieden) { st.UNAB -= 2; st.GAUL += 1; }
   for (const k of Object.keys(st)) st[k] = Math.max(0, st[k] + (k === 'POUJ' && !st[k] ? 0 : 1.2 * a.normal()));
   const summe = Object.values(st).reduce((x, y) => x + y, 0);
@@ -506,7 +561,7 @@ function lagerOption(s, lager) {
     hist: historischesLager(s.zeit) === lager,
     richtung: lager === 'volksfront' ? 'ost' : undefined,
     dient: LAGER_DIENT[lager],
-    w: { mehrheit: startMehrheit(s, lager) - s.w.mehrheit },
+    w: { rueckhalt: startMehrheit(s, lager) - s.w.rueckhalt },
     ergebnis: `${k.name} wird Ministerpräsident: ${L.name}. Die Nationalversammlung spricht ihm mit ${stimmen} von ${g} Stimmen das Vertrauen aus.`,
     aktion: st => {
       bildeRegierung(st, lager, k);
@@ -534,7 +589,7 @@ export const dynamisch = {
       opts.push({
         text: 'Nicht zurücktreten, sondern die Nationalversammlung auflösen und neu wählen lassen.',
         hist: zeitIndex(s.zeit) === zeitIndex(1955.2),
-        w: { mehrheit: 35 - s.w.mehrheit, ansehen: -2 },
+        w: { rueckhalt: 35 - s.w.rueckhalt, ansehen: -2 },
         dient: { stabilitaet: 0.5 },
         ergebnis: `${s.regierungschef} löst die Nationalversammlung auf – zum ersten Mal seit 1877. Bis zur Wahl im nächsten Halbjahr bleibt die Regierung geschäftsführend im Amt.`,
         aktion: st => { zieheWahlVor(st, 1); st.f['gebildet_' + st.zeit] = true; },
@@ -570,11 +625,11 @@ export const dynamisch = {
         optionen: [
           { text: 'Mit den Gaullisten und den Unabhängigen regieren.', hist: true,
             ergebnis: `${s.regierungschef} bleibt Premierminister. Die Regierung stützt sich auf Gaullisten und Unabhängige.`,
-            aktion: st => { st.regierung = ['GAUL', 'UNAB']; st.w.mehrheit = reicht ? 75 : 55; } },
+            aktion: st => { st.regierung = ['GAUL', 'UNAB']; st.w.rueckhalt = reicht ? 75 : 55; } },
           { text: 'Die Mitte einbinden: Volksrepublikaner und Radikale in die Regierung holen.',
             ergebnis: 'Eine breite Regierung der nationalen Einheit. Europa-Freunde und Gaullisten sitzen am selben Kabinettstisch.',
             w: { europa: 2 }, richtung: 'europa',
-            aktion: st => { st.regierung = ['GAUL', 'UNAB', 'MRP', 'RAD']; st.w.mehrheit = 72; } },
+            aktion: st => { st.regierung = ['GAUL', 'UNAB', 'MRP', 'RAD']; st.w.rueckhalt = 72; } },
         ],
       };
     }
@@ -597,11 +652,11 @@ export const dynamisch = {
       optionen: [
         { text: 'Die Nationalversammlung auflösen und das Volk entscheiden lassen.', hist: true,
           ergebnis: 'Präsident de Gaulle löst die Nationalversammlung auf. Neuwahlen finden im nächsten Halbjahr statt; bis dahin bleibt die Regierung im Amt.',
-          w: { ansehen: 2, mehrheit: 40 },
+          w: { ansehen: 2, rueckhalt: 40 },
           aktion: st => { zieheWahlVor(st, 0); } },
         { text: 'Einen neuen Premierminister aus der Mitte ernennen.',
           ergebnis: 'Ein Kompromisskandidat der Mitte wird Premierminister. Die Gaullisten murren.',
-          w: { ansehen: -3, mehrheit: 50 }, richtung: 'europa',
+          w: { ansehen: -3, rueckhalt: 50 }, richtung: 'europa',
           aktion: st => { st.regierungschef = 'Antoine Pinay'; st.chefPartei = 'UNAB'; notiereChef(st); } },
       ],
       nachher: st => { delete st.f.krise_offen; },
@@ -618,13 +673,13 @@ export const dynamisch = {
       optionen: [
         { text: 'Den Franc abwerten.', richtung: 'national',
           ergebnis: 'Der Franc wird abgewertet. Die Exporte ziehen an, die Preise aber auch – und das Ansehen leidet.',
-          w: { franc: 45, inflation: 3, rang: -3, ansehen: -4, impuls: 0.8 } },
+          w: { franc: 45, inflation: 3, ansehen: -4, impuls: 0.8 } },
         { text: 'Ein hartes Sparprogramm auflegen.', richtung: 'sparen',
           ergebnis: 'Steuern rauf, Ausgaben runter. Die Märkte beruhigen sich, die Straße nicht.',
           w: { franc: 30, haushalt: 10, ansehen: -6, impuls: -1.5, preisdruck: -2 } },
         { text: 'In Washington um einen Notkredit bitten.', richtung: 'atlantisch',
           ergebnis: 'Washington hilft – und lässt Paris spüren, wer der Gläubiger ist.',
-          w: { franc: 30, usa: -3, rang: -4 } },
+          w: { franc: 30, usa: -3 } },
       ],
       nachher: st => { st.f.franckrisen = (st.f.franckrisen || 0) + 1; delete st.f.franc_offen; },
     };
@@ -640,7 +695,7 @@ export const dynamisch = {
       text: `Der Staatshaushalt ist erschöpft. Das Schatzamt kann die Gehälter der Beamten und den Sold der Armee nur noch mit Vorschüssen der Banque de France bezahlen.${n >= 1 ? '\n\nEs ist nicht die erste Krise dieser Art. Ein weiterer Notstand wäre der Staatsbankrott.' : ''}`,
       optionen: [
         { text: 'Steuern erhöhen.', richtung: 'sparen', ergebnis: 'Die Einnahmen steigen, die Unzufriedenheit auch.', w: { haushalt: 18, ansehen: -6, impuls: -1.5 } },
-        { text: 'Die Militärausgaben kürzen.', richtung: 'dekolonisation', ergebnis: 'Die Generäle protestieren, die Kassen erholen sich.', w: { haushalt: 16, armee: -8, rang: -2 } },
+        { text: 'Die Militärausgaben kürzen.', richtung: 'dekolonisation', ergebnis: 'Die Generäle protestieren, die Kassen erholen sich.', w: { haushalt: 16, armee: -8 } },
         { text: 'Die Notenbank zur Finanzierung zwingen.', ergebnis: 'Die Druckerpressen laufen. Die Inflation zieht an.', w: { haushalt: 14, preisdruck: 4, franc: -10 } },
       ],
       nachher: st => { st.f.notstaende = (st.f.notstaende || 0) + 1; delete st.f.haushalt_offen; },
@@ -660,7 +715,7 @@ export const dynamisch = {
       optionen: [
         { text: 'Den Forderungen der Generäle nachgeben.', richtung: 'kolonial',
           ergebnis: 'Die Regierung gibt nach. Die Armee hat gezeigt, dass sie die Politik bestimmen kann.',
-          w: { armee: 30, ansehen: -10, rang: -4 }, loesche: ['algerien_verhandlung'], setze: ['algerien_truppen'] },
+          w: { armee: 30, ansehen: -10 }, loesche: ['algerien_verhandlung'], setze: ['algerien_truppen'] },
         { text: 'Die Republik verteidigen: Loyale Truppen und Bürger mobilisieren.', richtung: 'dekolonisation',
           zufall: [
             { p: st => Math.max(0.05, Math.min(0.6, (30 - st.w.armee) / 40 + (dg ? -0.15 : 0.1))),
@@ -685,7 +740,7 @@ export function machtUebergabeDeGaulle(s, a) {
   s.regierungschef = 'Charles de Gaulle';
   s.chefPartei = 'GAUL';
   s.regierung = ['GAUL', 'UNAB', 'MRP', 'RAD', 'SFIO'];
-  s.w.mehrheit = 80;
+  s.w.rueckhalt = 80;
   s.w.ansehen = 6;
   s.w.bonus = 12;
   s.w.armee = Math.max(s.w.armee, 70);
@@ -713,7 +768,7 @@ export function nachOption(s, o) {
   for (const p of s.regierung) for (const t of r) d += haltung(p, t);
   // die Dulder zählen halb
   for (const [p, anteil] of Object.entries(LAGER[s.lager]?.toleranz || {})) for (const t of r) d += 0.5 * anteil * haltung(p, t);
-  s.w.mehrheit += (s.republik === 5 ? 0.4 : 1.2) * Math.max(-6, Math.min(2, d));
+  s.w.rueckhalt += (s.republik === 5 ? 0.4 : 1.2) * Math.max(-6, Math.min(2, d));
 }
 
 export function pruefeKrise(s) {
@@ -724,8 +779,8 @@ export function pruefeKrise(s) {
     delete s.erledigt[id];
     s.einschub.push(id);
   };
-  if (vierte(s) && s.w.mehrheit <= 0) sturz(s, 'vertrauen');
-  if (fuenfte(s) && s.w.mehrheit <= 0) neu('krise_offen', 'dyn:misstrauensvotum');
+  if (vierte(s) && s.w.rueckhalt <= 0) sturz(s, 'vertrauen');
+  if (fuenfte(s) && s.w.rueckhalt <= 0) neu('krise_offen', 'dyn:misstrauensvotum');
   if (s.w.armee <= 12 && s.lager !== 'militaer') neu('meuterei_offen', 'dyn:meuterei');
   if (s.w.franc <= 5) neu('franc_offen', 'dyn:franckrise');
 }

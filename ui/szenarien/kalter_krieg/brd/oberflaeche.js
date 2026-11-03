@@ -23,15 +23,28 @@ export default {
   kurzinfo: L => (L.kanzler ? `Kanzler ${L.kanzler}` : ''),
 
   // Lagebild
-  skala: { zustimmung: [10, 60], wachstum: [-2, 12], arbeitslosigkeit: [0, 15], ansehen: [-30, 30], haushalt: [0, 100] },
   zeile(s, k) {
     if (k === 'flucht' && s.f.vereinigt) return 'aus';
     if (k === 'einheit' && s.f.vereinigt) return 'vollzogen';
     return null;
   },
-  warnung: (s, k, v) => (k === 'moskau' && v <= 15) || (k === 'haushalt' && v <= 10) || (k === 'koalition' && v <= 15 && s.regierung.length > 1)
-    || (['usa', 'frankreich', 'grossbritannien'].includes(k) && v < 20 && !s.f.vereinigt && s.w.souveraenitaet < 50),
-  wertTitel: (s, k) => (k === 'zustimmung' ? `${s.kanzlerpartei === 'SPD' ? 'SPD' : 'Union'} in Umfragen` : null),
+  // Warnungen über den Katalog hinaus: Ohne Vertrauen der Westmächte droht das Besatzungsrecht
+  warnung: (s, k, v) => (['usa', 'frankreich', 'grossbritannien'].includes(k) && v < 20 && !s.f.vereinigt && s.w.souveraenitaet < 50),
+  // Was die Standardwerte in der Bundesrepublik genau messen und bewirken (ergänzt den Katalog in werte.js)
+  erklaerung: s => ({
+    zustimmung: {
+      was: `Anteil der Kanzlerpartei (${s.kanzlerpartei === 'SPD' ? 'SPD' : 'Union'}) in Umfragen, in Prozent.`,
+      wirkt: 'Bestimmt ihr Ergebnis bei den Bundestagswahlen (1953, 1957, 1961). Wachstum hebt sie, Arbeitslosigkeit über 5 % und Inflation über 3 % senken sie.',
+    },
+    rueckhalt: {
+      was: s.regierung.length > 1 ? 'Das Klima in der Koalition, von 0 bis 100.' : 'Wie geschlossen die Regierungsfraktion hinter dem Kanzler steht, von 0 bis 100.',
+      senkt: 'Entscheidungen gegen die Linie der Partner – zu weit nach Osten oder zu weit nach Westen –, Sparprogramme, Streit um Posten.',
+      wirkt: 'Strebt von selbst gegen 55. Sinkt er auf 0, zerbricht die Koalition: Die Partner verhandeln neu, oder ein konstruktives Misstrauensvotum bringt eine andere Regierung. Eine Alleinregierung kennt keine Koalitionskrise.',
+    },
+    inflation: { hebt: 'Konjunkturprogramme, Haushaltsdefizite; 1951 der Boom des Koreakriegs.', wirkt: 'Über 3 % drückt sie auf die Umfrage.' },
+    arbeitslosigkeit: { hebt: 'Vertriebene und Flüchtlinge aus der DDR, schwaches Wachstum.', wirkt: 'Über 5 % drückt sie auf die Umfrage.' },
+    haushalt: { wirkt: 'Vorhaben kosten Haushaltspunkte. Unter 20 bremst er das Wachstum; unter 0 kommt ein Haushaltsnotstand, beim dritten der Staatsbankrott.' },
+  }),
   parlament: s => ({
     titel: 'Bundestag',
     reihenfolge: ['KPD', 'SPD', 'FDP', 'Union', 'Kleine', 'Sonstige'],
