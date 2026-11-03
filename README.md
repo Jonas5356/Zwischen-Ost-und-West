@@ -1,9 +1,9 @@
 # Zwischen Ost und West
 
-Eine textbasierte Politiksimulation über Europa im Kalten Krieg, vom Herbst 1949 bis zum Frühjahr 1964, Halbjahr für Halbjahr. Zu Beginn wählst du dein Land:
+Eine textbasierte Politiksimulation über Europa im Kalten Krieg, vom Januar 1946 bis zum Frühjahr 1964, Halbjahr für Halbjahr. Zu Beginn wählst du dein Land:
 
-- **Bundesrepublik Deutschland** – durch Petersberger Abkommen, Stalin-Note, Wiederbewaffnung, Römische Verträge, Mauerbau und Spiegel-Affäre.
-- **Frankreich** – durch die Regierungskrisen der Vierten Republik, Indochina und Điện Biên Phủ, Schuman-Plan und EVG, Suez, Algerien, den Mai 1958, de Gaulles Fünfte Republik und den Élysée-Vertrag.
+- **Bundesrepublik Deutschland** (ab ihrer Gründung 1949) – durch Petersberger Abkommen, Stalin-Note, Wiederbewaffnung, Römische Verträge, Mauerbau und Spiegel-Affäre.
+- **Frankreich** (ab 1946) – durch die Verfassungskämpfe der Nachkriegszeit, den Bruch mit den Kommunisten, den Marshallplan, die Regierungskrisen der Vierten Republik, Indochina und Điện Biên Phủ, Schuman-Plan und EVG, Suez, Algerien, den Mai 1958, de Gaulles Fünfte Republik und den Élysée-Vertrag.
 
 Das jeweils andere Land, die USA und die Sowjetunion steuert das Spiel: Sie verfolgen eigene Ziele, die du nur vermuten kannst.
 
@@ -19,7 +19,7 @@ Selbst bauen: `build_windows.bat` doppelklicken (braucht Rust und Node.js, das S
 
 ## Spielprinzip
 
-- **Runden:** 30 Halbjahre, von 1949/II bis 1964/I.
+- **Runden:** Halbjahre von 1946/I bis 1964/I. Die Welt beginnt 1946; jedes Land steigt ein, wenn es entsteht – die Bundesrepublik im Herbst 1949. Wer sie spielt, beginnt dort; was bis dahin geschah, entscheiden die anderen Länder, und die erste Zeitung blickt darauf zurück. Kommt es nicht zum Weststaat (Washington bleibt bei der Viermächteverwaltung, Paris verweigert sich, Berlin wird aufgegeben), gibt es die Bundesrepublik in dieser Partie nicht. Wer die Bundesrepublik spielt, für den kommt es immer zu ihrer Gründung.
 - **Länderwahl:** Bundesrepublik oder Frankreich. Wo beide betroffen sind – Schuman-Plan, europäische Armee, Saar, Suez, Römische Verträge, Colombey, Élysée –, entscheidet jedes Land selbst; Angebote gehen hin und her. Trifft dich eine Entscheidung eines anderen Landes unmittelbar (Paris lässt die EVG scheitern, Bonn lehnt das Saarstatut ab), kommt ein **Telegramm**.
 - **Vorlagen:** In jedem Halbjahr landen die historischen Ereignisse als Entscheidungsvorlagen auf dem Schreibtisch, dazu Briefe von Ministern, Verbänden und Zeitgenossen (Böckler, Heuss, Heisenberg, Fritz Bauer …). Am Ende des Halbjahrs bringst du ein Regierungsvorhaben ein – Lastenausgleich, Kindergeld, Kartellgesetz, Autobahnbau.
 - **Lagebild:** Beziehungen zu Washington, Paris, London und Moskau (0–100, hoch heißt gut), Souveränität, Aussicht auf Einheit, europäische Integration, Umfragewerte der Kanzlerpartei, Ansehen des Kanzlers, Koalitionsklima, Wachstum, Arbeitslosigkeit, Haushalt, Fluchtbewegung aus der DDR.
@@ -29,7 +29,8 @@ Selbst bauen: `build_windows.bat` doppelklicken (braucht Rust und Node.js, das S
 
 ### Frankreich
 
-- **Die Vierte Republik:** Jede Regierung hängt an einer brüchigen Mehrheit. Ihr Rückhalt in der Nationalversammlung sinkt mit Kolonialkriegen, Inflation und Entscheidungen, die Koalitionsparteien verprellen; je geringer er ist, desto eher stürzt die Regierung – dann bestimmst du mit, wer die nächste bildet (Dritte Kraft, rechte Mitte, Mendès France, Republikanische Front …), und führst sie weiter. Ist das Land instabil, wechseln die Regierungen etwa so oft wie in der Geschichte; wer es stabilisiert (Verfassungsreform, Zufriedenheit, Frieden in den Kolonien), regiert lange. Gewählt wird alle fünf Jahre, vorzeitig nur nach einer Auflösung, die erst nach zwei Stürzen binnen 18 Monaten erlaubt ist.
+- **Die Nachkriegsjahre:** 1946 regiert eine Provisorische Regierung aus Kommunisten, Sozialisten und Volksrepublikanern. Du entscheidest mit über die Verfassung (auch eine Präsidialverfassung nach de Gaulles Ideen von Bayeux ist möglich, die Regierungen stützt), über Ho Chi Minh und Haiphong, die Saar, den Rauswurf der Kommunisten, den Marshallplan, die Londoner Empfehlungen für einen Weststaat und die NATO.
+- **Die Vierte Republik:** Jede Regierung hängt an einer brüchigen Mehrheit. Ihr Rückhalt in der Nationalversammlung sinkt mit Kolonialkriegen, Inflation und Entscheidungen, die Koalitionsparteien verprellen; je geringer er ist, desto eher stürzt die Regierung – dann bestimmst du mit, wer die nächste bildet (Tripartisme, Dritte Kraft, rechte Mitte, Mendès France, Republikanische Front …), und führst sie weiter. Ist das Land instabil, wechseln die Regierungen etwa so oft wie in der Geschichte; wer es stabilisiert (Verfassungsreform, Zufriedenheit, Frieden in den Kolonien), regiert lange. Gewählt wird alle fünf Jahre, vorzeitig nur nach einer Auflösung, die erst nach zwei Stürzen binnen 18 Monaten erlaubt ist.
 - **Kolonialkriege:** Indochina und Algerien sind ein eigener Strang mit Kriegslage, Kriegsmüdigkeit und der Loyalität der Armee. Verliert die Republik die Armee, kommt es zum Mai 1958 – mit de Gaulle, einer Militärregierung oder einer Volksfront – oder zum Bürgerkrieg.
 - **Lagebild:** Beziehungen zu Washington, Bonn, London und Moskau, Rang in der Welt, Europa, Atomprogramm; Indochina, Algerien, Armee; Zufriedenheit, Ansehen und Rückhalt der Regierung; Wachstum, Inflation, Haushalt und Franc. Die Zeitung heißt „Le Messager“.
 - **Enden:** Bürgerkrieg, Staatsbankrott oder ein Krieg der Supermächte; sonst der Abschlussbericht mit allen Regierungschefs.
@@ -57,7 +58,7 @@ Die Ereignisse hängen voneinander ab. Einige Beispiele:
 Tauri-2-Programm: die Oberfläche ist HTML/JavaScript ohne Build-Schritt (`ui/`), die Rust-Seite (`src-tauri/`) speichert Spielstände und holt Updates (`tauri-plugin-updater`, Befehle `update_pruefen` und `update_installieren`, Oberfläche in `ui/update.js`).
 
 - `ui/engine.js` – Spielablauf, unabhängig von den Ländern: Weltzustand mit mehreren Ländern, gerichtete Beziehungen (0–100, hoch = gut), Postfach für Nachrichten zwischen Ländern, Weltereignisse, gemeinsame Vorgangsliste aller Länder nach Monat, Zufall, Speicherbarkeit
-- `ui/szenarien/kalter_krieg/` – die Welt 1949–1964: `index.js` (Länder, Startbeziehungen), `weltereignisse.js`, je ein Modul pro Land
+- `ui/szenarien/kalter_krieg/` – die Welt 1946–1964: `index.js` (Länder, Startbeziehungen), `weltereignisse.js`, je ein Modul pro Land
 - `ui/szenarien/kalter_krieg/brd/` – die Bundesrepublik: `modell.js` (Wirtschafts-, Umfrage- und Wahlmodell, Koalitionsbildung, Krisen), Ereignisse nach Zeitabschnitten, `einheit.js` (alternativer Strang), `akten.js`, `vorhaben.js`, `enden.js`, `zeitgeschehen.js`, `regierungen.js` (Ziele, wenn das Spiel Bonn steuert), `oberflaeche.js` (Bundestag, Zeitung, Wahlabend)
 - `ui/szenarien/kalter_krieg/frankreich/` – Frankreich, gleich aufgebaut: `modell.js` (Nationalversammlung, Regierungsstürze, Wahlen, Kolonialkriege, Armee, Inflation und Franc), Ereignisse, `akten.js`, `vorhaben.js`, `enden.js`, `zeitgeschehen.js`, `regierungen.js`, `oberflaeche.js`
 - `usa.js`, `su.js` – die Supermächte: Regierungen mit Zielen und verborgenen Typen, Regierungswechsel, eigene Entscheidungen

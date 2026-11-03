@@ -48,7 +48,13 @@ export const suRegime = s => s.welt.laender.su?.regime;
 export const praesident = s => USA[usaRegime(s)]?.kurz || 'der Präsident';
 export const praesidentVoll = s => USA[usaRegime(s)]?.name || 'der Präsident';
 /** Amerikanischer Außenminister, falls bekannt (Acheson, Dulles, Rusk) */
-export const usaAussen = s => USA[usaRegime(s)]?.aussen || null;
+export function usaAussen(s) {
+  const r = usaRegime(s);
+  // Trumans Außenminister: Byrnes (bis Januar 1947), Marshall (bis Januar 1949), Acheson
+  if (r === 'truman' && zeitIndex(s.zeit) < zeitIndex(1947.1)) return 'Byrnes';
+  if (r === 'truman' && zeitIndex(s.zeit) < zeitIndex(1949.1)) return 'Marshall';
+  return USA[r]?.aussen || null;
+}
 /** „Stalin“, „Chruschtschow“ … */
 export const suChef = s => SU[suRegime(s)]?.kurz || 'Moskau';
 export const suAussen = s => aussenminister(s.zeit, suRegime(s));

@@ -27,11 +27,12 @@ function bericht(s) {
   else if (s.republik === 4) titel = 'Die Vierte Republik lebt';
 
   absaetze.push(`Frühjahr 1964. ${s.republik === 5 ? `Frankreich ist eine Präsidialrepublik; ${s.praesident} regiert aus dem Élysée, Premierminister ist ${s.regierungschef}.` : s.lager === 'militaer' ? `Frankreich wird von einer Militärregierung unter ${s.regierungschef} regiert. Die Republik ist suspendiert.` : `Die Vierte Republik besteht noch. Ministerpräsident ist ${s.regierungschef}, getragen von der Formel „${LAGER[s.lager]?.name}“.`}`);
-  absaetze.push(`In fünfzehn Jahren hatte Frankreich ${anzahl} Regierungschefs; ${stuerze ? `${stuerze}-mal ist eine Regierung gestürzt` : 'keine Regierung ist gestürzt'}. Zum Vergleich: In der Geschichte zählte allein die Vierte Republik zwischen 1949 und 1958 siebzehn Kabinette.\n\nRegierungschefs: ${chefText(s)}.`);
+  absaetze.push(`Seit 1946 hatte Frankreich ${anzahl} Regierungschefs; ${stuerze ? `${stuerze}-mal ist eine Regierung gestürzt` : 'keine Regierung ist gestürzt'}. Zum Vergleich: In der Geschichte zählte Frankreich zwischen 1946 und 1958 mehr als zwanzig Regierungen.${f.praesidialverfassung ? ' Die Präsidialverfassung von 1946 hat die Regierungen gestützt.' : ''}\n\nRegierungschefs: ${chefText(s)}.`);
 
   const kolonien = [];
-  if (f.indochina_beendet) kolonien.push(f.dien_bien_phu ? 'Indochina ging nach Điện Biên Phủ verloren' : 'der Indochina-Krieg wurde beendet');
-  else kolonien.push('in Indochina wird noch immer gekämpft');
+  if (f.indochina_ausgleich) kolonien.push('Vietnam wurde ohne Krieg unabhängig');
+  else if (f.indochina_beendet) kolonien.push(f.dien_bien_phu ? 'Indochina ging nach Điện Biên Phủ verloren' : 'der Indochina-Krieg wurde beendet');
+  else if (f.indochinakrieg) kolonien.push('in Indochina wird noch immer gekämpft');
   if (f.algerien_unabhaengig) kolonien.push('Algerien ist unabhängig');
   else if (f.algerien_autonomie) kolonien.push('Algerien hat Autonomie innerhalb Frankreichs, ohne Krieg');
   else if (f.algerienkrieg) kolonien.push('der Algerienkrieg dauert an');
@@ -44,7 +45,10 @@ function bericht(s) {
   if (s.weltflags.evg === 'ratifiziert') europa.push('die Europäische Verteidigungsgemeinschaft');
   if (f.rom_ratifiziert) europa.push('die Europäische Wirtschaftsgemeinschaft');
   if (f.elysee) europa.push('den Freundschaftsvertrag mit Bonn');
-  absaetze.push(europa.length ? `Europa: Frankreich hat ${europa.join(', ').replace(/, ([^,]*)$/, ' und $1')} mitgetragen. Das Verhältnis zur Bundesrepublik ist ${w.brd >= 70 ? 'eng wie nie' : w.brd >= 50 ? 'gut' : w.brd >= 30 ? 'kühl' : 'zerrüttet'}.` : 'Europa: Frankreich ist allen Plänen einer europäischen Einigung ferngeblieben.');
+  const nachbar = s.welt.laender.brd?.nie
+    ? ' Einen deutschen Staat gibt es nicht; Deutschland ist noch immer besetzt.'
+    : ` Das Verhältnis zur Bundesrepublik ist ${w.brd >= 70 ? 'eng wie nie' : w.brd >= 50 ? 'gut' : w.brd >= 30 ? 'kühl' : 'zerrüttet'}.`;
+  absaetze.push(europa.length ? `Europa: Frankreich hat ${europa.join(', ').replace(/, ([^,]*)$/, ' und $1')} mitgetragen.${nachbar}` : `Europa: Frankreich ist allen Plänen einer europäischen Einigung ferngeblieben.${nachbar}`);
   absaetze.push(`Die Bombe: ${f.atomtest ? 'Frankreich ist Atommacht.' : f.atombombe ? 'Frankreich arbeitet an einer eigenen Bombe.' : 'Frankreich hat keine eigenen Atomwaffen.'} Rang in der Welt: ${Math.round(w.rang)} von 100.`);
   absaetze.push(`Wirtschaft: zuletzt ${pct(w.wachstum)} Wachstum bei ${pct(w.inflation)} Inflation; der Franc ${w.franc >= 60 ? 'ist stabil' : w.franc >= 30 ? 'hält' : 'ist schwach'}${f.neuer_franc ? ', seit 1960 als Neuer Franc' : ''}.`);
   const a = aufloesung(s, 'Paris');
@@ -56,9 +60,9 @@ export const ENDEN = {
   krieg: {
     titel: 'Der Krieg',
     ascii: 'pilz',
-    text: s => `${s.weltflags.atomkrieg ? 'Es beginnt mit Kuba: Amerikanische Bomber greifen die sowjetischen Raketenstellungen an, Moskau antwortet in Berlin.' : 'Es beginnt in Deutschland, mit einem Zwischenfall, einem Missverständnis, einem Befehl, der zu spät widerrufen wird.'} Binnen Stunden fliegen die ersten Atomwaffen. Sowjetische Panzer stoßen durch Deutschland auf den Rhein vor; die französischen Divisionen in Baden werden überrollt.
+    text: s => `${s.weltflags.atomkrieg ? 'Es beginnt mit Kuba: Amerikanische Bomber greifen die sowjetischen Raketenstellungen an, Moskau antwortet in Berlin.' : `Es beginnt ${s.zeit < 1950 ? 'in Berlin' : 'in Deutschland'}, mit einem Zwischenfall, einem Missverständnis, einem Befehl, der zu spät widerrufen wird.`} Binnen Stunden fliegen die ersten Atomwaffen. Sowjetische Panzer stoßen durch Deutschland auf den Rhein vor; die französischen Divisionen in Baden werden überrollt.
 
-Was Frankreich in fünfzehn Jahren aufgebaut hat, liegt in Trümmern. Das Spiel endet ${zeitText(s.zeit)}.`,
+Was Frankreich seit dem Krieg aufgebaut hat, liegt in Trümmern. Das Spiel endet ${zeitText(s.zeit)}.`,
   },
   buergerkrieg: {
     titel: 'Der Bürgerkrieg',

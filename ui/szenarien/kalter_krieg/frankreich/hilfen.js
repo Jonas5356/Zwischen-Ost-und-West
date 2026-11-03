@@ -38,7 +38,11 @@ export function pariserAussen(s) {
 export const brd = s => s.andere('brd');
 export const kanzler = s => brd(s).kanzler || 'der Bundeskanzler';
 export const bonn = s => (brd(s).f.hauptstadt_berlin ? 'Berlin' : 'Bonn');
-/** Ist die Bundesrepublik auf Westkurs (nicht neutral, nicht vereinigt)? */
-export const bonnImWesten = s => !brd(s).f.neutral && !brd(s).f.vereinigt;
+/** Gibt es die Bundesrepublik (schon)? In manchen Läufen wird sie nie gegründet. */
+export const bonnExistiert = s => s.welt.laender.brd?.aktiv !== false;
+/** Ist Deutschland ohne eigenen Staat geblieben (keine Gründung 1949)? */
+export const deutschlandBesetzt = s => !!s.welt.laender.brd?.nie;
+/** Gibt es die Bundesrepublik, und ist sie auf Westkurs (nicht neutral, nicht vereinigt)? */
+export const bonnImWesten = s => bonnExistiert(s) && !brd(s).f.neutral && !brd(s).f.vereinigt;
 export const deutschland = s => (brd(s).f.vereinigt ? 'Deutschland' : 'die Bundesrepublik');
 export const Deutschland = s => (brd(s).f.vereinigt ? 'Deutschland' : 'Die Bundesrepublik');

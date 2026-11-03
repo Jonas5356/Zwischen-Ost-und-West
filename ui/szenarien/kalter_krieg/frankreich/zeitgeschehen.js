@@ -2,6 +2,21 @@
 import { istDeGaulle } from './modell.js';
 
 export default [
+  { zeit: 1946.1, text: 'General de Gaulle ist am 20. Januar als Chef der Provisorischen Regierung zurückgetreten. Er zieht sich nach Colombey-les-Deux-Églises zurück.' },
+  { zeit: 1946.1, text: 'Die Pariser Stadträtin Marthe Richard setzt ein Gesetz durch: Die Bordelle werden geschlossen.' },
+  { zeit: 1946.1, text: 'In Bayeux entwirft de Gaulle seine Idee einer Verfassung mit einem starken Präsidenten über den Parteien.' },
+  { zeit: 1946.2, text: 'In Cannes findet zum ersten Mal das Filmfestival statt. Die Pariser Friedenskonferenz verhandelt über die Verträge mit Italien und den früheren Verbündeten Deutschlands.' },
+  { zeit: 1946.2, text: 'Beim Nürnberger Prozess werden zwölf der führenden Nationalsozialisten zum Tode verurteilt.' },
+  { zeit: 1947.1, text: s => (s.f.praesidialverfassung ? 'Vincent Auriol ist zum ersten Präsidenten der neuen Republik gewählt worden – mit Befugnissen, wie sie kein Präsident der Dritten Republik hatte. (Fiktion)' : 'Vincent Auriol ist zum ersten Präsidenten der Vierten Republik gewählt worden.'), wenn: s => !s.f.provisorisch },
+  { zeit: 1947.1, text: 'Christian Dior zeigt seine erste Kollektion; die Amerikaner nennen sie den „New Look“.' },
+  { zeit: 1947.1, text: 'Der Winter ist der härteste seit Jahrzehnten. Kohle ist knapp, Brot und Fleisch sind rationiert.' },
+  { zeit: 1947.1, text: 'Albert Camus’ Roman „Die Pest“ ist erschienen und wird zum Bestseller.' },
+  { zeit: 1947.2, text: 'General Leclerc ist bei einem Flugzeugabsturz in Algerien ums Leben gekommen.' },
+  { zeit: 1948.1, text: 'In Paris sammelt das RPF de Gaulles Hunderttausende Mitglieder. Bei den Gemeindewahlen im Herbst 1947 hat es fast 40 Prozent erreicht.', wenn: s => !!s.f.rpf },
+  { zeit: 1948.2, text: 'Die Vereinten Nationen verabschieden in Paris die Allgemeine Erklärung der Menschenrechte – mitverfasst von René Cassin.' },
+  { zeit: 1948.2, text: 'Der Radrennfahrer Gino Bartali gewinnt die Tour de France; Louison Bobet wird Vierter.' },
+  { zeit: 1949.1, text: 'Die Brotkarte wird abgeschafft. Zum ersten Mal seit dem Krieg kann jeder so viel Brot kaufen, wie er will.' },
+  { zeit: 1949.1, text: 'Der Boxer Marcel Cerdan, Weltmeister im Mittelgewicht, ist ein Nationalheld – und der Geliebte von Édith Piaf.' },
   { zeit: 1949.2, text: 'Simone de Beauvoirs „Das andere Geschlecht“ ist erschienen und sorgt für einen Skandal.' },
   { zeit: 1949.2, text: 'Am 1. Oktober ruft Mao Zedong in Peking die Volksrepublik China aus. In Indochina bekommen die Viet Minh einen mächtigen Nachbarn.' },
   { zeit: 1950.1, text: 'In Paris lassen die Hafenarbeiter keine Waffen für Indochina mehr verladen; die Kommunisten sammeln Unterschriften für den Stockholmer Appell gegen die Atombombe.' },

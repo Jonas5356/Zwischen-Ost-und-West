@@ -16,6 +16,7 @@ export default {
     if (s.lager === 'militaer') return { titel: s.regierungschef, text: 'Militärregierung' };
     if (s.republik === 5) return { titel: `Premierminister ${s.regierungschef}`, text: `unter Präsident ${s.praesident}` };
     if (s.lager === 'de_gaulle') return { titel: 'Ministerpräsident Charles de Gaulle', text: 'Regierung des öffentlichen Heils' };
+    if (s.f.provisorisch) return { titel: `Regierungschef ${s.regierungschef}`, text: `Provisorische Regierung: ${liste(s.regierung.map(parteiKurz))}` };
     return { titel: `Ministerpräsident ${s.regierungschef}`, text: `${LAGER[s.lager]?.name}: ${liste(s.regierung.map(parteiKurz))}` };
   },
   paraphe: s => s.regierungschef.replace(/^(General|Charles) /, '').split(' ').map(x => x[0]).join('.') + '.',
@@ -24,6 +25,9 @@ export default {
   skala: { zustimmung: [10, 70], wachstum: [-2, 12], inflation: [0, 20], ansehen: [-30, 30], haushalt: [0, 100] },
   zeile(s, k) {
     if (k === 'indochina' && s.f.indochina_beendet) return 'beendet';
+    // Die Bundesrepublik gibt es erst ab 1949 – oder nie
+    if (k === 'brd' && s.welt.laender.brd?.nie) return 'Deutschland besetzt';
+    if (k === 'brd' && s.welt.laender.brd?.aktiv === false) return 'noch kein Staat';
     if (k === 'algerien' && s.f.algerien_unabhaengig) return 'unabhängig';
     if (k === 'mehrheit' && s.lager === 'militaer') return 'aufgelöst';
     return null;
@@ -42,7 +46,7 @@ export default {
 
   wahlabend: {
     absender: 'Innenministerium',
-    titel: e => `Die Wahl zur Nationalversammlung ${jahrVon(e.zeit)}`,
+    titel: e => (e.verfassunggebend ? `Die Wahl zur Verfassunggebenden Versammlung ${jahrVon(e.zeit)}` : `Die Wahl zur Nationalversammlung ${jahrVon(e.zeit)}`),
     unter: 'Ergebnis in Prozent der Stimmen',
     reihenfolge: REIHENFOLGE,
     name: k => PARTEIEN[k]?.name || k,
@@ -58,14 +62,14 @@ export default {
     titel: 'Le Messager',
     untertitel: 'Unabhängige Tageszeitung für Politik und Kultur',
     ort: () => 'Paris',
-    preis: (s, zeit) => (zeit < 1953 ? '12 Francs' : zeit < 1958 ? '15 Francs' : zeit < 1960 ? '20 Francs' : '0,25 Neue Francs'),
+    preis: (s, zeit) => (zeit < 1947 ? '3 Francs' : zeit < 1949 ? '6 Francs' : zeit < 1953 ? '12 Francs' : zeit < 1958 ? '15 Francs' : zeit < 1960 ? '20 Francs' : '0,25 Neue Francs'),
     rubrik: 'Aus der Innenpolitik',
     entscheidet: 'Paris entscheidet',
-    erste: (s, M) => ({ titel: 'Frankreich im Herbst 1949', unter: `Ministerpräsident ${s.regierungschef} führt die Regierung der Dritten Kraft`, text: M.beschreibung }),
+    erste: (s, M) => ({ titel: 'Frankreich im Januar 1946', unter: `${s.regierungschef} folgt General de Gaulle an der Spitze der Provisorischen Regierung`, text: M.beschreibung }),
     wahl(wahl, bildung) {
       const st = Object.entries(wahl.stimmen).sort((a, b) => b[1] - a[1]);
       return {
-        titel: `Wahl zur Nationalversammlung: ${PARTEIEN[st[0][0]]?.kurz} vorn mit ${zahl(st[0][1])} Prozent`,
+        titel: `${wahl.verfassunggebend ? 'Wahl zur Verfassunggebenden Versammlung' : 'Wahl zur Nationalversammlung'}: ${PARTEIEN[st[0][0]]?.kurz} vorn mit ${zahl(st[0][1])} Prozent`,
         unter: st.slice(1, 4).map(([k, v]) => `${PARTEIEN[k]?.kurz} ${zahl(v)} %`).join(', '),
         text: bildung ? bildung.ergebnis : '',
       };
@@ -85,8 +89,8 @@ export default {
     { key: 'inflation', farbe: 'var(--stempel)', name: 'Inflation' },
   ],
 
-  hilfe: `<p>Du führst die französische Regierung vom Herbst 1949 bis zum Frühjahr 1964. Jede Runde ist ein Halbjahr. Zu Beginn regiert Georges Bidault mit der „Dritten Kraft“ aus Sozialisten, Volksrepublikanern, Radikalen und Unabhängigen.</p>
-<p><strong>Regierungsstürze.</strong> In der Vierten Republik hängt jede Regierung an einer brüchigen Mehrheit. Im Lagebild steht der „Rückhalt in der Nationalversammlung“: Er sinkt von selbst, durch die Kolonialkriege, durch Inflation und durch Entscheidungen, die deine Koalitionspartner verprellen. Je geringer er ist, desto eher stürzt die Regierung; dann bestimmst du mit, wer die nächste bildet, und führst sie weiter. Wer das Land stabilisiert – Reform der Verfassung, Wohlstand, Frieden –, regiert lange. Gewählt wird regulär alle fünf Jahre; eine vorzeitige Auflösung erlaubt die Verfassung erst, wenn binnen 18 Monaten zwei Regierungen gestürzt sind.</p>
-<p><strong>Die Kolonialkriege.</strong> In Indochina kämpft das Expeditionskorps gegen die Viet Minh, ab 1954 beginnt in Algerien ein Aufstand. Die Lage in beiden Ländern, die Kriegsmüdigkeit zu Hause und die Loyalität der Armee hängen von deinen Entscheidungen ab. Fällt die Loyalität der Armee zu tief, droht ein Putsch – und im schlimmsten Fall ein Bürgerkrieg, der das Spiel beendet.</p>
+  hilfe: `<p>Du führst die französische Regierung vom Januar 1946 bis zum Frühjahr 1964. Jede Runde ist ein Halbjahr. Zu Beginn regiert Félix Gouin eine Provisorische Regierung aus Kommunisten, Sozialisten und Volksrepublikanern (der „Tripartisme“). Ihre erste Aufgabe ist eine Verfassung: Wie sie aussieht, entscheidest du mit – auch, ob die neue Republik einen starken Präsidenten bekommt.</p>
+<p><strong>Regierungsstürze.</strong> In der Vierten Republik hängt jede Regierung an einer brüchigen Mehrheit. Im Lagebild steht der „Rückhalt in der Nationalversammlung“: Er sinkt von selbst, durch die Kolonialkriege, durch Inflation und durch Entscheidungen, die deine Koalitionspartner verprellen. Je geringer er ist, desto eher stürzt die Regierung; dann bestimmst du mit, wer die nächste bildet, und führst sie weiter. Wer das Land stabilisiert – Reform der Verfassung, Wohlstand, Frieden –, regiert lange. Gewählt wird regulär alle fünf Jahre; eine vorzeitige Auflösung erlaubt die Verfassung erst, wenn binnen 18 Monaten zwei Regierungen gestürzt sind. Mit einer Präsidialverfassung (wenn du sie 1946 durchsetzt) stehen die Regierungen fester, und schon ein Sturz erlaubt die Auflösung.</p>
+<p><strong>Die Kolonialkriege.</strong> In Indochina verhandelt Paris 1946 mit Ho Chi Minh; scheitern die Gespräche, kämpft das Expeditionskorps gegen die Viet Minh. Ab 1954 beginnt in Algerien ein Aufstand. Die Lage in beiden Ländern, die Kriegsmüdigkeit zu Hause und die Loyalität der Armee hängen von deinen Entscheidungen ab. Fällt die Loyalität der Armee zu tief, droht ein Putsch – und im schlimmsten Fall ein Bürgerkrieg, der das Spiel beendet.</p>
 <p><strong>Das Lagebild.</strong> Rechts siehst du, wie Washington, Bonn, London und Moskau zu Frankreich stehen (hoch heißt immer gut), Frankreichs Rang in der Welt, die europäische Integration und das Atomprogramm, darunter Kolonien und Armee, Innenpolitik und Wirtschaft mit Inflation und der Stabilität des Franc.</p>`,
 };

@@ -1,6 +1,6 @@
 // Frankreich: Vorlagen 1955 bis 1958 (Algerienkrieg, Suez, Römische Verträge, Mai 1958)
 import { vierte, fuenfte, istDeGaulle, algerienkrieg, indochinakrieg, machtUebergabeDeGaulle, notiereChef, gesamtSitze, zieheWahlVor } from './modell.js';
-import { pariserAussen, brd, kanzler, bonn, bonnImWesten, deutschland } from './hilfen.js';
+import { pariserAussen, brd, kanzler, bonn, bonnImWesten, bonnExistiert, deutschland } from './hilfen.js';
 import { praesident } from '../brd/hilfen.js';
 import { zeitIndex, zeitPlus } from '../../../engine.js';
 
@@ -220,7 +220,7 @@ In Sèvres haben französische, britische und israelische Unterhändler geheim e
     wenn: s => !!s.weltflags.suez_angriff,
     absender: 'Oberkommando der Suez-Operation',
     text: s => (s.weltflags.suez_druck
-      ? `Washington hat London mit dem Zusammenbruch des Pfunds gedroht, Moskau mit Raketen auf Paris und London. Premierminister Eden hat ohne Absprache einem Waffenstillstand zugestimmt – die Truppen stehen erst auf halbem Weg am Kanal. ${kanzler(s)} ist ausgerechnet heute in Paris zu Besuch.`
+      ? `Washington hat London mit dem Zusammenbruch des Pfunds gedroht, Moskau mit Raketen auf Paris und London. Premierminister Eden hat ohne Absprache einem Waffenstillstand zugestimmt – die Truppen stehen erst auf halbem Weg am Kanal.${bonnExistiert(s) ? ` ${kanzler(s)} ist ausgerechnet heute in Paris zu Besuch.` : ''}`
       : 'Washington hat nicht eingegriffen. Britische und französische Truppen kontrollieren die Kanalzone; Nasser ist in Kairo eingeschlossen. Moskau droht mit Raketen, doch Washington stellt sich vor seine Verbündeten.'),
     optionen: s => (s.weltflags.suez_druck ? [
       { text: 'Mit London den Waffenstillstand annehmen.', hist: true,
@@ -582,14 +582,14 @@ De Gaulle erwägt eine ungewöhnliche Geste: ${kanzler(s)} nicht in Paris, sonde
     titel: 'Ein Direktorium für die NATO',
     datum: '17. September 1958',
     ab: 1958.2, bis: 1959.2, ordnung: 9.5,
-    wenn: s => istDeGaulle(s) && !s.f.memorandum,
+    wenn: s => istDeGaulle(s) && !s.f.memorandum && !s.f.nato_fern,
     absender: 'Präsidialamt',
     text: s => `De Gaulle will Frankreich wieder als Weltmacht behandelt sehen. Ein Memorandum an ${praesident(s)} und den britischen Premierminister Macmillan liegt bereit: Die NATO soll von einem Direktorium der drei Mächte geführt werden, das über den Einsatz von Atomwaffen weltweit gemeinsam entscheidet. Lehnen die Angelsachsen ab, behält sich Paris seine Haltung zur NATO vor.
 
-Die Bundesrepublik, Italien und die kleineren Verbündeten wären ausgeschlossen.`,
+${bonnExistiert(s) ? 'Die Bundesrepublik, Italien' : 'Italien'} und die kleineren Verbündeten wären ausgeschlossen.`,
     optionen: [
       { text: 'Das Memorandum schicken.', hist: true, richtung: 'national',
-        ergebnis: 'De Gaulle schickt das Memorandum. Washington und London antworten ausweichend; Bonn ist verstimmt, als es davon erfährt.',
+        ergebnis: s => `De Gaulle schickt das Memorandum. Washington und London antworten ausweichend; ${bonnExistiert(s) ? 'Bonn' : 'Rom'} ist verstimmt, als es davon erfährt.`,
         w: { usa: -4, grossbritannien: -3, brd: -3, rang: 3 }, setze: ['memorandum'], dient: { unabhaengigkeit: 1.2, westbindung: -0.3 } },
       { text: 'Auf das Memorandum verzichten.', richtung: 'atlantisch',
         ergebnis: 'Paris verzichtet auf das Memorandum.',

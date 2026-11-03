@@ -25,7 +25,7 @@ export const WERTE = {
   ansehen:         { name: 'Ansehen der Regierung', kurz: 'Ansehen', min: -30, max: 30 },
   mehrheit:        { name: 'Rückhalt in der Nationalversammlung', kurz: 'Mehrheit', min: 0, max: 100 },
   wachstum:        { name: 'Wirtschaftswachstum', kurz: 'Wachstum', min: -10, max: 20, einheit: '%', keinHinweis: true },
-  inflation:       { name: 'Inflation', kurz: 'Inflation', min: -5, max: 40, einheit: '%', invertiert: true, keinHinweis: true },
+  inflation:       { name: 'Inflation', kurz: 'Inflation', min: -5, max: 70, einheit: '%', invertiert: true, keinHinweis: true },
   haushalt:        { name: 'Haushaltslage', kurz: 'Haushalt', min: -20, max: 100 },
   franc:           { name: 'Stabilität des Franc', kurz: 'Franc', min: 0, max: 100 },
   impuls:          { name: 'Konjunkturimpuls', kurz: 'Konjunktur', min: -6, max: 6 },
@@ -68,6 +68,8 @@ const HALTUNG = {
 // richtet sich nach dem Lager (ki.js: regimeVon).
 
 export const LAGER = {
+  tripartisme: { name: 'Tripartisme', parteien: ['PCF', 'SFIO', 'MRP'], toleranz: {},
+    beschreibung: 'Die drei großen Parteien der Résistance – Kommunisten, Sozialisten und Volksrepublikaner – regieren gemeinsam.' },
   dritte_kraft: { name: 'Dritte Kraft', parteien: ['SFIO', 'MRP', 'RAD', 'UNAB'], toleranz: {},
     beschreibung: 'Sozialisten, Volksrepublikaner, Radikale und Unabhängige – die Parteien der Mitte gegen Kommunisten und Gaullisten.' },
   mitte_rechts: { name: 'Mitte-rechts', parteien: ['MRP', 'RAD', 'UNAB'], toleranz: { GAUL: 0.3 },
@@ -87,20 +89,25 @@ export const LAGER = {
 // Mögliche Regierungschefs je Lager: [Name, Partei, ab, bis]; der erste passende, der nicht
 // gerade gestürzt wurde, bekommt den Auftrag
 const CHEFS = {
-  dritte_kraft: [['Georges Bidault', 'MRP', 1949.2, 1950.1], ['Henri Queuille', 'RAD', 1949.2, 1951.2], ['René Pleven', 'RAD', 1950.2, 1952.1],
-    ['Robert Schuman', 'MRP', 1949.2, 1953.1], ['Félix Gaillard', 'RAD', 1957.2, 1958.2], ['Pierre Pflimlin', 'MRP', 1955.1, 1958.2], ['Paul Ramadier', 'SFIO', 1949.2, 1958.2], ['Robert Lecourt', 'MRP', 1949.2, 1958.2]],
+  // Thorez als Regierungschef ist Fiktion (er war 1946/47 stellvertretender Ministerpräsident)
+  tripartisme: [['Georges Bidault', 'MRP', 1946.1, 1946.2], ['Léon Blum', 'SFIO', 1946.2, 1946.2], ['Paul Ramadier', 'SFIO', 1947.1, 1947.2],
+    ['Félix Gouin', 'SFIO', 1946.1, 1949.2], ['Georges Bidault', 'MRP', 1947.1, 1949.2], ['Maurice Thorez', 'PCF', 1946.1, 1949.2]],
+  dritte_kraft: [['Paul Ramadier', 'SFIO', 1947.1, 1947.2], ['Robert Schuman', 'MRP', 1947.2, 1948.2], ['André Marie', 'RAD', 1948.2, 1948.2], ['Henri Queuille', 'RAD', 1948.2, 1951.2],
+    ['Georges Bidault', 'MRP', 1949.2, 1950.1], ['René Pleven', 'RAD', 1950.2, 1952.1],
+    ['Robert Schuman', 'MRP', 1947.2, 1953.1], ['Félix Gaillard', 'RAD', 1957.2, 1958.2], ['Pierre Pflimlin', 'MRP', 1955.1, 1958.2], ['Paul Ramadier', 'SFIO', 1949.2, 1958.2], ['Robert Lecourt', 'MRP', 1949.2, 1958.2]],
   mitte_rechts: [['Edgar Faure', 'RAD', 1952.1, 1952.1], ['Antoine Pinay', 'UNAB', 1952.1, 1952.2], ['René Mayer', 'RAD', 1953.1, 1953.1], ['Joseph Laniel', 'UNAB', 1953.2, 1954.1],
     ['Edgar Faure', 'RAD', 1955.1, 1958.2], ['Pierre Pflimlin', 'MRP', 1958.1, 1958.2], ['Antoine Pinay', 'UNAB', 1953.1, 1958.2], ['René Mayer', 'RAD', 1952.2, 1958.2],
     ['Georges Bidault', 'MRP', 1950.1, 1958.2], ['Henri Queuille', 'RAD', 1949.2, 1958.2], ['René Pleven', 'RAD', 1949.2, 1958.2], ['Joseph Laniel', 'UNAB', 1952.1, 1958.2]],
   mendes: [['Pierre Mendès France', 'RAD', 1952.1, 1964.1], ['Edgar Faure', 'RAD', 1952.1, 1964.1]],
   republikanische_front: [['Guy Mollet', 'SFIO', 1955.2, 1957.1], ['Maurice Bourgès-Maunoury', 'RAD', 1957.1, 1957.2], ['Guy Mollet', 'SFIO', 1951.2, 1964.1],
-    ['Christian Pineau', 'SFIO', 1951.2, 1964.1], ['Gaston Defferre', 'SFIO', 1951.2, 1964.1], ['Maurice Bourgès-Maunoury', 'RAD', 1951.2, 1964.1], ['Jules Moch', 'SFIO', 1949.2, 1964.1]],
-  volksfront: [['Daniel Mayer', 'SFIO', 1949.2, 1964.1], ['Pierre Cot', 'RAD', 1949.2, 1964.1], ['Édouard Depreux', 'SFIO', 1949.2, 1964.1]],
+    ['Christian Pineau', 'SFIO', 1951.2, 1964.1], ['Gaston Defferre', 'SFIO', 1951.2, 1964.1], ['Maurice Bourgès-Maunoury', 'RAD', 1951.2, 1964.1], ['Jules Moch', 'SFIO', 1946.1, 1964.1]],
+  volksfront: [['Daniel Mayer', 'SFIO', 1946.1, 1964.1], ['Pierre Cot', 'RAD', 1946.1, 1964.1], ['Édouard Depreux', 'SFIO', 1946.1, 1964.1]],
 };
 
 /** Historisches Lager zu einem Zeitpunkt (für den Randvermerk „wie in der Geschichte“) */
 export function historischesLager(z) {
   const i = zeitIndex(z);
+  if (i < zeitIndex(1947.2)) return 'tripartisme';
   if (i < zeitIndex(1952.1)) return 'dritte_kraft';
   if (i < zeitIndex(1954.2)) return 'mitte_rechts';
   if (i < zeitIndex(1955.1)) return 'mendes';
@@ -127,15 +134,18 @@ export function moeglicheLager(s) {
   const z = s.zeit;
   const out = [];
   const reicht = l => lagerStimmen(s, l) > g / 2;
+  // Solange die Kommunisten in der Regierung sind, regieren die drei großen Parteien gemeinsam;
+  // die „Dritte Kraft“ entsteht erst ohne sie
+  if (!s.f.pcf_raus && reicht('tripartisme')) out.push('tripartisme');
   // Die Dritte Kraft zerbricht am Schulstreit: Danach gehen die Sozialisten in die Opposition
-  if (!s.f.schulstreit_bruch && reicht('dritte_kraft')) out.push('dritte_kraft');
+  if ((s.f.pcf_raus || z >= 1948.1) && !s.f.schulstreit_bruch && reicht('dritte_kraft')) out.push('dritte_kraft');
   if (z >= 1951.2 && reicht('mitte_rechts')) out.push('mitte_rechts');
   // Mendès France hat erst nach einer Niederlage in Indochina oder einer schweren Krise eine Chance
   if ((s.f.dien_bien_phu || s.f.indochina_krise || s.w.indochina < 25 || z >= 1955.1) && !s.f.mendes_gestuerzt && z >= 1953.2 && reicht('mendes')) out.push('mendes');
   if ((z >= 1955.2 || s.f.schulstreit_bruch) && reicht('republikanische_front')) out.push('republikanische_front');
   if (s.f.linksbuendnis && reicht('volksfront')) out.push('volksfront');
   // Wenn gar nichts reicht: eine Mitte-rechts-Minderheitsregierung oder die Dritte Kraft
-  if (!out.length) out.push(z >= 1952.1 ? 'mitte_rechts' : 'dritte_kraft');
+  if (!out.length) out.push(z >= 1952.1 ? 'mitte_rechts' : s.f.pcf_raus || z >= 1948.1 ? 'dritte_kraft' : 'tripartisme');
   return out;
 }
 
@@ -176,7 +186,7 @@ export function notiereChef(s) {
 }
 
 /** Titel des Regierungschefs: Ministerpräsident (Président du Conseil) bzw. Premierminister */
-export const chefTitel = s => (s.republik === 5 ? 'Premierminister' : s.lager === 'militaer' ? 'Chef der Militärregierung' : 'Ministerpräsident');
+export const chefTitel = s => (s.republik === 5 ? 'Premierminister' : s.f.provisorisch ? 'Regierungschef' : s.lager === 'militaer' ? 'Chef der Militärregierung' : 'Ministerpräsident');
 export const istDeGaulle = s => s.lager === 'de_gaulle';
 export const vierte = s => s.republik === 4 && s.lager !== 'militaer';
 export const fuenfte = s => s.republik === 5;
@@ -184,39 +194,45 @@ export const fuenfte = s => s.republik === 5;
 // ------------------------------------------------------------------ Startzustand
 
 export function startzustand() {
+  // Januar 1946: De Gaulle ist als Chef der Provisorischen Regierung zurückgetreten.
   return {
     w: {
-      rang: 40, europa: 5, atom: 5, indochina: 45, algerien: 75, armee: 70,
-      zustimmung: 32, ansehen: 0, mehrheit: 52, wachstum: 7, inflation: 11, haushalt: 35, franc: 45,
-      impuls: 0, preisdruck: 2, kriegsmuede: 4, bonus: 0,
+      rang: 34, europa: 0, atom: 3, indochina: 52, algerien: 72, armee: 68,
+      zustimmung: 40, ansehen: 0, mehrheit: 55, wachstum: 10, inflation: 40, haushalt: 25, franc: 30,
+      impuls: 0, preisdruck: 3, kriegsmuede: 1, bonus: 0,
     },
-    f: { apparentements: false, 'gebildet_1949.2': true },
+    f: { apparentements: false, provisorisch: true, 'gebildet_1946.1': true },
     republik: 4,
-    lager: 'dritte_kraft',
-    regierungschef: 'Georges Bidault',
-    chefPartei: 'MRP',
+    lager: 'tripartisme',
+    regierungschef: 'Félix Gouin',
+    chefPartei: 'SFIO',
     praesident: 'Vincent Auriol',
-    chefliste: [{ name: 'Georges Bidault', partei: 'MRP', lager: 'dritte_kraft', ab: 1949.2 }],
-    regierung: ['SFIO', 'MRP', 'RAD', 'UNAB'],
+    chefliste: [{ name: 'Félix Gouin', partei: 'SFIO', lager: 'tripartisme', ab: 1946.1 }],
+    regierung: ['PCF', 'SFIO', 'MRP'],
     stuerze: [],
-    legislaturBeginn: 1946.2,
-    // Nationalversammlung von 1946 (vereinfacht; die Gaullisten sind als Abgeordnetengruppe erst entstanden)
-    sitze: { PCF: 182, SFIO: 102, RAD: 69, MRP: 166, UNAB: 72, GAUL: 27 },
+    legislaturBeginn: 1945.2,
+    // Erste Verfassunggebende Versammlung (Oktober 1945), vereinfacht
+    sitze: { PCF: 159, SFIO: 146, MRP: 150, RAD: 57, UNAB: 64 },
   };
 }
+
+/** Wer ernennt die Regierung? Bis zur Verfassung der Präsident der Verfassunggebenden Versammlung */
+export const praesidentText = s => (s.f.provisorisch ? `Präsident der Verfassunggebenden Versammlung ${s.praesident}` : `Präsident der Republik ${s.praesident}`);
 
 // ------------------------------------------------------------------ Wirtschaft
 
 // Grundwachstum (real, % p. a.) und Grundinflation, ohne die im Modell erklärten Teile
-const BASIS = { 1949: 7.0, 1950: 7.0, 1951: 6.0, 1952: 3.0, 1953: 3.2, 1954: 5.0, 1955: 5.6, 1956: 5.4, 1957: 6.0, 1958: 3.0, 1959: 3.5, 1960: 7.0, 1961: 5.5, 1962: 6.6, 1963: 5.3, 1964: 6.5 };
-const INFLATION = { 1949: 9, 1950: 7, 1951: 9, 1952: 6, 1953: 1, 1954: 1, 1955: 1.5, 1956: 2.5, 1957: 3.5, 1958: 7, 1959: 4, 1960: 3.5, 1961: 3.3, 1962: 4.5, 1963: 4.5, 1964: 3.5 };
+const BASIS = { 1946: 11, 1947: 7, 1948: 8, 1949: 7.0, 1950: 7.0, 1951: 6.0, 1952: 3.0, 1953: 3.2, 1954: 5.0, 1955: 5.6, 1956: 5.4, 1957: 6.0, 1958: 3.0, 1959: 3.5, 1960: 7.0, 1961: 5.5, 1962: 6.6, 1963: 5.3, 1964: 6.5 };
+const INFLATION = { 1946: 40, 1947: 42, 1948: 40, 1949: 9, 1950: 7, 1951: 9, 1952: 6, 1953: 1, 1954: 1, 1955: 1.5, 1956: 2.5, 1957: 3.5, 1958: 7, 1959: 4, 1960: 3.5, 1961: 3.3, 1962: 4.5, 1963: 4.5, 1964: 3.5 };
 
 export const algerienkrieg = s => !!s.f.algerienkrieg && !s.f.algerien_frieden;
-export const indochinakrieg = s => !s.f.indochina_beendet;
+/** Krieg in Indochina: seit Dezember 1946 (Haiphong), bis zu einem Frieden */
+export const indochinakrieg = s => !!s.f.indochinakrieg && !s.f.indochina_beendet;
 
 export function berechneUmfrage(s) {
   const w = s.w;
-  let u = 30 + 0.8 * (w.wachstum - 4) - 0.7 * (w.inflation - 4) + w.ansehen + w.bonus - w.kriegsmuede;
+  // Hohe Inflation ärgert, aber an Nachkriegsraten gewöhnt man sich: der Abzug ist begrenzt
+  let u = 30 + 0.8 * (Math.min(w.wachstum, 10) - 4) - 0.7 * Math.min(w.inflation - 4, 16) + w.ansehen + w.bonus - w.kriegsmuede;
   if (s.lager === 'de_gaulle') u += 18;
   if (s.lager === 'militaer') u -= 10;
   return Math.max(5, Math.min(85, runde1(u)));
@@ -247,7 +263,7 @@ export function rundenende(s, a) {
   if (algerienkrieg(s)) inf += 0.8;
   if (s.weltflags.koreakrieg && j <= 1951) inf += 3;
   inf += 0.6 * a.normal();
-  w.inflation = runde1(Math.max(-3, Math.min(35, inf)));
+  w.inflation = runde1(Math.max(-3, Math.min(65, inf)));
   w.preisdruck *= 0.5;
 
   // --- Haushalt
@@ -256,10 +272,12 @@ export function rundenende(s, a) {
   if (algerienkrieg(s)) lasten += 2.2 + (s.f.wehrpflicht_verlaengert ? 0.6 : 0);
   if (s.f.atomprogramm) lasten += 0.4;
   if (s.f.sozialprogramm) lasten += 0.4;
+  // Wiederaufbau und Versorgung bis zum Marshallplan
+  if (j < 1949) lasten += s.f.marshallplan ? 1.8 : 3;
   w.haushalt = runde1(w.haushalt + 0.5 * (w.wachstum - 4) + 1.6 - lasten);
 
   // --- Franc: verliert Vertrauen mit der Inflation
-  w.franc = runde1(w.franc + (55 - w.franc) * 0.1 - 0.5 * (w.inflation - 5) + (w.haushalt > 40 ? 1 : 0));
+  w.franc = runde1(w.franc + (55 - w.franc) * 0.1 - 0.5 * (Math.min(w.inflation, 12) - 5) + (w.haushalt > 40 ? 1 : 0));
 
   // --- Kolonialkriege
   if (indochinakrieg(s)) {
@@ -301,6 +319,8 @@ export function rundenende(s, a) {
     let ziel = 19 + 80 * (anteil - 0.5) + 0.6 * (w.zustimmung - 25);
     if (s.f.stabilitaet_reform) ziel += 7;
     if (s.f.stabilitaet_reform2) ziel += 10;
+    // Präsidialverfassung von 1946 (Fiktion): ein starker Präsident stützt die Regierung
+    if (s.f.praesidialverfassung) ziel += 8;
     if (!indochinakrieg(s) && !algerienkrieg(s)) ziel += 10;
     if (w.inflation > 8) ziel -= 4;
     if (indochinakrieg(s) && w.indochina < 30) ziel -= 5;
@@ -325,6 +345,11 @@ export function rundenende(s, a) {
     if (a.zufall() < p) sturz(s, 'misstrauen');
   }
 
+  // Das RPF: De Gaulle sammelt seine Anhänger gegen das „Regime der Parteien“
+  if (zeitIndex(s.zeit) === zeitIndex(1947.1) && !s.f.rpf && !s.f.de_gaulle) {
+    s.f.rpf = true;
+    (s.notizen ||= []).push('In Straßburg ruft General de Gaulle das „Rassemblement du peuple français“ ins Leben – gegen das „Regime der Parteien“.');
+  }
   // Der Präsident der Republik
   if (s.republik === 4 && zeitIndex(s.zeit) >= zeitIndex(1953.2) && s.praesident === 'Vincent Auriol') {
     s.praesident = 'René Coty';
@@ -359,13 +384,14 @@ export function sturz(s, anlass) {
  * Legislatur und wenn binnen 18 Monaten zwei Regierungen gestürzt wurden.
  */
 export function aufloesungMoeglich(s) {
-  if (!vierte(s)) return false;
+  if (!vierte(s) || s.f.provisorisch) return false;
   const jetzt = zeitIndex(s.zeit);
   if (jetzt - zeitIndex(s.legislaturBeginn) < 3) return false;
   const kuerzlich = (s.stuerze || []).filter(z => jetzt - zeitIndex(z) <= 3);
   // keine Auflösung, wenn ohnehin im nächsten Halbjahr gewählt wird
   if ((s.wahlplan || []).some(z => zeitIndex(z) - jetzt <= 1 && zeitIndex(z) >= jetzt)) return false;
-  return kuerzlich.length >= 2;
+  // Mit der Präsidialverfassung (Fiktion) genügt ein Sturz
+  return kuerzlich.length >= (s.f.praesidialverfassung ? 1 : 2);
 }
 
 /** Wahl vorziehen (Auflösung): im nächsten Halbjahr, danach wieder im Fünfjahrestakt */
@@ -376,8 +402,14 @@ export function zieheWahlVor(s, n = 1) {
 
 // ------------------------------------------------------------------ Wahlen
 
-// Stimmenanteile ohne Regierungsbilanz (Vierte Republik), grob nach 1951 und 1956
+// Stimmenanteile ohne Regierungsbilanz (Vierte Republik), grob nach 1946, 1951 und 1956
 function grundanteile(s, j) {
+  if (j < 1951) {
+    // 1946: drei große Parteien; ab 1947 wächst das RPF de Gaulles
+    const t = Math.max(0, Math.min(1, (j - 1946) / 5));
+    const gaul = s.f.rpf ? 16 + 6 * t : 2;
+    return { PCF: 27, SFIO: 20 - 5 * t, RAD: 11, MRP: 27 - 14 * t - (s.f.rpf ? 6 : 0), UNAB: 13, GAUL: gaul, POUJ: 0 };
+  }
   const t = Math.max(0, Math.min(1, (j - 1951) / 5));
   const lin = (a, b) => a + (b - a) * t;
   const st = {
@@ -424,16 +456,20 @@ export function wahl(s, a) {
   s.sitze = sitze;
   s.legislaturBeginn = s.zeit;
   s.f.legislatur = (s.f.legislatur || 1) + 1;
-  // Nach der Wahl: nächste reguläre Wahl in fünf Jahren
-  const naechste = zeitPlus(s.zeit, 10);
-  s.wahlplan = [...(s.wahlplan || []).filter(z => zeitIndex(z) < zeitIndex(s.zeit)), s.zeit, naechste];
-  return { zeit: s.zeit, stimmen: st, sitze: { ...sitze }, gesamt, republik: s.republik };
+  // Nach der Wahl: nächste reguläre Wahl in fünf Jahren. Eine Verfassunggebende Versammlung
+  // wählt nur bis zur Verfassung; die Wahl von 1951 lag historisch im Juni (1951/I).
+  const verfassunggebend = !!s.f.provisorisch;
+  const frueher = (s.wahlplan || []).filter(z => zeitIndex(z) < zeitIndex(s.zeit));
+  if (s.f.provisorisch) s.wahlplan = [...frueher, s.zeit, ...(s.wahlplan || []).filter(z => zeitIndex(z) > zeitIndex(s.zeit))];
+  else s.wahlplan = [...frueher, s.zeit, zeitIndex(s.zeit) === zeitIndex(1946.2) ? 1951.1 : zeitPlus(s.zeit, 10)];
+  return { zeit: s.zeit, stimmen: st, sitze: { ...sitze }, gesamt, republik: s.republik, verfassunggebend };
 }
 
 // ------------------------------------------------------------------ Lager und Ziele der gesteuerten Regierung
 
 /** Ziele, denen die Wahl eines Lagers dient (für die vom Spiel gesteuerte Regierung) */
 const LAGER_DIENT = {
+  tripartisme: { sozial: 0.5, unabhaengigkeit: 0.3 },
   dritte_kraft: { europa: 0.4, westbindung: 0.4, deutschland_einbinden: 0.3 },
   mitte_rechts: { kolonien: 0.5, saar: 0.3, deutschland_klein: 0.2 },
   mendes: { frieden_kolonien: 0.6, modernisierung: 0.4 },
@@ -505,14 +541,14 @@ export const dynamisch = {
       });
     }
     const einleitung = nachWahl
-      ? 'Die neue Nationalversammlung ist gewählt. Wie in der Vierten Republik üblich, tritt die Regierung zurück; der Präsident der Republik muss einen neuen Ministerpräsidenten zur Investitur vorschlagen.'
-      : `Die Regierung ${s.regierungschef} ist gestürzt. ${anlass === 'vertrauen' ? 'Sie hat die Vertrauensfrage verloren.' : 'Ihre Mehrheit ist zerfallen; in einer Vertrauensabstimmung hat sie keine Mehrheit mehr gefunden.'} Präsident ${s.praesident} hat die Fraktionsvorsitzenden zu sich gebeten.`;
+      ? (s.f.provisorisch ? 'Die neue Verfassunggebende Versammlung ist gewählt. Die Provisorische Regierung tritt zurück; die Versammlung wählt einen neuen Regierungschef.' : 'Die neue Nationalversammlung ist gewählt. Wie in der Vierten Republik üblich, tritt die Regierung zurück; der Präsident der Republik muss einen neuen Ministerpräsidenten zur Investitur vorschlagen.')
+      : `Die Regierung ${s.regierungschef} ist gestürzt. ${anlass === 'vertrauen' ? 'Sie hat die Vertrauensfrage verloren.' : 'Ihre Mehrheit ist zerfallen; in einer Vertrauensabstimmung hat sie keine Mehrheit mehr gefunden.'} ${praesidentText(s)} hat die Fraktionsvorsitzenden zu sich gebeten.`;
     return {
       titel: nachWahl ? `Regierungsbildung ${jahrVon(s.zeit)}` : 'Regierungskrise',
       datum: zeitText(s.zeit),
       art: 'haupt',
       inland: false,
-      absender: `Präsident der Republik ${s.praesident}`,
+      absender: praesidentText(s),
       text: `${einleitung}\n\n${sitzText(s)}\n\nWen soll der Präsident mit der Regierungsbildung beauftragen? Du führst die neue Regierung weiter.`,
       optionen: opts,
       nachher: st => { delete st.f.krise_offen; delete st.krisenAnlass; },

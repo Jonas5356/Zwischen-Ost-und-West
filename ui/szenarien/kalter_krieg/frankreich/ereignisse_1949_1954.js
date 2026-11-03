@@ -27,9 +27,10 @@ export default [
     titel: 'Ein Kaiser für Vietnam',
     datum: 'Herbst 1949',
     ab: 1949.2, ordnung: 10,
+    wenn: indochinakrieg,
     absender: 'Ministerium für die assoziierten Staaten',
     ascii: 'dschungel',
-    text: `Seit 1946 führt Frankreich in Indochina Krieg gegen die Viet Minh Ho Chi Minhs. Im März hat Präsident Auriol mit dem früheren Kaiser Bao Dai die Élysée-Abkommen geschlossen: Ein „Staat Vietnam“ unter Bao Dai soll innerhalb der Französischen Union unabhängig werden – Armee, Diplomatie und Finanzen bleiben aber weitgehend in französischer Hand. Die Nationalversammlung muss die Abkommen noch ratifizieren.
+    text: `Seit Jahren führt Frankreich in Indochina Krieg gegen die Viet Minh Ho Chi Minhs. Im März hat Präsident Auriol mit dem früheren Kaiser Bao Dai die Élysée-Abkommen geschlossen: Ein „Staat Vietnam“ unter Bao Dai soll innerhalb der Französischen Union unabhängig werden – Armee, Diplomatie und Finanzen bleiben aber weitgehend in französischer Hand. Die Nationalversammlung muss die Abkommen noch ratifizieren.
 
 In Washington sieht man den Krieg inzwischen als Teil des Kampfes gegen den Kommunismus, seit Mao in China gesiegt hat. Die Kommunisten in Paris nennen ihn den „schmutzigen Krieg“.`,
     optionen: [
@@ -53,7 +54,7 @@ In Washington sieht man den Krieg inzwischen als Teil des Kampfes gegen den Komm
     titel: 'Die Saarkonventionen',
     datum: '3. März 1950',
     ab: 1950.1, ordnung: 3,
-    wenn: bonnImWesten,
+    wenn: s => bonnImWesten(s) && !!s.f.saar_zone,
     absender: 'Gilbert Grandval, Hoher Kommissar an der Saar',
     text: s => `Das Saarland ist seit 1947 wirtschaftlich an Frankreich angeschlossen: französischer Franc, französischer Zoll, die Kohlegruben unter französischer Verwaltung. Ministerpräsident Johannes Hoffmann regiert mit Billigung von Paris. Nun sollen Konventionen die Autonomie der Saar festschreiben; die Gruben würden für fünfzig Jahre an Frankreich verpachtet.
 
@@ -532,7 +533,7 @@ Als Preis kannst du verlangen, dass ${kanzler(s)} auf atomare, biologische und c
     titel: 'Die Zukunft der Saar',
     datum: 'Oktober 1954',
     ab: 1954.2, bis: 1955.1, ordnung: 9.5,
-    wenn: s => bonnImWesten(s) && !brd(s).f.saar_entschieden && !brd(s).f.saarstatut && (!!brd(s).f.pariser_vertraege || !!brd(s).f.evg),
+    wenn: s => bonnImWesten(s) && !!s.f.saar_zone && !brd(s).f.saar_entschieden && !brd(s).f.saarstatut && (!!brd(s).f.pariser_vertraege || !!brd(s).f.evg),
     absender: 'Quai d’Orsay',
     text: s => `Bevor Frankreich ${brd(s).f.evg ? 'die letzten EVG-Abkommen' : 'die Pariser Verträge'} ratifiziert, muss die Saarfrage gelöst sein; sonst gibt es in der Nationalversammlung keine Mehrheit. Die Saar ist wirtschaftlich mit Frankreich verbunden, politisch autonom.
 

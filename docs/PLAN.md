@@ -1,10 +1,10 @@
 # Plan: Mehrere Länder mit Regierungen und Zielen
 
-Stand: November 2026. Phase 1 ist umgesetzt (Version 0.2.0). Seit 0.3.0 kann in der BRD auch die SPD regieren, ohne dass das Spiel endet – Voraussetzung dafür, dass die BRD später vom Spiel gesteuert werden kann. Seit 0.4.0 handeln USA und Sowjetunion mit eigenen Regierungen und Zielen (erster Teil von Phase 2). Seit 0.5.0 ist Frankreich spielbar; wer Frankreich spielt, dem steht eine vom Spiel gesteuerte Bundesrepublik gegenüber (und umgekehrt).
+Stand: November 2026. Phase 1 ist umgesetzt (Version 0.2.0). Seit 0.3.0 kann in der BRD auch die SPD regieren, ohne dass das Spiel endet – Voraussetzung dafür, dass die BRD später vom Spiel gesteuert werden kann. Seit 0.4.0 handeln USA und Sowjetunion mit eigenen Regierungen und Zielen (erster Teil von Phase 2). Seit 0.5.0 ist Frankreich spielbar; wer Frankreich spielt, dem steht eine vom Spiel gesteuerte Bundesrepublik gegenüber (und umgekehrt). Seit 0.6.0 beginnt die Welt 1946; Länder steigen ein, wenn sie entstehen (Bundesrepublik 1949).
 
 ## Ziel
 
-Eine gemeinsame Welt 1949–1964, später erweiterbar, mit mehreren Ländern. Jedes Land außer den USA und der Sowjetunion soll am Ende spielbar sein; die beiden Supermächte steuert immer das Spiel. Gespielt wird von einer Person (kein Hotseat).
+Eine gemeinsame Welt 1946–1964, später erweiterbar, mit mehreren Ländern. Jedes Land außer den USA und der Sowjetunion soll am Ende spielbar sein; die beiden Supermächte steuert immer das Spiel. Gespielt wird von einer Person (kein Hotseat).
 
 **Grundsatz:** Jede Entscheidung funktioniert für Mensch und Spiel gleich. Spielt man Frankreich, entscheidet das Spiel für die BRD anhand derselben Vorlagen, die man als BRD-Spieler sieht. Jede Option braucht deshalb Angaben, aus denen sich ihr Nutzen berechnen lässt.
 
@@ -13,7 +13,9 @@ Eine gemeinsame Welt 1949–1964, später erweiterbar, mit mehreren Ländern. Je
 - **Beziehungen:** eine Skala für alle Länder und Richtungen, 0–100, hoch = gut. Kein getrennter Spannungswert; „Spannung mit Moskau“ ist zu „Beziehung zu Moskau“ geworden (gespiegelt). Beziehungen sind gerichtet: `beziehungen[von][zu]` = wie Land `von` Land `zu` sieht.
 - **Geschichtstreue wie in Hearts of Iron IV:** „historisch“ heißt, die Länder verfolgen die Ziele ihrer historischen Regierungen, nicht dass sie dasselbe tun. Ändert sich die Regierung anders als in der Geschichte (z. B. erfolgreicher Generalsputsch in Frankreich 1961), gelten die Ziele der neuen Regierung. Daneben ein Modus „zufällig“; vorgesehen ist ein Regler, der beides mischt.
 - **Kein Bonus für historische Optionen;** Geschichtstreue entsteht allein über Ziele und Regierungswechsel.
-- **Zeitraum:** vorerst 1949–1964, mit dem Ziel späterer Erweiterung.
+- **Zeitraum:** seit 0.6.0 1946–1964 (Beginn des Kalten Kriegs), mit dem Ziel späterer Erweiterung.
+- **Einstiege (0.6.0):** Die Welt beginnt für alle 1946/I. Ein Land, das es noch nicht gibt, steigt ein, wenn es entsteht (Bundesrepublik 1949/II; später Indien, Israel, Südkorea …). Länder können im Lauf einer Partie nicht gewechselt werden. Entsteht ein Land wegen der Entscheidungen der anderen nicht, gibt es es in dieser Partie nicht – in einer anderen kann man es wählen. Wird es gespielt, entsteht es immer: Optionen, die seine Gründung verhindern würden (`gegenGruendung`), sind dann gesperrt. Ohne Weststaat bleibt Deutschland vorerst einfach besetzt; später sollen die Kosten einer langen Besatzung steigen und einen Anreiz schaffen, Deutschland (in welcher Form auch immer) entstehen zu lassen.
+- **Präsidialverfassung 1946 (Fiktion):** schlank – stützt den Rückhalt der Regierungen und erlaubt die Auflösung schon nach einem Sturz.
 - **Spielstände:** Beim Umbau dürfen alte Spielstände ungültig werden.
 - **Länderreihenfolge** nach Frankreich: entscheidet Jonas später.
 - **Gespielt wird ein Staat, nicht eine Partei:** Regierungswechsel beenden das Spiel nicht; der Spieler führt die neue Regierung weiter (umgesetzt für die BRD in 0.3.0: Union oder SPD als Kanzlerpartei, Koalitionswahl nur, wenn die Kanzlerpartei regieren kann). Für die BRD-Regierungen in Phase 2 heißt das: Union- und SPD-Regierungen bekommen eigene Ziele.

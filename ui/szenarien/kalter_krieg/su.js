@@ -30,14 +30,14 @@ export const REGIERUNGEN = {
     typen: {
       stoermanoever: { p: 0.75, name: 'Störmanöver', kurz: 'nein – die Deutschlandpolitik ist ein Störmanöver',
         beschreibung: 'Die Angebote sollen vor allem die Westverträge aufhalten. Die DDR gibt Stalin nicht her.',
-        ziele: { neutrales_deutschland: 0.2, ddr_halten: 1.6 },
+        ziele: { neutrales_deutschland: 0.2, ddr_halten: 1.6, west_berlin: 1.0, ostblock: 1.5 },
         berichte: [
           'Nach Erkenntnissen aus Ost-Berlin hat Stalin der SED-Führung versichert, Moskau werde die DDR unter keinen Umständen aufgeben.',
           'In Karlshorst wird der Aufbau einer kasernierten Volkspolizei beschleunigt – kein Zeichen für einen baldigen Abzug.',
         ] },
       ernst: { p: 0.25, name: 'Ernst gemeint', kurz: 'ja – ein neutrales Deutschland ist ihm wichtiger',
         beschreibung: 'Ein bündnisfreies Gesamtdeutschland wäre Stalin den Preis der DDR wert.',
-        ziele: { neutrales_deutschland: 2.0, ddr_halten: 0.4 },
+        ziele: { neutrales_deutschland: 2.0, ddr_halten: 0.4, koexistenz: 1.0, ostblock: 0.9 },
         berichte: [
           'Ein Gesprächspartner aus dem sowjetischen Außenministerium deutet an, Moskau könne die SED für ein neutrales Deutschland fallen lassen.',
           'Ulbricht soll in Moskau zu hören bekommen haben, die DDR sei „kein Selbstzweck“.',
@@ -114,7 +114,7 @@ export const REGIERUNGEN = {
         berichte: ['Molotow soll im Präsidium die „Entstalinisierung“ für einen Fehler erklärt haben.', 'Die sowjetischen Truppen in Ungarn und der DDR erhalten neue Panzer.'] },
       pragmatiker: { p: 0.2, name: 'Pragmatiker', kurz: 'ja – hart im Ton, aber verhandlungsbereit',
         beschreibung: 'Hinter der harten Fassade rechnet Molotow kühl und ist zu Geschäften bereit.', ziele: { koexistenz: 1.1, neutrales_deutschland: 0.8 },
-        berichte: ['Molotow hat westlichen Diplomaten ungewöhnlich offen eine „Verhandlungslösung für Deutschland“ in Aussicht gestellt.', 'Moskau hat die Handelsdelegation in Bonn aufgestockt.'] },
+        berichte: ['Molotow hat westlichen Diplomaten ungewöhnlich offen eine „Verhandlungslösung für Deutschland“ in Aussicht gestellt.', 'Moskau hat seine Handelsdelegationen in Westeuropa aufgestockt.'] },
     },
   },
 };
@@ -122,6 +122,7 @@ export const REGIERUNGEN = {
 /** Außenminister zum Zeitpunkt (für Texte) */
 export function aussenminister(z, regime) {
   if (regime === 'molotow') return 'Schepilow';
+  if (zeitIndex(z) < zeitIndex(1949.1)) return 'Molotow';
   if (zeitIndex(z) < zeitIndex(1953.1)) return 'Wyschinski';
   if (zeitIndex(z) < zeitIndex(1956.2)) return 'Molotow';
   return 'Gromyko';
@@ -162,8 +163,83 @@ const WECHSEL = [
 const flucht = s => brd(s).w.flucht ?? 30;
 
 const ereignisse = [
+  // ------------------------------------------------------------ 1946–1949
   {
-    id: 'su_stalin_note', titel: 'Eine Note zur deutschen Frage', ab: 1952.1, ordnung: 2.5,
+    id: 'su_iran', titel: 'Die Truppen im Iran', ab: 1946.1, bis: 1946.1, ordnung: 4,
+    optionen: [
+      { text: 'Die Truppen gegen eine Ölkonzession abziehen.', hist: true, dient: { koexistenz: 1.1, weltmacht: -0.1 }, w: { usa: 5, prestige: -2, wirtschaft: 2 },
+        ergebnis: s => `${name(s)} lässt die Rote Armee aus dem Nordiran abziehen; Teheran sagt eine sowjetisch-iranische Ölgesellschaft zu.` },
+      { text: 'Bleiben und die Republiken in Aserbaidschan und Kurdistan schützen.', dient: { weltmacht: 0.6, ostblock: 0.3, koexistenz: -1.2 }, w: s => ({ usa: s.weltflags.iran_druck ? -12 : -6, sicherheit: -6, prestige: 2 }),
+        ergebnis: 'Die Rote Armee bleibt im Nordiran. Der Streit vor den Vereinten Nationen wird zur ersten Krise zwischen den Siegermächten. (Fiktion)',
+        aktion: (s, a) => a.weltflag('iran_besetzt') },
+    ],
+  },
+  {
+    id: 'su_marshall', titel: 'Der Marshallplan', ab: 1947.1, bis: 1947.1, ordnung: 6.5,
+    wenn: s => !!s.weltflags.marshall_angebot,
+    optionen: [
+      { text: 'Ablehnen und den Volksdemokratien die Teilnahme verbieten.', hist: true, dient: { ostblock: 0.6, westbindung_stoeren: 0.3 }, w: { kontrolle: 5, usa: -6, wirtschaft: -2 },
+        ergebnis: 'Molotow verlässt die Pariser Konferenz. Polen und die Tschechoslowakei müssen ihre Zusage zurückziehen.',
+        aktion: (s, a) => a.weltflag('marshall_ost', 'nein') },
+      { text: 'Mitmachen und amerikanische Hilfe annehmen.', dient: { koexistenz: 0.9, ostblock: -0.3 }, w: { wirtschaft: 8, kontrolle: -4, usa: 6 },
+        ergebnis: 'Die Sowjetunion erklärt sich bereit, am europäischen Wiederaufbauprogramm teilzunehmen. In Washington ist man überrascht – und uneins. (Fiktion)',
+        aktion: (s, a) => a.weltflag('marshall_ost', 'ja') },
+    ],
+  },
+  {
+    id: 'su_kominform', titel: 'Zwei Lager', ab: 1947.2, bis: 1947.2, ordnung: 9,
+    optionen: [
+      { text: 'Das Kominform gründen: Die Kommunisten Europas sollen gegen den Marshallplan kämpfen.', hist: true, dient: { ostblock: 0.6, westbindung_stoeren: 0.4, koexistenz: -0.2 }, w: { kontrolle: 4, usa: -5 },
+        ergebnis: 'In Polen gründen die kommunistischen Parteien das Kominform. Schdanow verkündet, die Welt sei in zwei Lager geteilt; die Parteien Frankreichs und Italiens sollen den Kampf aufnehmen.',
+        aktion: (s, a) => a.weltflag('kominform') },
+      { text: 'Den westlichen Kommunisten freie Hand lassen.', dient: { koexistenz: 1, ostblock: -0.1 }, w: { kontrolle: -2 },
+        ergebnis: 'Moskau verzichtet auf eine neue Internationale. Die westlichen Kommunisten bleiben bei ihrem parlamentarischen Kurs. (Fiktion)' },
+    ],
+  },
+  {
+    id: 'su_prag', rueckblick: true, titel: 'Die Krise in Prag', ab: 1948.1, bis: 1948.1, ordnung: 2,
+    optionen: [
+      { text: 'Gottwald bei der Machtübernahme unterstützen.', hist: true, dient: { ostblock: 0.7, koexistenz: -0.2 }, w: { kontrolle: 5, usa: -8, prestige: -2 },
+        ergebnis: 'In Prag übernehmen die Kommunisten unter Gottwald die Macht. Präsident Beneš gibt nach; Außenminister Jan Masaryk stirbt wenige Tage später.',
+        aktion: (s, a) => a.weltflag('prag_putsch') },
+      { text: 'Die Koalitionsregierung in Prag bestehen lassen.', dient: { koexistenz: 1, ostblock: -0.2 }, w: { kontrolle: -3, usa: 4 },
+        ergebnis: 'Moskau hält Gottwald zurück. Die Tschechoslowakei bleibt eine Demokratie mit kommunistischem Regierungschef. (Fiktion)' },
+    ],
+  },
+  {
+    id: 'su_tito', titel: 'Der Streit mit Tito', ab: 1948.1, bis: 1948.1, ordnung: 6,
+    optionen: [
+      { text: 'Jugoslawien aus dem Kominform ausschließen.', hist: true, dient: { ostblock: 0.9 }, w: { kontrolle: -2, prestige: -2 },
+        ergebnis: 'Das Kominform schließt die jugoslawischen Kommunisten aus. Tito geht seinen eigenen Weg.',
+        aktion: (s, a) => a.weltflag('tito_bruch') },
+      { text: 'Einen Ausgleich mit Tito suchen.', dient: { ostblock: -0.3, koexistenz: 0.3 }, w: { kontrolle: -3 },
+        ergebnis: 'Moskau und Belgrad legen ihren Streit bei – vorerst. (Fiktion)' },
+    ],
+  },
+  {
+    id: 'su_blockade', rueckblick: true, titel: 'Der Weststaat und Berlin', ab: 1948.2, bis: 1948.2, ordnung: 1,
+    wenn: s => (s.weltflags.weststaat_usa === 'ja' || s.weltflags.weststaat_paris === 'ja') && !s.weltflags.blockade,
+    optionen: [
+      { text: 'Alle Land- und Wasserwege nach West-Berlin sperren.', hist: true, dient: { west_berlin: 0.8, westbindung_stoeren: 0.5, koexistenz: -0.2 }, w: { usa: -12, prestige: 2 },
+        ergebnis: 'Nach der Währungsreform in den Westzonen sperrt die Sowjetunion alle Land- und Wasserwege nach West-Berlin.',
+        aktion: (s, a) => a.weltflag('blockade') },
+      { text: 'Bei Protesten bleiben.', dient: { koexistenz: 1, west_berlin: -0.1 }, w: { prestige: -3 },
+        ergebnis: 'Moskau protestiert gegen die Pläne für einen westdeutschen Staat, lässt die Zugänge nach Berlin aber offen. (Fiktion)' },
+    ],
+  },
+  {
+    id: 'su_blockade_ende', rueckblick: true, titel: 'Die Blockade beenden?', ab: 1949.1, bis: 1949.1, ordnung: 4.5,
+    wenn: s => !!s.weltflags.blockade && !s.weltflags.blockade_ende && !s.weltflags.berlin_aufgegeben,
+    optionen: [
+      { text: 'Die Blockade aufheben.', hist: true, dient: { koexistenz: 1.4, west_berlin: -0.2 }, w: { usa: 6, prestige: -2 },
+        ergebnis: 'Im Mai hebt die Sowjetunion die Blockade West-Berlins auf. Die Luftbrücke hat sie gebrochen.',
+        aktion: (s, a) => a.weltflag('blockade_ende') },
+      { text: 'Die Blockade fortsetzen.', dient: { west_berlin: 0.4, koexistenz: -1 }, w: { usa: -6, prestige: -5, wirtschaft: -3 },
+        ergebnis: 'Die Blockade geht weiter. Die Luftbrücke auch.' },
+    ],
+  },
+  {
+    id: 'su_stalin_note', braucht: ['brd'], titel: 'Eine Note zur deutschen Frage', ab: 1952.1, ordnung: 2.5,
     wenn: s => !brd(s).f.neutral && !brd(s).f.vereinigt && !brd(s).f.westvertraege,
     optionen: [
       { text: 'Den Westmächten einen Friedensvertrag für ein neutrales Deutschland anbieten.', hist: true,
@@ -215,7 +291,7 @@ const ereignisse = [
     ],
   },
   {
-    id: 'su_juni17', titel: 'Aufstand in der DDR', ab: 1953.1, ordnung: 5.5,
+    id: 'su_juni17', braucht: ['brd'], titel: 'Aufstand in der DDR', ab: 1953.1, ordnung: 5.5,
     wenn: s => !brd(s).f.vereinigt && !brd(s).f.neutral,
     optionen: [
       { text: 'Den Aufstand mit Panzern niederschlagen.', hist: true, dient: { ostblock: 1, ddr_halten: 1 }, w: { kontrolle: 10, prestige: -4, usa: -3 },
@@ -228,7 +304,7 @@ const ereignisse = [
     ],
   },
   {
-    id: 'su_einladung', titel: 'Diplomatische Beziehungen mit Bonn?', ab: 1955.2, ordnung: 8.5,
+    id: 'su_einladung', braucht: ['brd'], titel: 'Diplomatische Beziehungen mit Bonn?', ab: 1955.2, ordnung: 8.5,
     wenn: s => !brd(s).f.vereinigt && !brd(s).f.moskau_beziehungen,
     optionen: [
       { text: 'Den Bundeskanzler zu Gesprächen über diplomatische Beziehungen einladen.', hist: true,
@@ -269,7 +345,7 @@ const ereignisse = [
     ],
   },
   {
-    id: 'su_berlin_ultimatum', titel: 'Ein Ultimatum für Berlin?', ab: 1958.2, ordnung: 10.5,
+    id: 'su_berlin_ultimatum', braucht: ['brd'], titel: 'Ein Ultimatum für Berlin?', ab: 1958.2, ordnung: 10.5,
     wenn: s => !brd(s).f.vereinigt && !brd(s).f.freistadt_vereinbart,
     optionen: [
       { text: 'Den Westmächten ein Ultimatum stellen: West-Berlin soll Freie Stadt werden.', hist: true,
@@ -280,7 +356,7 @@ const ereignisse = [
     ],
   },
   {
-    id: 'su_mauer', titel: 'Ulbricht will die Grenze schließen', ab: 1961.2, ordnung: 7.5,
+    id: 'su_mauer', braucht: ['brd'], titel: 'Ulbricht will die Grenze schließen', ab: 1961.2, ordnung: 7.5,
     wenn: s => !brd(s).f.vereinigt && !brd(s).f.freistadt_vereinbart,
     optionen: [
       { text: 'Ulbricht die Abriegelung der Sektorengrenze erlauben.', hist: true,

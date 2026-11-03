@@ -30,6 +30,12 @@ test('Startregierungen, Typen und Vorab-Einschätzung', () => {
   assert.equal(welt.laender.usa.regime, 'truman');
   assert.equal(welt.laender.su.regime, 'stalin');
   assert.ok(['ernst', 'stoermanoever'].includes(welt.laender.su.typ));
+  // Die Bundesrepublik entsteht erst im Herbst 1949; bis dahin läuft die Welt ohne sie
+  assert.equal(welt.laender.brd.aktiv, false);
+  E.aktuelles(W, welt);
+  assert.equal(welt.zeit, 1949.2);
+  assert.equal(welt.laender.brd.gegruendet, 1949.2);
+  assert.equal(welt.laender.su.regime, 'stalin');
   const E0 = welt.laender.brd.einschaetzung.su;
   assert.equal(E0.regime, 'stalin');
   assert.ok(nah(Object.values(E0.p).reduce((a, b) => a + b, 0), 1));
@@ -61,9 +67,10 @@ test('Im historischen Modus kommen die historischen Regierungen, solange die Lag
 test('Im freien Modus kommen auch andere Regierungen, und jede Entscheidung der Supermächte kommt vor', () => {
   const regime = new Set(), entscheidungen = new Set();
   for (let seed = 1; seed <= 250; seed++) {
-    for (const [st, g] of [['zufall', 0], ['einheit', 0.5], ['ost', 0]]) {
+    // Auch als Frankreich: Wer die Bundesrepublik spielt, für den sind Entscheidungen gegen ihre Gründung gesperrt
+    for (const [st, g, land] of [['zufall', 0, 'brd'], ['einheit', 0.5, 'brd'], ['ost', 0, 'brd'], ['zufall', 0, 'frankreich']]) {
       if (seed > 120 && st !== 'zufall') continue;
-      const { welt } = spiele(seed, st, null, { geschichtstreue: g });
+      const { welt } = spiele(seed, st, null, { geschichtstreue: g, land });
       for (const land of ['usa', 'su']) {
         for (const r of welt.laender[land].regierungen) regime.add(land + ':' + r.regime);
         for (const c of welt.laender[land].chronik) if (c.art !== 'wechsel') entscheidungen.add(`${land}:${c.id}:${c.wahl}`);

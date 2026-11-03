@@ -1,5 +1,6 @@
 // Land: Frankreich – spielbar, sonst vom Spiel gesteuert (Regierungen nach Lager, ki.js)
 import * as modell from './modell.js';
+import teil0 from './ereignisse_1946_1949.js';
 import teil1 from './ereignisse_1949_1954.js';
 import teil2 from './ereignisse_1955_1958.js';
 import teil3 from './ereignisse_1959_1964.js';
@@ -25,9 +26,10 @@ export default {
   kurz: 'Frankreich',
   hauptstadt: 'Paris',
   rolle: 'Französische Regierung',
-  untertitel: '1949–1964',
-  beschreibung: 'Herbst 1949. Frankreich hat den Krieg gewonnen und fühlt sich doch besiegt. Seine Regierungen halten selten länger als ein paar Monate, in Indochina führt es einen Kolonialkrieg, den es nicht gewinnen kann, die Kommunisten sind die stärkste Partei. Washington verlangt, dass Paris die Deutschen wieder aufrüsten lässt. Zwischen Grandeur und Abhängigkeit, Empire und Europa muss die Republik ihren Platz finden.',
-  wahlen: [1951.1, 1956.1],
+  untertitel: '1946–1964',
+  beschreibung: 'Januar 1946. General de Gaulle ist im Streit mit den Parteien zurückgetreten. Frankreich hat den Krieg gewonnen und fühlt sich doch besiegt: Brot und Kohle sind rationiert, die Preise steigen jeden Monat, in Indochina und Nordafrika wankt das Empire. Kommunisten, Sozialisten und Volksrepublikaner regieren gemeinsam und sollen dem Land eine neue Verfassung geben. Im Rheinland, an der Saar und in Berlin will Paris sicherstellen, dass Deutschland nie wieder angreifen kann – doch die Welt zerfällt gerade in zwei Lager, und Frankreich muss seinen Platz zwischen ihnen finden.',
+  // Juni 1946: zweite Verfassunggebende Versammlung (weitere Wahlen setzt das Modell)
+  wahlen: [1946.1],
   werte: modell.WERTE,
   parteien: modell.PARTEIEN,
   startzustand: modell.startzustand,
@@ -43,7 +45,7 @@ export default {
     nachEntscheidung: s => { modell.notiereChef(s); s.w.zustimmung = modell.berechneUmfrage(s); },
   },
   dynamisch: modell.dynamisch,
-  ereignisse: [...teil1, ...teil2, ...teil3, ...akten],
+  ereignisse: [...teil0, ...teil1, ...teil2, ...teil3, ...akten],
   vorhaben,
   enden: ENDEN,
   oberflaeche,

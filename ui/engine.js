@@ -114,6 +114,22 @@ export function sicht(W, welt, land = welt.spieler[0]) {
 }
 
 export const istMensch = (welt, land) => welt.spieler.includes(land);
+/** Gibt es das Land schon (oder überhaupt)? Länder mit späterem Einstieg sind bis zur Gründung inaktiv. */
+export const istAktiv = (welt, land) => !!welt.laender[land] && welt.laender[land].aktiv !== false;
+const aktiveLaender = (W, welt) => Object.keys(W.laender).filter(l => istAktiv(welt, l));
+/** Braucht das Ereignis Länder, die es (noch) nicht gibt? (`braucht: ['brd']`) */
+const brauchtOk = (welt, ev) => !ev.braucht || ev.braucht.every(l => istAktiv(welt, l));
+/** Erfüllt das Ereignis seine Bedingungen (ohne Zeitfenster und Auslöser)? */
+const passt = (welt, ev, s) => brauchtOk(welt, ev) && (!ev.wenn || ev.wenn(s));
+/**
+ * Option, die die Gründung eines Landes verhindern würde (`gegenGruendung: 'brd'`): gesperrt,
+ * solange dieses Land gespielt wird und noch nicht gegründet ist.
+ */
+function gegenGespieltes(welt, o) {
+  const g = o.gegenGruendung;
+  if (!g) return false;
+  return (Array.isArray(g) ? g : [g]).some(l => istMensch(welt, l) && !istAktiv(welt, l));
+}
 
 // ---------- Wirkungen ----------
 
@@ -198,8 +214,8 @@ export function differenz(M, vorher, s) {
 
 // ---------- Spiel anlegen ----------
 
-function neuesLand(M) {
-  const st = M.startzustand ? M.startzustand() : {};
+function neuesLand(M, welt) {
+  const st = M.startzustand ? M.startzustand(welt) : {};
   // weitere Felder des Startzustands (z. B. kanzlerpartei) unverändert übernehmen
   const { w, f, kanzler, regierung, sitze, ...weitere } = st;
   return {
@@ -250,11 +266,15 @@ export function neueWelt(W, { spieler, seed, geschichtstreue = 1 } = {}) {
     ergebnis: null,
     ende: null,
   };
-  for (const [id, M] of Object.entries(W.laender)) welt.laender[id] = neuesLand(M);
+  for (const [id, M] of Object.entries(W.laender)) {
+    welt.laender[id] = neuesLand(M, welt);
+    // Länder mit späterem Einstieg (z. B. die Bundesrepublik 1949) gibt es noch nicht
+    if (M.gruendung && zeitIndex(M.gruendung.zeit) > zeitIndex(W.start)) welt.laender[id].aktiv = false;
+  }
   for (const [von, ziele] of Object.entries(W.startBeziehungen || {})) {
     for (const [zu, wert] of Object.entries(ziele)) setzeBeziehung(welt, von, zu, wert);
   }
-  for (const id of Object.keys(W.laender)) {
+  for (const id of aktiveLaender(W, welt)) {
     W.laender[id].modell?.initialisiere?.(sicht(W, welt, id), api(W, welt, id));
   }
   KI.initialisiere(W, welt);
@@ -287,7 +307,37 @@ function moeglich(W, welt, land, ev, s) {
   if (!ev.wiederholbar && L.erledigt[ev.id] !== undefined) return false;
   if (!imFenster(ev, welt.zeit)) return false;
   if (ev.ausloeser && !offeneNachricht(welt, land, ev.ausloeser, ev.ausloeserVon)) return false;
-  return !ev.wenn || ev.wenn(s);
+  return passt(welt, ev, s);
+}
+
+/**
+ * Gründungen zu Beginn eines Halbjahrs: Ist der Zeitpunkt erreicht und die Bedingung erfüllt,
+ * entsteht das Land mit seinem Startzustand; sonst gibt es es in diesem Lauf nicht. Ein
+ * gespieltes Land wird immer gegründet (Optionen dagegen sind gesperrt, siehe `gegenGruendung`).
+ */
+function gruendungen(W, welt) {
+  for (const [land, M] of Object.entries(W.laender)) {
+    const g = M.gruendung;
+    const L = welt.laender[land];
+    if (!g || L.aktiv !== false || L.nie || zeitIndex(welt.zeit) < zeitIndex(g.zeit)) continue;
+    if (!istMensch(welt, land) && g.wenn && !g.wenn(welt)) {
+      L.nie = true;
+      welt.weltflags['nie_' + land] = welt.zeit;
+      continue;
+    }
+    const neu = neuesLand(M, welt);
+    neu.gegruendet = welt.zeit;
+    // An Ort und Stelle ersetzen, damit schon bestehende Landsichten (auch ihr Proxy auf `w`) gültig bleiben
+    const altW = L.w || {};
+    for (const k of Object.keys(L)) delete L[k];
+    for (const k of Object.keys(altW)) delete altW[k];
+    Object.assign(L, neu);
+    L.w = Object.assign(altW, neu.w);
+    g.aktion?.(welt);
+    M.modell?.initialisiere?.(sicht(W, welt, land), api(W, welt, land));
+    welt.weltflags['gegruendet_' + land] = welt.zeit;
+    KI.neuesLand(W, welt, land);
+  }
 }
 
 const istHauptereignis = ev => ev.art !== 'akte' && !ev.nurGeplant && !ev.nurRueckfrage;
@@ -314,7 +364,7 @@ function vorgaengeEinesLandes(W, welt, land) {
   const M = W.laender[land];
   const L = welt.laender[land];
   const s = sicht(W, welt, land);
-  if (!M.ereignisse?.length) return [];
+  if (!M.ereignisse?.length || !istAktiv(welt, land)) return [];
 
   // 1. Geplante Folgeereignisse
   const faellig = L.geplant.filter(g => zeitIndex(g.zeit) <= zeitIndex(welt.zeit));
@@ -323,7 +373,7 @@ function vorgaengeEinesLandes(W, welt, land) {
   for (const g of faellig) {
     const ev = findeEreignis(W, welt, land, g.id);
     if (!ev || L.erledigt[g.id] !== undefined) continue;
-    if (ev.wenn && !ev.wenn(s)) continue;
+    if (!passt(welt, ev, s)) continue;
     geplant.push(ev);
   }
 
@@ -356,19 +406,20 @@ export function starteRunde(W, welt) {
   welt.pos = 0;
   welt.ergebnis = null;
   welt.modellGelaufen = false;
+  gruendungen(W, welt);
   KI.rundenstart(W, welt);
   weltereignisse(W, welt);
 
   const items = [];
-  for (const land of Object.keys(W.laender)) items.push(...vorgaengeEinesLandes(W, welt, land));
+  for (const land of aktiveLaender(W, welt)) items.push(...vorgaengeEinesLandes(W, welt, land));
   // Stabil nach Monat sortieren: bei Gleichstand bleibt die Reihenfolge der Länder
   items.sort((a, b) => a.ordnung - b.ordnung);
   welt.queue = items.map(({ land, id }) => ({ land, id }));
 
   // Regierungsvorhaben am Ende des Halbjahrs (gesteuerte Länder wählen selbst)
-  for (const land of Object.keys(W.laender)) if (W.laender[land].vorhaben?.length) welt.queue.push({ land, id: '@vorhaben' });
+  for (const land of aktiveLaender(W, welt)) if (W.laender[land].vorhaben?.length) welt.queue.push({ land, id: '@vorhaben' });
 
-  for (const land of Object.keys(W.laender)) {
+  for (const land of aktiveLaender(W, welt)) {
     const M = W.laender[land];
     if (!M.modell?.lagebericht) continue;
     const L = welt.laender[land];
@@ -422,7 +473,7 @@ function vorruecken(W, welt) {
     }
     const ev = findeEreignis(W, welt, item.land, item.id);
     const s = sicht(W, welt, item.land);
-    if (!ev || (!ev.dynamisch && ev.wenn && !ev.wenn(s))) { welt.pos++; continue; }
+    if (!ev || !istAktiv(welt, item.land) || (!ev.dynamisch && !passt(welt, ev, s))) { welt.pos++; continue; }
     if (istMensch(welt, item.land)) return;
     // Land wird vom Spiel gesteuert: entscheiden und weiter
     spielEntscheidet(W, welt, item.land, ev);
@@ -481,7 +532,7 @@ function wendeBei(W, welt, land, ev, quelle, texte) {
   const s = sicht(W, welt, land);
   const bei = txt(quelle.bei, s) || {};
   for (const [ziel, eff] of Object.entries(bei)) {
-    if (!eff || !W.laender[ziel]) continue;
+    if (!eff || !W.laender[ziel] || !istAktiv(welt, ziel)) continue;
     const Mz = W.laender[ziel];
     const sz = sicht(W, welt, ziel);
     const vorher = schnappschuss(Mz, sz);
@@ -531,7 +582,7 @@ export function optionen(W, welt, land, ev) {
   return (txt(ev.optionen, s) || []).map((o, i) => ({
     ...o,
     index: i,
-    verfuegbar: !o.wenn || o.wenn(s),
+    verfuegbar: (!o.wenn || o.wenn(s)) && !gegenGespieltes(welt, o),
     sichtbar: !o.nurWenn || o.nurWenn(s),
   })).filter(o => o.sichtbar);
 }
@@ -548,7 +599,7 @@ function entscheide(W, welt, land, ev, index) {
   const s = sicht(W, welt, land);
   const opts = txt(ev.optionen, s);
   const o = opts[index];
-  if (!o || (o.wenn && !o.wenn(s))) throw new Error('Option nicht verfügbar');
+  if (!o || (o.wenn && !o.wenn(s)) || gegenGespieltes(welt, o)) throw new Error('Option nicht verfügbar');
   const vorher = schnappschuss(M, s);
   const texte = [];
 
@@ -711,7 +762,7 @@ export function weiter(W, welt) {
 }
 
 function rundenende(W, welt) {
-  for (const land of Object.keys(W.laender)) {
+  for (const land of aktiveLaender(W, welt)) {
     const M = W.laender[land];
     if (!M.modell?.rundenende) continue;
     const L = welt.laender[land];
@@ -724,7 +775,7 @@ function rundenende(W, welt) {
   welt.modellGelaufen = true;
 
   // Wahlen
-  for (const land of Object.keys(W.laender)) {
+  for (const land of aktiveLaender(W, welt)) {
     const M = W.laender[land];
     const L = welt.laender[land];
     const wahl = (L.wahlplan || []).find(z => zeitIndex(z) === zeitIndex(welt.zeit));
@@ -743,7 +794,7 @@ function rundenende(W, welt) {
 }
 
 function abschliessen(W, welt) {
-  for (const land of Object.keys(W.laender)) {
+  for (const land of aktiveLaender(W, welt)) {
     W.laender[land].modell?.pruefeEnde?.(sicht(W, welt, land), api(W, welt, land));
     if (welt.ende) return;
   }
@@ -778,10 +829,10 @@ function aktualisiereQueue(W, welt, abOrdnung) {
     const L = welt.laender[item.land];
     if (L.erledigt[item.id] !== undefined && !findeEreignis(W, welt, item.land, item.id)?.wiederholbar) return false;
     const ev = findeEreignis(W, welt, item.land, item.id);
-    return ev && (!ev.wenn || ev.wenn(sicht(W, welt, item.land)));
+    return ev && istAktiv(welt, item.land) && passt(welt, ev, sicht(W, welt, item.land));
   });
   const drin = (land, id) => welt.queue.some(q => q.land === land && q.id === id) || bleibt.some(q => q.land === land && q.id === id);
-  for (const land of Object.keys(W.laender)) {
+  for (const land of aktiveLaender(W, welt)) {
     const M = W.laender[land];
     if (!M.ereignisse?.length) continue;
     const s = sicht(W, welt, land);
@@ -793,7 +844,7 @@ function aktualisiereQueue(W, welt, abOrdnung) {
     }
   }
   // Fällige geplante Ereignisse (z. B. aus einer Entscheidung in diesem Halbjahr mit in: 0)
-  for (const land of Object.keys(W.laender)) {
+  for (const land of aktiveLaender(W, welt)) {
     const L = welt.laender[land];
     const faellig = L.geplant.filter(g => zeitIndex(g.zeit) <= zeitIndex(welt.zeit));
     if (!faellig.length) continue;

@@ -33,10 +33,11 @@ test('Unter einer SPD-geführten Regierung passen Absender und Texte', () => {
   for (let seed = 1; seed <= 300; seed++) {
     const welt = E.neueWelt(W, { spieler: ['brd'], seed });
     const s = E.sicht(W, welt, 'brd');
-    const ab = 2 + (seed * 13) % 28; // frühestens im zweiten Halbjahr ist ein Wechsel möglich
+    // frühestens im zweiten Halbjahr nach der Gründung (1949/II) ist ein Wechsel möglich
+    const ab = E.zeitPlus(1949.2, 1 + (seed * 13) % 28);
     let n = 0, gewechselt = false;
     while (!welt.ende && n++ < 3000) {
-      if (!gewechselt && welt.runde >= ab) { M.wechsleRegierung(s, 'SPD', varianten[seed % 3]); gewechselt = true; }
+      if (!gewechselt && E.zeitIndex(welt.zeit) >= E.zeitIndex(ab) && E.istAktiv(welt, 'brd')) { M.wechsleRegierung(s, 'SPD', varianten[seed % 3]); gewechselt = true; }
       const a = E.aktuelles(W, welt);
       if (a.typ === 'ergebnis' || a.typ === 'wahl' || a.typ === 'rundenende' || a.typ === 'telegramm') { E.weiter(W, welt); continue; }
       if (a.typ === 'vorhaben') {

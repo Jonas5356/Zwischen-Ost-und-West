@@ -29,6 +29,25 @@ export default {
   titel: 'Bundesrepublik Deutschland',
   untertitel: '1949–1964',
   rolle: 'Bundesregierung',
+  // Die Bundesrepublik entsteht im Herbst 1949 – wenn die Westmächte einen Weststaat wollen,
+  // Paris (wo nötig) zustimmt und Berlin nicht aufgegeben wurde. Wird sie gespielt, entsteht sie immer.
+  gruendung: {
+    zeit: 1949.2,
+    wenn: welt => {
+      const f = welt.weltflags;
+      if (f.weststaat_usa === 'vier' || f.berlin_aufgegeben) return false;
+      if (f.weststaat_usa === 'nur_mit_paris' && f.weststaat_paris !== 'ja') return false;
+      return true;
+    },
+    aktion: welt => {
+      const b = welt.beziehungen;
+      const plus = (von, zu, d) => { if (b[von]?.[zu] !== undefined) b[von][zu] = Math.max(0, Math.min(100, b[von][zu] + d)); };
+      // Ohne Frankreich gegründet: Die französische Zone bleibt außen vor (Fiktion)
+      if (welt.weltflags.weststaat_paris === 'nein') { welt.weltflags.ohne_franzoesische_zone = true; plus('brd', 'frankreich', -15); plus('frankreich', 'brd', -10); }
+      if (welt.laender.frankreich?.f?.demontagen_hart) plus('brd', 'frankreich', -6);
+      if (welt.weltflags.berlin_massnahme === 'luftbruecke') plus('brd', 'usa', 5);
+    },
+  },
   // Wird die Bundesrepublik vom Spiel gesteuert, regiert sie nach Zielen (ki.js)
   regierungen: REGIERUNGEN,
   regimeVon,

@@ -13,7 +13,7 @@ export default [
     titel: 'Die Mittelmeerflotte',
     datum: 'März 1959',
     ab: 1959.1, bis: 1960.2, ordnung: 3,
-    wenn: s => istDeGaulle(s) && !s.f.flotte_entschieden && !s.f.nato_austritt,
+    wenn: s => istDeGaulle(s) && !s.f.flotte_entschieden && !s.f.nato_austritt && !s.f.nato_fern,
     absender: 'Ministerium der Streitkräfte',
     text: `Die französische Mittelmeerflotte steht im Kriegsfall unter NATO-Kommando. Für de Gaulle ist das unerträglich: Frankreichs Interessen am Mittelmeer – Algerien, Afrika – seien nicht die der NATO. Washington und London haben das Memorandum über ein Direktorium nicht ernst genommen.`,
     optionen: [

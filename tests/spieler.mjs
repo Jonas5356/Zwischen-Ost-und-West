@@ -10,8 +10,11 @@ const richtungen = o => (Array.isArray(o.richtung) ? o.richtung : o.richtung ? [
 const istWest = o => richtungen(o).some(r => ['west', 'europa', 'atlantisch'].includes(r));
 const istOst = o => richtungen(o).some(r => ['ost', 'national', 'dekolonisation'].includes(r));
 
-/** strategie: 'zufall' | 'historisch' | 'ost' | 'west' | 'einheit'; land: das gespielte Land */
-export function spiele(seed, strategie = 'zufall', log = null, { geschichtstreue = 1, land = 'brd' } = {}) {
+/**
+ * strategie: 'zufall' | 'historisch' | 'ost' | 'west' | 'einheit'; land: das gespielte Land;
+ * vorgabe: { ereignisId: Optionsindex } – feste Entscheidungen, z. B. um seltene Wege zu prüfen
+ */
+export function spiele(seed, strategie = 'zufall', log = null, { geschichtstreue = 1, land = 'brd', vorgabe = null } = {}) {
   const welt = E.neueWelt(W, { spieler: [land], seed, geschichtstreue });
   const s = E.sicht(W, welt, land);
   let schritte = 0;
@@ -59,6 +62,7 @@ export function spiele(seed, strategie = 'zufall', log = null, { geschichtstreue
       else if (strategie === 'ost') o = opts.find(istOst) || opts[Math.floor(r() * opts.length)];
       else if (strategie === 'west') o = opts.find(istWest) || opts.find(x => x.hist) || opts[0];
       else o = opts[Math.floor(r() * opts.length)];
+      if (vorgabe && vorgabe[a.ev.id] !== undefined) o = opts.find(x => x.index === vorgabe[a.ev.id]) || o;
       if (log) log(`${E.zeitText(s.zeit)} ${E.txt(a.ev.titel, s)} → ${E.txt(o.text, s)}`);
       E.waehle(W, welt, o.index);
       continue;

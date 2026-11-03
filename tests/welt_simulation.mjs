@@ -14,9 +14,10 @@ const zaehle = (o, k) => { o[k] = (o[k] || 0) + 1; };
 for (let seed = 1; seed <= n; seed++) {
   const { welt } = spiele(seed, strategie, null, { geschichtstreue: g, land: gespielt });
   zaehle(enden, welt.ende.id + (welt.ende.ausgeloest && welt.ende.ausgeloest !== gespielt ? ' (' + welt.ende.ausgeloest + ')' : ''));
-  if (welt.laender.brd.f.vereinigt) vereinigt++;
-  for (const f of ['juni17_panzer', 'juni17_zugestaendnisse', 'ungarn_einmarsch', 'ungarn_neutral', 'mauer_genehmigt', 'mauer_abgelehnt', 'raketen_kuba', 'radford', 'atomkrieg', 'suez_angriff', 'pariser_ratifiziert', 'nato_veto', 'saar_akzeptiert', 'rom_angebot']) if (welt.weltflags[f]) zaehle(flags, f);
-  for (const f of ['essentials', 'kuba_massnahme', 'kuba_ausgang', 'evg', 'schuman_antwort']) if (welt.weltflags[f]) zaehle(flags, f + '=' + welt.weltflags[f]);
+  if (welt.laender.brd.f?.vereinigt) vereinigt++;
+  if (welt.laender.brd.nie) zaehle(flags, 'Bundesrepublik nie gegründet');
+  for (const f of ['iran_besetzt', 'bizone', 'truman_doktrin', 'kominform', 'prag_putsch', 'blockade', 'blockade_ende', 'berlin_aufgegeben', 'juni17_panzer', 'juni17_zugestaendnisse', 'ungarn_einmarsch', 'ungarn_neutral', 'mauer_genehmigt', 'mauer_abgelehnt', 'raketen_kuba', 'radford', 'atomkrieg', 'suez_angriff', 'pariser_ratifiziert', 'nato_veto', 'saar_akzeptiert', 'rom_angebot']) if (welt.weltflags[f]) zaehle(flags, f);
+  for (const f of ['marshall_ost', 'weststaat_usa', 'weststaat_paris', 'berlin_massnahme', 'nato_angebot', 'essentials', 'kuba_massnahme', 'kuba_ausgang', 'evg', 'schuman_antwort']) if (welt.weltflags[f]) zaehle(flags, f + '=' + welt.weltflags[f]);
   const F = welt.laender.frankreich;
   for (const f of ['de_gaulle', 'dien_bien_phu', 'indochina_beendet', 'algerien_unabhaengig', 'atomtest', 'rom_ratifiziert', 'colombey_angeboten', 'elysee', 'veto_gb']) if (F.f[f]) zaehle(flags, 'Paris: ' + f);
   zaehle(flags, 'Paris: Regierung am Ende ' + F.lager);
@@ -27,12 +28,12 @@ for (let seed = 1; seed <= n; seed++) {
       if (c.art === 'wechsel') continue;
       zaehle(wahl, `${land}:${c.id} → ${c.wahl.slice(0, 60)}`);
     }
-    for (const r of L.regierungen) zaehle(regierungen, `${land}:${r.regime}${r.typ ? '/' + r.typ : ''}`);
+    for (const r of L.regierungen || []) zaehle(regierungen, `${land}:${r.regime}${r.typ ? '/' + r.typ : ''}`);
     // Einschätzung am Ende jeder Regierungszeit: Wahrscheinlichkeit des wahren Typs
     const E = welt.laender[gespielt].einschaetzung?.[land];
     if (!E) continue;
     const alle = [...(E.frueher || []), { regime: E.regime, p: E.p }];
-    const regs = [...L.regierungen];
+    const regs = [...(L.regierungen || [])];
     for (const e of alle) {
       const r = regs.find(x => x.regime === e.regime && x.typ);
       if (!r || !Object.keys(e.p).length) continue;

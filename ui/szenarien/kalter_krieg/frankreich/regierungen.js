@@ -27,6 +27,21 @@ const BASIS = {
 };
 
 export const REGIERUNGEN = {
+  tripartisme: {
+    name: 'Tripartisme', kurz: 'Tripartisme', titel: 'Regierung des Tripartisme',
+    lambda: 1.7, werte: { ...WERTE, moskau: 0.4 }, ziele: { ...BASIS, sozial: 1.3, deutschland_klein: 1.4, saar: 1.2, westbindung: 0.6, unabhaengigkeit: 0.9 },
+    frage: 'Stellt sich Paris im Streit der Großmächte an die Seite Washingtons?',
+    typen: {
+      westen: { p: 0.6, name: 'Westen', kurz: 'ja – ohne amerikanische Kredite geht es nicht',
+        beschreibung: 'Die Regierung weiß, dass Frankreich ohne amerikanisches Geld nicht wieder aufgebaut werden kann, und rückt Schritt für Schritt nach Westen.',
+        ziele: { westbindung: 1.3, unabhaengigkeit: 0.5, deutschland_klein: 1.1 },
+        berichte: ['Blum soll aus Washington mit der Überzeugung zurückgekehrt sein, Frankreich müsse sich entscheiden.', 'Im Außenministerium heißt es, Bidault habe den Glauben an eine Verständigung mit Molotow verloren.'] },
+      bruecke: { p: 0.4, name: 'Brücke', kurz: 'nein – Paris will zwischen den Blöcken vermitteln',
+        beschreibung: 'Die Regierung hält an der Rolle Frankreichs als Brücke zwischen Ost und West fest und will Deutschland mit Moskau gemeinsam kleinhalten.',
+        ziele: { westbindung: 0.3, unabhaengigkeit: 1.4, deutschland_klein: 1.7 },
+        berichte: ['Bidault soll in Moskau einen Vertrag gegen Deutschland nach dem Vorbild von 1944 angeregt haben.', 'Die kommunistischen Minister setzen im Kabinett durch, dass Paris in Deutschlandfragen nicht mit London und Washington stimmt.'] },
+    },
+  },
   dritte_kraft: {
     name: 'Dritte Kraft', kurz: 'Dritte Kraft', titel: 'Regierung der Dritten Kraft',
     lambda: 1.8, werte: WERTE, ziele: { ...BASIS, europa: 1.2, westbindung: 1.2, deutschland_einbinden: 1.3 },

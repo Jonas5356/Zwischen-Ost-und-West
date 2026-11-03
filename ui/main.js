@@ -97,9 +97,12 @@ function beginneSpiel() {
 
 // ---------------------------------------------------------------- Washington und Moskau
 
+/** Erstes Halbjahr des gespielten Landes (Länder mit späterem Einstieg beginnen mit ihrer Gründung) */
+const einstieg = () => s.gegruendet ?? W.start;
+
 /** Die vom Spiel gesteuerten Länder mit Regierungen, deren Absichten der Spieler einschätzt: [[id, Hauptstadt]] */
 const maechte = () => Object.keys(W.laender)
-  .filter(id => W.laender[id].regierungen && !welt.spieler.includes(id))
+  .filter(id => W.laender[id].regierungen && !welt.spieler.includes(id) && E.istAktiv(welt, id))
   .map(id => [id, W.laender[id].hauptstadt]);
 
 /** Verbale Einschätzung einer Wahrscheinlichkeit */
@@ -216,7 +219,7 @@ function zeichne() {
 }
 
 function zeichneKopf() {
-  $('eingang').innerHTML = `<span class="stempel">${esc(E.zeitLang(s.zeit))}<small>Runde ${s.runde} von ${E.zeitIndex(W.ende) - E.zeitIndex(W.start) + 1}</small></span>`;
+  $('eingang').innerHTML = `<span class="stempel">${esc(E.zeitLang(s.zeit))}<small>Runde ${E.zeitIndex(s.zeit) - E.zeitIndex(einstieg()) + 1} von ${E.zeitIndex(W.ende) - E.zeitIndex(einstieg()) + 1}</small></span>`;
   const k = ui.kopf(s);
   $('kopf-regierung').innerHTML = `<strong>${esc(k.titel)}</strong>${k.text ? `, ${esc(k.text)}` : ''}`;
   $('zeitung-neu').hidden = s.zeitungGelesen === s.zeit;
@@ -349,8 +352,8 @@ function ausgabe(zeit) {
   const wahl = s.wahlen.find(w => gleich(w.zeit, vor));
   const wirtschaft = s.verlauf.find(v => gleich(v.zeit, vor));
   const davor = s.verlauf.find(v => gleich(v.zeit, E.zeitPlus(vor, -1)));
-  const erste = gleich(zeit, W.start);
-  const nr = E.zeitIndex(zeit) - E.zeitIndex(W.start) + 1;
+  const erste = gleich(zeit, einstieg());
+  const nr = E.zeitIndex(zeit) - E.zeitIndex(einstieg()) + 1;
 
   const Z = ui.zeitung;
   let html = `<header class="zkopf">
@@ -377,6 +380,22 @@ function ausgabe(zeit) {
   if (aufmacher) {
     html += `<article class="aufmacher"><h3>${esc(aufmacher.titel)}</h3><p class="unterzeile">${esc(aufmacher.unter)}</p>${absaetze(aufmacher.text)}</article>`;
   }
+  // Wer später einsteigt, bekommt in der ersten Ausgabe einen Rückblick auf die Jahre davor
+  if (erste && E.zeitIndex(einstieg()) > E.zeitIndex(W.start)) {
+    const rueckblick = maechte().flatMap(([land, ort]) => (welt.laender[land].chronik || [])
+      .filter(c => E.zeitIndex(c.zeit) < E.zeitIndex(zeit) && c.ergebnis && (c.art === 'wechsel' || (c.oeffentlich && !c.inland && c.art === 'haupt' && !c.id.startsWith('dyn:'))))
+      .map(c => ({ ...c, ort, wichtig: !!W.laender[land].ereignisse?.find(e => e.id === c.id)?.rueckblick })))
+      .sort((a, b) => E.zeitIndex(a.zeit) - E.zeitIndex(b.zeit));
+    // nicht mehr als zwölf Meldungen: zuerst die Wendepunkte (`rueckblick: true` am Ereignis), dann gleichmäßig verteilt
+    const wichtige = rueckblick.filter(c => c.wichtig).slice(0, 12);
+    const andere = rueckblick.filter(c => !c.wichtig);
+    const frei = 12 - wichtige.length;
+    const auswahl = [...wichtige, ...(andere.length > frei ? andere.filter((_, i) => i % Math.ceil(andere.length / Math.max(frei, 1)) === 0).slice(0, frei) : andere)]
+      .sort((a, b) => E.zeitIndex(a.zeit) - E.zeitIndex(b.zeit));
+    if (auswahl.length) {
+      html += `<section class="rueckblick"><h4>Was seit ${E.jahrVon(W.start)} geschah</h4>${auswahl.map(c => `<div class="meldung-z"><h5>${esc(E.zeitText(c.zeit))} · ${esc(c.ort)} – ${esc(c.titel)}</h5><p>${esc(c.ergebnis)}</p></div>`).join('')}</section>`;
+    }
+  }
 
   html += `<div class="spalten">`;
   if (rest.length) {
@@ -400,7 +419,7 @@ function zeigeZeitung(zeit = s.zeit) {
   zeitungZeit = zeit;
   $('zeitung').innerHTML = ausgabe(zeit);
   $('zeitung').scrollTop = 0;
-  $('z-aelter').disabled = E.zeitIndex(zeit) <= E.zeitIndex(W.start);
+  $('z-aelter').disabled = E.zeitIndex(zeit) <= E.zeitIndex(einstieg());
   $('z-neuer').disabled = E.zeitIndex(zeit) >= E.zeitIndex(s.zeit);
   if (E.zeitIndex(zeit) === E.zeitIndex(s.zeit)) {
     s.zeitungGelesen = s.zeit;

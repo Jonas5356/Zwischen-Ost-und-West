@@ -24,8 +24,9 @@
 import { zufall, txt, zeitIndex, sicht, api } from './engine.js';
 
 /** Wird das Land vom Spiel nach Zielen gesteuert? (hat Regierungen und wird nicht gespielt) */
-const istKI = (W, welt, land) => !!W.laender[land]?.regierungen && !welt.spieler.includes(land);
-const mensch = welt => welt.spieler;
+const istKI = (W, welt, land) => !!W.laender[land]?.regierungen && !welt.spieler.includes(land) && welt.laender[land]?.aktiv !== false;
+/** Gespielte Länder, die es schon gibt (nur sie beobachten die anderen) */
+const mensch = welt => welt.spieler.filter(l => welt.laender[l]?.aktiv !== false);
 
 // ---------------------------------------------------------------- Nutzen und Wahl
 
@@ -238,6 +239,26 @@ export function pruefeRegime(W, welt, land) {
   const L = welt.laender[land];
   const r = M.regimeVon(sicht(W, welt, land));
   if (r && r !== L.regime) starteRegime(W, welt, land, r);
+}
+
+/**
+ * Ein Land ist gegründet worden: Wird es gesteuert, tritt seine Regierung an; wird es
+ * gespielt, beginnt seine Einschätzung der anderen Regierungen bei deren Vorab-Einschätzung.
+ */
+export function neuesLand(W, welt, land) {
+  if (istKI(W, welt, land)) {
+    const M = W.laender[land];
+    if (M.regimeVon) pruefeRegime(W, welt, land);
+    else if (M.startRegime) starteRegime(W, welt, land, M.startRegime);
+    return;
+  }
+  if (!welt.spieler.includes(land)) return;
+  const E = (welt.laender[land].einschaetzung ||= {});
+  for (const [andere, M] of Object.entries(W.laender)) {
+    if (andere === land || !istKI(W, welt, andere)) continue;
+    const L = welt.laender[andere];
+    E[andere] = { regime: L.regime, p: { ...typPrior(welt, M.regierungen[L.regime]) }, verlauf: [], frueher: [] };
+  }
 }
 
 /** Zu Beginn jedes Halbjahrs: Regierungswechsel, dann Berichte */

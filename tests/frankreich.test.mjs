@@ -20,7 +20,7 @@ test('Frankreich gespielt, historische Entscheidungen: die Geschichte kommt unge
   assert.ok(deGaulle >= 0.75 * n, `de Gaulle nur in ${deGaulle} von ${n}`);
   assert.ok(algerien >= 0.6 * n, `Algerien unabhängig nur in ${algerien} von ${n}`);
   assert.ok(abschluss >= 0.85 * n, `nur ${abschluss} von ${n} Partien laufen bis 1964`);
-  // Die Vierte Republik ist instabil: historisch etwa 15 Kabinette zwischen 1949 und 1958
+  // Die Vierte Republik ist instabil: historisch mehr als zwanzig Regierungen zwischen 1946 und 1958
   const schnitt = stuerze / n;
   assert.ok(schnitt >= 6 && schnitt <= 15, `im Schnitt ${schnitt.toFixed(1)} Regierungsstürze bis 1958`);
 });
@@ -66,6 +66,16 @@ test('Wer Frankreich stabilisiert, erlebt weniger Regierungsstürze', () => {
 
 test('Jedes Ereignis und jedes Vorhaben Frankreichs kommt vor', () => {
   const gesehen = new Set(), vorhaben = new Set();
+  // Seltene Wege: Frieden in Indochina nach Haiphong; ein Deutschland ohne Weststaat
+  for (let seed = 1; seed <= 20; seed++) {
+    spiele(seed, 'historisch', null, { land: 'frankreich', vorgabe: { fr_ho_sainteny: 0, fr_fontainebleau: 0, fr_haiphong: 1 } }).gesehen.forEach(x => gesehen.add(x));
+    if (gesehen.has('fr_indochina1947')) break;
+  }
+  for (let seed = 1; seed <= 300; seed++) {
+    const r = spiele(seed, 'historisch', null, { land: 'frankreich', vorgabe: { fr_london1948: 2 } });
+    r.gesehen.forEach(x => gesehen.add(x));
+    if (gesehen.has('fr_deutschland_besetzt')) break;
+  }
   for (const [str, g] of [['zufall', 1], ['zufall', 0], ['ost', 1], ['west', 0.5], ['historisch', 1]]) {
     for (let seed = 1; seed <= 60; seed++) {
       const r = spiele(seed, str, null, { land: 'frankreich', geschichtstreue: g });
@@ -104,10 +114,40 @@ test('Gesteuertes Frankreich: EVG scheitert meist, de Gaulle kommt meist, Bonn b
 test('Gesteuerte Bundesrepublik antwortet auf Paris (Postfach in beide Richtungen)', () => {
   for (let seed = 1; seed <= 20; seed++) {
     const { welt } = spiele(seed, 'historisch', null, { land: 'frankreich' });
+    if (welt.laender.brd.nie) continue; // selten: kein Weststaat
     assert.ok(welt.weltflags.schuman_antwort, 'Bonn hat den Schuman-Plan nicht beantwortet');
     assert.ok(welt.laender.brd.regierungen.length >= 1, 'Bonn hat keine Regierung mit Zielen');
     // Paris schätzt Bonns Absichten ein
     assert.ok(welt.laender.frankreich.einschaetzung.brd, 'keine Einschätzung über Bonn');
+  }
+});
+
+test('Ohne Weststaat: Frankreich spielt ohne Bundesrepublik, und ihre Inhalte bleiben aus', () => {
+  let ohne = 0;
+  for (let seed = 1; seed <= 300 && ohne < 3; seed++) {
+    const { welt, gesehen } = spiele(seed, 'historisch', null, { land: 'frankreich', vorgabe: { fr_london1948: 2 } });
+    if (!welt.laender.brd.nie) continue;
+    ohne++;
+    assert.equal(welt.ende.id, 'abschluss');
+    assert.ok(welt.weltflags.nie_brd);
+    assert.equal(welt.laender.brd.chronik.length, 0, 'die nie gegründete Bundesrepublik hat entschieden');
+    for (const id of ['fr_schuman', 'fr_pleven', 'fr_evg_unterschrift', 'fr_saarstatut', 'fr_elysee']) assert.ok(!gesehen.includes(id), id + ' ohne Bundesrepublik');
+    for (const l of ['usa', 'su']) for (const c of welt.laender[l].chronik) assert.ok(!W.laender[l].ereignisse.find(e => e.id === c.id)?.braucht, c.id + ' ohne Bundesrepublik');
+  }
+  assert.ok(ohne >= 1, 'kein Lauf ohne Bundesrepublik gefunden');
+});
+
+test('Wer die Bundesrepublik spielt, beginnt 1949/II nach einem Vorlauf ab 1946', () => {
+  for (let seed = 1; seed <= 30; seed++) {
+    const welt = E.neueWelt(W, { spieler: ['brd'], seed });
+    assert.equal(welt.zeit, 1946.1);
+    E.aktuelles(W, welt);
+    assert.equal(welt.zeit, 1949.2);
+    assert.equal(welt.laender.brd.gegruendet, 1949.2);
+    // Entscheidungen gegen die Gründung sind gesperrt, solange die Bundesrepublik gespielt wird
+    assert.notEqual(welt.weltflags.weststaat_usa, 'vier');
+    assert.ok(!welt.weltflags.berlin_aufgegeben);
+    assert.ok(welt.laender.frankreich.chronik.length > 15, 'Frankreich hat im Vorlauf entschieden');
   }
 });
 

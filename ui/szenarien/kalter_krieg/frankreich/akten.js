@@ -1,10 +1,74 @@
 // Frankreich: Briefe und kleinere Vorlagen, die zufällig auf dem Schreibtisch landen
-import { vierte, istDeGaulle, algerienkrieg } from './modell.js';
+import { vierte, istDeGaulle, algerienkrieg, indochinakrieg } from './modell.js';
 import { bonnImWesten } from './hilfen.js';
 
 const akte = a => ({ art: 'akte', ...a });
 
 export default [
+  // ------------------------------------------------------------------ 1946–1949
+  akte({
+    id: 'fa_mauriac_gnade', titel: 'Gnade für die Verurteilten?', ab: 1946.1, bis: 1946.2, ordnung: 2,
+    absender: 'François Mauriac, Schriftsteller',
+    text: 'Mauriac bittet im „Figaro“ um Milde: Die Säuberung nach der Befreiung habe genug Opfer gefordert, Tausende Kollaborateure säßen noch in den Gefängnissen, viele für Taten, die andere ungestraft begangen hätten. Die Kommunisten nennen ihn spöttisch „Saint François des Assises“ und verlangen weitere Prozesse.',
+    optionen: [
+      { text: 'Die Gerichte weiterarbeiten lassen – Gnade gibt es nur im Einzelfall.', hist: true, richtung: 'sozial', ergebnis: 'Die Säuberung geht weiter. Die Prozesse ziehen sich bis in die fünfziger Jahre.', w: { ansehen: 1 }, dient: { sozial: 0.2 } },
+      { text: 'Ein Amnestiegesetz für minder schwere Fälle vorbereiten.', richtung: 'kirche', ergebnis: 'Die Regierung kündigt eine Amnestie für minder schwere Fälle an. Die Résistance-Verbände sind empört.', w: { ansehen: -2, mehrheit: -2, armee: 1 }, dient: { stabilitaet: 0.3 } },
+    ],
+    historisch: 'Die ersten Amnestiegesetze für Kollaborateure wurden erst 1951 und 1953 beschlossen.',
+  }),
+  akte({
+    id: 'fa_leclerc', titel: 'Ein Bericht aus Indochina', ab: 1947.1, bis: 1947.1, ordnung: 1,
+    wenn: indochinakrieg,
+    absender: 'General Philippe Leclerc',
+    text: 'Leclerc ist von einer Inspektionsreise aus Indochina zurück. Sein Bericht ist deutlich: Mit Waffen allein sei der Krieg nicht zu gewinnen. Der Antikommunismus sei ein Hebel ohne Ansatzpunkt, solange die nationale Frage nicht gelöst sei. Er rät, mit den Vietnamesen zu verhandeln – auch mit Ho Chi Minh.',
+    optionen: [
+      { text: 'Den Bericht zu den Akten legen; die Armee soll die Lage wiederherstellen.', hist: true, richtung: 'kolonial', ergebnis: 'Der Bericht verschwindet in einer Schublade. Leclerc lehnt das Kommando in Indochina ab.', w: { armee: 1 }, dient: { kolonien: 0.6 } },
+      { text: 'Leclerc nach Indochina schicken – mit dem Auftrag, zu verhandeln.', richtung: 'dekolonisation', ergebnis: 'Leclerc wird Hochkommissar mit dem Auftrag, einen Ausweg zu suchen. Die Kolonialpartei ist alarmiert.', w: { indochina: 2, armee: -2 }, setze: ['indochina_verhandlung'], dient: { frieden_kolonien: 0.8 } },
+    ],
+    historisch: 'Leclerc warnte Anfang 1947 vor einem aussichtslosen Kolonialkrieg und lehnte den Oberbefehl in Indochina ab. Er starb im November 1947 bei einem Flugzeugabsturz in Algerien.',
+  }),
+  akte({
+    id: 'fa_tende', titel: 'Tende und Brigue', ab: 1947.1, bis: 1947.2, ordnung: 2,
+    absender: 'Präfekt der Alpes-Maritimes',
+    text: 'Der Friedensvertrag mit Italien spricht Frankreich die Gemeinden Tende und La Brigue in den Seealpen zu. Der Präfekt schlägt vor, die Bewohner in einer Volksabstimmung zustimmen zu lassen – das Ergebnis sei sicher, und es mache sich gut vor der Welt.',
+    optionen: [
+      { text: 'Die Volksabstimmung abhalten.', hist: true, ergebnis: 'Die Bewohner von Tende und La Brigue stimmen mit großer Mehrheit für Frankreich.', w: { rang: 1, ansehen: 1 }, dient: { unabhaengigkeit: 0.2 } },
+      { text: 'Die Grenzänderung ohne Abstimmung vollziehen.', ergebnis: 'Die Gemeinden werden ohne Abstimmung eingegliedert. In Rom ist man verstimmt.', w: { rang: -1 } },
+    ],
+    historisch: 'Tende und La Brigue kamen mit dem Pariser Friedensvertrag vom 10. Februar 1947 an Frankreich; im Oktober 1947 stimmten die Bewohner in einer Volksabstimmung zu.',
+  }),
+  akte({
+    id: 'fa_camus_madagaskar', titel: 'Die Ansteckung', ab: 1947.1, bis: 1947.2, ordnung: 5,
+    wenn: s => !!s.f.madagaskar_repression,
+    absender: 'Albert Camus, Chefredakteur des „Combat“',
+    text: 'Camus schreibt im „Combat“ über Madagaskar: Französische Polizisten foltern Verdächtige, Gefangene werden aus Flugzeugen geworfen. „Wir tun, was wir den Deutschen vorgeworfen haben“, schreibt er. Er verlangt Aufklärung.',
+    optionen: [
+      { text: 'Eine Untersuchung anordnen.', richtung: 'dekolonisation', ergebnis: 'Die Regierung schickt Inspektoren nach Madagaskar. Die Kolonialverwaltung ist empört.', w: { rang: 1, armee: -2, ansehen: 1 }, dient: { frieden_kolonien: 0.4 } },
+      { text: 'Schweigen.', hist: true, ergebnis: 'Die Regierung antwortet nicht. Der Artikel wird bald vergessen.', w: { rang: -1 }, dient: { kolonien: 0.3 } },
+    ],
+    historisch: 'Camus veröffentlichte am 10. Mai 1947 den Leitartikel „La contagion“ über die Folter auf Madagaskar.',
+  }),
+  akte({
+    id: 'fa_brot', titel: '200 Gramm Brot', ab: 1947.2, bis: 1948.1, ordnung: 3,
+    absender: 'Minister für Landwirtschaft und Versorgung',
+    text: 'Die Getreideernte ist nach dem harten Winter und einem trockenen Sommer die schlechteste seit Jahrzehnten. Der Minister will die Brotration auf 200 Gramm am Tag senken – weniger als unter der Besatzung. Die Alternative: Getreide in Amerika kaufen, mit Dollar, die Frankreich nicht hat.',
+    optionen: [
+      { text: 'Die Ration senken.', hist: true, richtung: 'sparen', ergebnis: 'Die Brotration fällt auf 200 Gramm. In den Städten gibt es Hungerdemonstrationen.', w: { ansehen: -4 }, dient: { stabilitaet: -0.2 } },
+      { text: 'Getreide in Amerika kaufen.', richtung: 'atlantisch', ergebnis: 'Paris kauft amerikanisches Getreide auf Kredit. Die Ration bleibt, die Schulden wachsen.', w: { haushalt: -4, franc: -2, usa: 2 }, dient: { sozial: 0.4 } },
+    ],
+    historisch: 'Im September 1947 wurde die Brotration auf 200 Gramm am Tag gesenkt. Die Brotkarte wurde erst im Februar 1949 abgeschafft.',
+  }),
+  akte({
+    id: 'fa_thorez', titel: 'Thorez und die Rote Armee', ab: 1949.1, bis: 1949.1, ordnung: 2,
+    wenn: s => !!s.f.pcf_raus,
+    absender: 'Jules Moch, Innenminister',
+    text: 'Maurice Thorez hat erklärt, die Werktätigen Frankreichs würden der Roten Armee nicht anders begegnen als die Werktätigen Polens und Rumäniens, falls sie Frankreich auf der Verfolgung eines Angreifers betreten müsse. Die Rechte verlangt ein Verbot der Kommunistischen Partei.',
+    optionen: [
+      { text: 'Kein Verbot – die Partei politisch bekämpfen.', hist: true, ergebnis: 'Die Regierung verzichtet auf ein Verbot. Die Kommunisten bleiben die stärkste Partei im Land, isoliert, aber legal.', w: { ansehen: 1 }, dient: { stabilitaet: 0.4 } },
+      { text: 'Ein Verfahren wegen Aufrufs zum Landesverrat einleiten.', richtung: 'atlantisch', ergebnis: 'Gegen Thorez wird ermittelt. Die Kommunisten rufen zu Massenkundgebungen auf.', w: { usa: 3, moskau: -4, mehrheit: -2, ansehen: -1 }, dient: { westbindung: 0.5, stabilitaet: -0.3 } },
+    ],
+    historisch: 'Thorez gab seine Erklärung am 22. Februar 1949 ab. Die Regierung verzichtete auf ein Verbot der PCF.',
+  }),
   akte({
     id: 'fa_juin', titel: 'Der Marschall spricht', ab: 1953.2, bis: 1954.1, ordnung: 3,
     wenn: s => !!s.f.evg_unterzeichnet && !s.weltflags.evg,

@@ -269,6 +269,9 @@ button { font: inherit; color: inherit; }
 .land-text.klein { color: var(--grau); }
 .dialog .neu { max-height: calc(100vh - 220px); overflow: auto; }
 
+/* Rückblick in der ersten Zeitungsausgabe */
+.zeitung .rueckblick { margin: 0 0 18px; padding-bottom: 12px; border-bottom: 1px solid var(--linie); }
+
 /* Telegramm */
 .blatt.telegramm { background: #f6eedb; }
 .blatt.telegramm .text { text-transform: uppercase; letter-spacing: .02em; }

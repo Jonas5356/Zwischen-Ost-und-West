@@ -69,6 +69,7 @@ test('Jedes Ereignis kommt in irgendeinem Spiel vor', () => {
 
 test('Kostenlose Vorhaben sind auch bei leerem Haushalt wählbar', () => {
   const welt = E.neueWelt(W, { spieler: ['brd'], seed: 3 });
+  E.aktuelles(W, welt); // Vorlauf bis zur Gründung der Bundesrepublik
   const s = E.sicht(W, welt, 'brd');
   s.w.haushalt = -0.4;
   const liste = E.verfuegbareVorhaben(W, welt, 'brd');
