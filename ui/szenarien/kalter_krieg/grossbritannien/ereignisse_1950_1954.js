@@ -27,6 +27,23 @@ export default [
     ],
     historisch: 'Klaus Fuchs wurde am 1. März 1950 zu vierzehn Jahren Haft verurteilt. Der Fall belastete die atomare Zusammenarbeit mit den USA bis 1958.',
   },
+  {
+    id: 'gb_colombo',
+    titel: 'Der Colombo-Plan',
+    datum: 'November 1950',
+    ab: 1950.2, bis: 1950.2, ordnung: 11,
+    absender: 'Commonwealth Relations Office',
+    text: 'Auf einer Konferenz in Colombo haben die Commonwealth-Länder einen Plan entworfen: Hilfe für die armen Länder Süd- und Südostasiens, um sie gegen den Kommunismus zu wappnen. Indien, Pakistan und Ceylon würden profitieren; London müsste einen großen Teil bezahlen – oder die Amerikaner um Hilfe bitten.',
+    optionen: [
+      { text: 'Den Plan mittragen und Geld geben.', hist: true, richtung: 'empire',
+        ergebnis: 'Der Colombo-Plan tritt in Kraft. Großbritannien gibt Geld und Experten für Süd- und Südostasien.',
+        w: { empire: 3, haushalt: -2, usa: 1 }, dient: { empire: 0.6, eindaemmung: 0.4 } },
+      { text: 'Freundlich unterstützen, aber kaum zahlen.',
+        ergebnis: 'London unterstützt den Plan mit Worten. Delhi ist enttäuscht. (Fiktion)',
+        w: { empire: -2 }, dient: { pfund: 0.3 } },
+    ],
+    historisch: 'Der Colombo-Plan wurde im November 1950 beschlossen und trat 1951 in Kraft; später traten auch die USA und Japan bei.',
+  },
   // ------------------------------------------------------------------ 1951
   {
     id: 'gb_bevan',
@@ -122,6 +139,27 @@ export default [
     ],
     historisch: 'Der Plan „Robot“ wurde im Februar und erneut im Juni 1952 im Kabinett abgelehnt. Das Pfund wurde erst 1958 für Ausländer konvertibel und erst 1972 freigegeben.',
   },
+  {
+    id: 'gb_evg',
+    titel: 'Die europäische Armee',
+    datum: 'Mai 1952',
+    ab: 1952.1, bis: 1952.1, ordnung: 5,
+    wenn: s => !s.weltflags.pleven_abgelehnt && s.weltflags.evg !== 'gescheitert',
+    absender: s => aussen(s),
+    text: s => `Sechs Länder wollen eine Europäische Verteidigungsgemeinschaft gründen, mit einer gemeinsamen Armee, in der auch deutsche Soldaten dienen. Großbritannien wird nicht Mitglied. Paris aber, wo die Mehrheit für den Vertrag wackelt, verlangt eine britische Garantie: London soll zusagen, der Gemeinschaft im Angriffsfall beizustehen und eng mit ihr zusammenzuarbeiten. ${londonerAussenKurz(s)} zögert.`,
+    optionen: [
+      { text: 'Eine Beistandsgarantie für die Gemeinschaft geben, ohne beizutreten.', hist: true,
+        ergebnis: 'London sagt der Verteidigungsgemeinschaft Beistand zu, ohne ihr beizutreten.',
+        w: { frankreich: 4, brd: 3, usa: 2 }, aktion: (s, a) => a.weltflag('gb_evg_garantie'), dient: { gleichgewicht: 0.6, eindaemmung: 0.3 } },
+      { text: 'Der Gemeinschaft beitreten – mit britischen Divisionen.', richtung: 'europa',
+        ergebnis: 'London kündigt an, der Verteidigungsgemeinschaft mit eigenen Divisionen beizutreten. In Paris wächst die Zustimmung zum Vertrag. (Fiktion)',
+        w: { frankreich: 8, brd: 6, usa: 4, europa: 8, empire: -3, rueckhalt: -4 }, aktion: (s, a) => a.weltflag('gb_evg_garantie', 'beitritt'), setze: ['evg_beitritt'], dient: { europa: 1.2, gleichgewicht: 0.6, empire: -0.4 } },
+      { text: 'Sich nicht festlegen.',
+        ergebnis: 'London gibt keine Garantie. In Paris sehen die Gegner des Vertrags sich bestätigt.',
+        w: { frankreich: -4 }, dient: { empire: 0.3 } },
+    ],
+    historisch: 'Am 27. Mai 1952 schloss Großbritannien mit der EVG einen Beistandsvertrag. Im April 1954 sagte London eine enge Zusammenarbeit zu – zu spät, um die Nationalversammlung zu überzeugen.',
+  },
   // ------------------------------------------------------------------ 1953
   {
     id: 'gb_gipfel',
@@ -197,6 +235,23 @@ export default [
         w: { rueckhalt: -2 }, setze: ['fernsehen_entschieden'], dient: { sozial: 0.2 } },
     ],
     historisch: 'Der Television Act wurde im Juli 1954 verabschiedet; ITV sendete ab September 1955.',
+  },
+  {
+    id: 'gb_guayana',
+    titel: 'Britisch-Guayana',
+    datum: 'Oktober 1953',
+    ab: 1953.2, bis: 1953.2, ordnung: 10,
+    absender: 'Kolonialministerium',
+    text: 'In Britisch-Guayana hat die Fortschrittliche Volkspartei unter Cheddi Jagan die ersten freien Wahlen gewonnen. Sie will die Zuckerplantagen reformieren und den Gewerkschaften mehr Rechte geben; der Gouverneur und Washington halten Jagan für einen Kommunisten. Der Gouverneur schlägt vor, die Verfassung außer Kraft zu setzen und Truppen zu schicken.',
+    optionen: [
+      { text: 'Die Verfassung aussetzen und Truppen schicken.', hist: true, richtung: 'empire',
+        ergebnis: 'Nach nur 133 Tagen wird die gewählte Regierung abgesetzt; britische Truppen landen in Georgetown.',
+        w: { usa: 3, empire: -1, ansehen: -2 }, dient: { eindaemmung: 0.6, sonderverhaeltnis: 0.4 } },
+      { text: 'Jagan regieren lassen.', richtung: 'dekolonisation',
+        ergebnis: 'Jagan bleibt im Amt. Washington ist besorgt, in der Karibik ist man erleichtert. (Fiktion)',
+        w: { usa: -4, empire: 1, ansehen: 1 }, dient: { sozial: 0.3, sonderverhaeltnis: -0.4 } },
+    ],
+    historisch: 'Am 9. Oktober 1953 setzte London die Verfassung von Britisch-Guayana außer Kraft und schickte Truppen.',
   },
   // ------------------------------------------------------------------ 1954
   {

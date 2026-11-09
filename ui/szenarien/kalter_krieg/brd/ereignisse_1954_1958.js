@@ -2,7 +2,7 @@
 import { pariserChef, pariserSpitze, pariserAussen, deGaulleRegiert } from '../frankreich/hilfen.js';
 import { west, geteilt, vereinigt, imBuendnis, adenauer, regiertMit, land, Land, wahlIn, hauptstadt, unionRegiert, spdRegiert, SPD_WAHLKAMPF, praesident, usaAussen, suChef, suRegime } from './hilfen.js';
 import { hatMehrheit } from './modell.js';
-import { londonerAussen, londonerAussenKurz, londonerChefKurz } from '../grossbritannien/hilfen.js';
+import { londonerAussen, londonerAussenKurz, londonerChef, londonerChefKurz } from '../grossbritannien/hilfen.js';
 
 export default [
   // ------------------------------------------------------------------ 1954/I
@@ -778,5 +778,26 @@ Nun lädt er ${s.kanzler === 'Adenauer' ? 'dich' : 'den Kanzler'} in sein Landha
         w: { usa: -10, moskau: 8, ansehen: -6, flucht: 12 }, setze: ['berlinkrise', 'freistadt_verhandlung'] },
     ],
     historisch: 'Das Ultimatum vom 27. November 1958 eröffnete die zweite Berlinkrise. Die Westmächte lehnten ab, ließen das Ultimatum aber durch Verhandlungen auslaufen. Die Krise endete erst mit dem Mauerbau 1961.',
+  },
+  {
+    id: 'devisenausgleich',
+    titel: 'Die Kosten der Rheinarmee',
+    ab: 1955.2, bis: 1964.1, ordnung: 12.9,
+    wiederholbar: true,
+    wenn: s => !s.f.vereinigt,
+    ausloeser: 'devisenausgleich', ausloeserVon: 'grossbritannien',
+    absender: 'Auswärtiges Amt, Abteilung West',
+    text: s => `London bittet um Geld. Die britische Rheinarmee koste jedes Jahr Dutzende Millionen Pfund in Devisen, während die Bundesrepublik Überschüsse anhäufe; ohne einen Ausgleich müsse London Truppen abziehen. ${londonerChef(s)} denkt an Vorauszahlungen für Rüstungskäufe in Großbritannien. Der Finanzminister will nicht zahlen, das Auswärtige Amt fürchtet um die britischen Divisionen am Rhein.`,
+    optionen: [
+      { text: 'Zahlen: Vorauszahlungen und Rüstungskäufe in Großbritannien.', hist: true, richtung: 'west',
+        ergebnis: 'Bonn sagt London einen Devisenausgleich für die Rheinarmee zu.',
+        w: { haushalt: -3, grossbritannien: 5 },
+        bei: { grossbritannien: { titel: 'Bonn zahlt', w: { haushalt: 4, pfund: 3, brd: 3 }, ergebnis: 'Bonn sagt einen Devisenausgleich für die Rheinarmee zu.' } } },
+      { text: 'Ablehnen – die Truppen schützen auch Großbritannien.',
+        ergebnis: 'Bonn lehnt einen Devisenausgleich ab. In London wird über einen Abzug von Truppen gesprochen.',
+        w: { grossbritannien: -4 },
+        bei: { grossbritannien: { titel: 'Bonn zahlt nicht', w: { brd: -2 }, ergebnis: 'Bonn lehnt einen Devisenausgleich für die Rheinarmee ab.' } } },
+    ],
+    historisch: 'Ab 1958 schlossen Bonn und London Abkommen über einen Devisenausgleich; die Bundesrepublik leistete Vorauszahlungen und kaufte Rüstungsgüter in Großbritannien.',
   },
 ];

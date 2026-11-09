@@ -256,10 +256,15 @@ export const legislaturAlter = s => zeitIndex(s.zeit) - zeitIndex(s.legislaturBe
 export const spaetestens = s => zeitPlus(s.legislaturBeginn, 10);
 export const wahlAngesetzt = s => (s.wahlplan || []).some(z => zeitIndex(z) === zeitIndex(s.zeit));
 
-/** Die Regierung löst das Unterhaus auf: Wahl am Ende dieses Halbjahrs */
+/**
+ * Die Regierung löst das Unterhaus auf: Wahl am Ende dieses Halbjahrs – oder des nächsten, wenn
+ * das Halbjahr schon abgeschlossen ist (Krisen nach dem Rundenende). Die Frist von fünf Jahren bleibt.
+ */
 export function aufloesen(s) {
-  if (wahlAngesetzt(s)) return;
-  s.wahlplan = [...(s.wahlplan || []).filter(z => zeitIndex(z) < zeitIndex(s.zeit)), s.zeit];
+  const z = s.welt?.modellGelaufen ? zeitPlus(s.zeit, 1) : s.zeit;
+  const plan = s.wahlplan || [];
+  if (plan.some(t => zeitIndex(t) === zeitIndex(z))) return;
+  s.wahlplan = [...plan.filter(t => zeitIndex(t) < zeitIndex(z)), z, ...plan.filter(t => zeitIndex(t) > zeitIndex(z))];
 }
 
 // Wahltermine wie in der Geschichte – die gesteuerte Regierung hält sich daran, wenn die Lage passt

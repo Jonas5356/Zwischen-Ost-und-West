@@ -2,7 +2,7 @@
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "Zwischen Ost und West",
   "mainBinaryName": "zwischen-ost-und-west",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "identifier": "io.github.jonas5356.zwischenostundwest",
   "build": {
     "frontendDist": "../ui"

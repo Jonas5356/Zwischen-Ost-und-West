@@ -106,6 +106,23 @@ export default [
     historisch: 'Großbritannien trat dem Bagdadpakt am 5. April 1955 bei; die USA wurden nie Mitglied.',
   },
 
+  {
+    id: 'gb_genfer_gipfel',
+    titel: 'Der Gipfel von Genf',
+    datum: 'Juli 1955',
+    ab: 1955.2, bis: 1955.2, ordnung: 7,
+    absender: s => aussen(s),
+    text: s => `Zum ersten Mal seit Potsdam treffen sich die Regierungschefs der vier Mächte, in Genf. ${praesident(s)} schlägt vor, einander Luftaufnahmen der Rüstung zu erlauben – „offener Himmel“. London könnte einen eigenen Plan vorlegen: Deutschland in freien Wahlen vereinigen, dafür eine Zone in der Mitte Europas, in der Ost und West ihre Truppen begrenzen.`,
+    optionen: [
+      { text: 'Den britischen Plan vorlegen: Einheit durch Wahlen, eine Zone mit begrenzten Truppen.', hist: true,
+        ergebnis: 'In Genf legt London einen Plan für Deutschland und eine Zone begrenzter Rüstung vor. Moskau lehnt freie Wahlen ab; man trennt sich freundlich und ergebnislos.',
+        w: { moskau: 3, ansehen: 2, brd: 1 }, dient: { entspannung: 0.8, gleichgewicht: 0.3 } },
+      { text: 'Sich ganz hinter den amerikanischen Vorschlag stellen.', richtung: 'atlantisch',
+        ergebnis: 'London unterstützt den „offenen Himmel“ der Amerikaner. Moskau lehnt ab.',
+        w: { usa: 3, moskau: -1 }, dient: { sonderverhaeltnis: 0.6 } },
+    ],
+    historisch: 'Auf dem Genfer Gipfel im Juli 1955 legte Eden einen Plan für eine entmilitarisierte Zone in Mitteleuropa vor; Eisenhower schlug „Open Skies“ vor. Beides scheiterte.',
+  },
   // ------------------------------------------------------------------ 1956
   {
     id: 'gb_todesstrafe',

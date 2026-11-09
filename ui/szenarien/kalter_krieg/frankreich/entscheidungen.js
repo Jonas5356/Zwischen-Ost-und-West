@@ -49,6 +49,8 @@ export default [
     aktion: (s, a) => a.sende('grossbritannien', 'abstimmung'),
     ergebnis: 'Paris schlägt London vor, die Haltung beider Länder abzustimmen, bevor Washington entscheidet.',
     richtung: 'national',
+    ki: true,
+    dient: { unabhaengigkeit: 0.4, kolonien: 0.2 },
   },
   {
     id: 'franc_abwertung',

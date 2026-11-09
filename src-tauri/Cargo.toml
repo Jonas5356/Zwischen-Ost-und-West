@@ -1,6 +1,6 @@
 [package]
 name = "zwischen-ost-und-west"
-version = "0.8.0"
+version = "0.9.0"
 description = "Historische Politiksimulation: die Bundesrepublik zwischen Ost und West, 1949–1964"
 edition = "2021"
 license = "MIT"

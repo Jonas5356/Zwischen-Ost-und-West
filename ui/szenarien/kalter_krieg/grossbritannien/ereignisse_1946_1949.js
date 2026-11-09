@@ -93,6 +93,23 @@ export default [
     historisch: 'Die Bizone entstand am 1. Januar 1947. Großbritannien konnte die Kosten der Besatzung kaum noch tragen.',
   },
 
+  {
+    id: 'gb_kalkutta',
+    titel: 'Der Tag der direkten Aktion',
+    datum: 'August 1946',
+    ab: 1946.2, bis: 1946.2, ordnung: 8,
+    absender: 'Vizekönig von Indien',
+    text: 'Die Muslimliga hat zu einem „Tag der direkten Aktion“ für einen eigenen Staat Pakistan aufgerufen. In Kalkutta sind binnen vier Tagen mehr als 4.000 Menschen getötet worden, Hindus wie Muslime. Der Vizekönig will eine Übergangsregierung unter Jawaharlal Nehru bilden, auch ohne die Muslimliga – oder er lässt die Armee die Ordnung wiederherstellen und verschiebt alle Verhandlungen.',
+    optionen: [
+      { text: 'Eine Übergangsregierung unter Nehru bilden und weiter verhandeln.', hist: true, richtung: 'dekolonisation',
+        ergebnis: 'Im September tritt in Delhi eine Übergangsregierung unter Jawaharlal Nehru an; später tritt auch die Muslimliga bei.',
+        w: { empire: -2, ansehen: 1 }, dient: { sozial: 0.3, empire: 0.1 } },
+      { text: 'Die Armee einsetzen und die Verhandlungen aussetzen.', richtung: 'empire',
+        ergebnis: 'Die Armee wird in den Unruhegebieten eingesetzt, die Verhandlungen ruhen. Der Kongress spricht von Verrat. (Fiktion)',
+        w: { empire: 1, ansehen: -2, haushalt: -2 }, setze: ['indien_hart'], dient: { empire: 0.6 } },
+    ],
+    historisch: 'Bei den Unruhen in Kalkutta ab dem 16. August 1946 starben über 4.000 Menschen. Am 2. September trat Nehrus Übergangsregierung an.',
+  },
   // ------------------------------------------------------------------ 1947
   {
     id: 'gb_kaeltewinter',
@@ -129,6 +146,24 @@ export default [
         dient: { eindaemmung: 0.8, empire: 0.4, pfund: -0.4 } },
     ],
     historisch: 'Die britischen Noten vom 21. Februar 1947 lösten die Truman-Doktrin aus: Washington übernahm die Hilfe für Griechenland und die Türkei.',
+  },
+  {
+    id: 'gb_marshall',
+    titel: 'Das Angebot aus Harvard',
+    datum: 'Juli 1947',
+    ab: 1947.2, bis: 1947.2, ordnung: 6.5,
+    wenn: s => !!s.weltflags.marshall_angebot,
+    absender: s => aussen(s),
+    text: s => `Außenminister Marshall hat in Harvard ganz Europa Hilfe angeboten, wenn die Europäer gemeinsam einen Plan vorlegen. ${londonerAussenKurz(s)} will das Angebot „mit beiden Händen“ ergreifen und mit Paris eine Konferenz der Europäer einberufen. Großbritannien wäre damit ein Land unter vielen, die gemeinsam planen – nicht mehr die Weltmacht, die mit Washington auf Augenhöhe verhandelt.`,
+    optionen: [
+      { text: 'Mit Paris eine europäische Konferenz einberufen.', hist: true, richtung: 'europa',
+        ergebnis: 'London und Paris laden die Europäer nach Paris ein. Sechzehn Länder legen einen gemeinsamen Plan vor; Moskau verbietet seinen Satelliten die Teilnahme.',
+        w: { usa: 4, frankreich: 4, haushalt: 3, impuls: 0.6, europa: 2 }, setze: ['marshallplan'], dient: { sonderverhaeltnis: 0.6, eindaemmung: 0.4, gleichgewicht: 0.3 } },
+      { text: 'Auf ein eigenes Abkommen mit Washington bestehen.',
+        ergebnis: 'London verlangt eine Sonderbehandlung als Partner Washingtons. Die Amerikaner sind verärgert; die Hilfe fließt später und spärlicher. (Fiktion)',
+        w: { usa: -4, frankreich: -3, haushalt: 1 }, setze: ['marshallplan'], dient: { empire: 0.4, sonderverhaeltnis: 0.2, europa: -0.4 } },
+    ],
+    historisch: 'Bevin und Bidault luden im Juli 1947 zur Pariser Konferenz; Großbritannien erhielt von allen Ländern die meisten Mittel des Marshallplans.',
   },
   {
     id: 'gb_exodus',
@@ -241,6 +276,23 @@ export default [
     historisch: 'Die Royal Air Force flog in der Operation „Plainfare“ rund ein Viertel der Fracht der Berliner Luftbrücke.',
   },
 
+  {
+    id: 'gb_wehrpflicht',
+    titel: 'Wehrpflicht im Frieden',
+    datum: 'Dezember 1948',
+    ab: 1948.2, bis: 1948.2, ordnung: 11,
+    absender: 'Verteidigungsministerium',
+    text: 'Zum ersten Mal in der Geschichte des Landes soll es auch im Frieden eine Wehrpflicht geben. Die Armee braucht Soldaten für Deutschland, Malaya, Palästina, die Kanalzone und Hongkong; die Berlinkrise zeigt, wie dünn die Decke ist. Die Generäle wollen achtzehn Monate Dienst. Die Gewerkschaften und viele Labour-Abgeordnete sind dagegen.',
+    optionen: [
+      { text: 'Achtzehn Monate Wehrdienst für alle jungen Männer.', hist: true,
+        ergebnis: 'Die Wehrpflicht wird auf achtzehn Monate festgelegt. Jedes Jahr werden 160.000 junge Männer einberufen.',
+        w: { usa: 3, gewerkschaften: -3, rueckhalt: -2 }, setze: ['wehrpflicht_bleibt'], dient: { eindaemmung: 0.6, empire: 0.6 } },
+      { text: 'Die Wehrpflicht auslaufen lassen und auf eine Berufsarmee setzen.',
+        ergebnis: 'Die Wehrpflicht läuft aus. Die Armee schrumpft; die Generäle warnen, das Empire sei nicht mehr zu halten. (Fiktion)',
+        w: { usa: -4, empire: -4, haushalt: 3, gewerkschaften: 3 }, dient: { pfund: 0.5, sozial: 0.4, empire: -0.5 } },
+    ],
+    historisch: 'Das Wehrpflichtgesetz von 1948 trat am 1. Januar 1949 in Kraft; 1950 wurde der Dienst wegen des Koreakriegs auf zwei Jahre verlängert. Die letzten Wehrpflichtigen wurden 1960 einberufen.',
+  },
   // ------------------------------------------------------------------ 1949
   {
     id: 'gb_nato',

@@ -31,5 +31,6 @@ export default [
     aktion: (s, a) => a.sende('grossbritannien', 'berlin_rueckendeckung'),
     ergebnis: 'Bonn bittet London um eine öffentliche Zusage für West-Berlin.',
     richtung: 'west',
+    ki: true,
   },
 ];

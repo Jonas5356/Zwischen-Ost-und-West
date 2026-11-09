@@ -89,14 +89,15 @@ export default [
     ],
     historisch: 'Der Streik der ASLEF dauerte vom 28. Mai bis 14. Juni 1955; die Regierung rief den Notstand aus.',
   }),
-  akte({
-    id: 'ga_bbc_suez', titel: 'Die BBC und Suez', ab: 1956.2, bis: 1956.2, ordnung: 10.5,
-    wenn: s => s.weltflags.suez_london === 'ja',
+  // Kein Zufallsbrief, sondern ein Vorgang: Er hängt davon ab, wie London sich bei Suez entscheidet
+  ({
+    id: 'gb_bbc_suez', titel: 'Die BBC und Suez', ab: 1956.2, bis: 1956.2, ordnung: 10.5,
+    wenn: s => s.weltflags.suez_london === 'ja' && !!s.weltflags.suez_angriff,
     absender: 'Büro des Premierministers',
     text: 'Die BBC lässt den Oppositionsführer nach der Ansprache des Premierministers antworten, und ihr Auslandsdienst berichtet über die Kritik in der britischen Presse. In Downing Street ist man außer sich; ein Minister schlägt vor, die BBC unter Regierungsaufsicht zu stellen, solange die Krise dauert.',
     optionen: [
-      { text: 'Die BBC gewähren lassen.', hist: true, ergebnis: 'Die Regierung lässt die BBC gewähren. Ihr Ruf als unabhängiger Sender wächst in aller Welt.', w: { ansehen: 1 } },
-      { text: 'Dem Auslandsdienst die Mittel kürzen.', ergebnis: 'Die Regierung kürzt dem Auslandsdienst die Mittel. Die Presse spricht von Zensur. (Fiktion)', w: { ansehen: -3 } },
+      { text: 'Die BBC gewähren lassen.', hist: true, ergebnis: 'Die Regierung lässt die BBC gewähren. Ihr Ruf als unabhängiger Sender wächst in aller Welt.', w: { ansehen: 1 }, dient: { sozial: 0.2 } },
+      { text: 'Dem Auslandsdienst die Mittel kürzen.', ergebnis: 'Die Regierung kürzt dem Auslandsdienst die Mittel. Die Presse spricht von Zensur. (Fiktion)', w: { ansehen: -3, haushalt: 1 }, dient: { empire: 0.3 } },
     ],
     historisch: 'Eden erwog während der Suezkrise, die BBC unter Regierungskontrolle zu stellen; Pläne zur Kürzung des Auslandsdienstes wurden nicht umgesetzt.',
   }),

@@ -69,14 +69,14 @@ function treueText() {
 let gewaehltesLand = null;
 function laenderWahl() {
   if (!W.spielbar.includes(gewaehltesLand)) gewaehltesLand = W.spielbar.includes(einst.land) ? einst.land : W.spielbar[0];
-  const andere = id => W.spielbar.filter(x => x !== id).map(x => W.laender[x].kurz || W.laender[x].name);
+  // Kurze Karten zur Wahl, darunter die Beschreibung des gewählten Landes
   $('n-laender').innerHTML = W.spielbar.map(id => {
     const M = W.laender[id];
     return `<button class="land-karte${id === gewaehltesLand ? ' gewaehlt' : ''}" data-land="${id}" aria-pressed="${id === gewaehltesLand}">
-      <span class="land-name">${esc(M.name)}</span><span class="land-rolle">${esc(M.rolle)}</span>
-      <span class="land-text">${esc(M.beschreibung)}</span>
-      <span class="land-text klein">${esc(M.oberflaeche.rolle)}${andere(id).length ? ` Die ${esc(andere(id).join(' und '))} steuert das Spiel.` : ''}</span></button>`;
+      <span class="land-name">${esc(M.name)}</span><span class="land-rolle">${esc(M.rolle)}${M.untertitel ? `, ${esc(M.untertitel)}` : ''}</span></button>`;
   }).join('');
+  const G = W.laender[gewaehltesLand];
+  $('n-land-detail').innerHTML = `<p class="land-text">${esc(G.beschreibung)}</p><p class="land-text klein">${esc(G.oberflaeche.rolle)}</p>`;
   $('n-laender').querySelectorAll('[data-land]').forEach(b => { b.onclick = () => { gewaehltesLand = b.dataset.land; laenderWahl(); }; });
 }
 function starteNeu() {

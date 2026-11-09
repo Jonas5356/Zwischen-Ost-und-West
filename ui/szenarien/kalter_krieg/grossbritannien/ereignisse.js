@@ -429,10 +429,10 @@ In Sèvres haben französische und israelische Unterhändler einen Plan vorgeleg
     optionen: [
       { text: 'Das Abkommen schließen.', hist: true,
         ergebnis: 'London und Washington schließen ein Abkommen über die Zusammenarbeit bei Atomwaffen. In Paris sieht man es mit Neid.',
-        w: { usa: 8, atom: 10, frankreich: -3 }, setze: ['atomabkommen'], dient: { sonderverhaeltnis: 1.2, atom: 0.6 } },
+        w: { usa: 8, atom: 10, frankreich: -3 }, setze: ['atomabkommen'], dient: { sonderverhaeltnis: 0.8, atom: 0.4 } },
       { text: 'Die eigene Bombe unabhängig halten.',
         ergebnis: 'London lehnt eine Bindung an die amerikanische Atomtechnik ab. (Fiktion)',
-        w: { usa: -3, haushalt: -2 }, setze: ['atomabkommen'], dient: { atom: 0.4, sonderverhaeltnis: -0.6 } },
+        w: { usa: -2, haushalt: -1 }, setze: ['atomabkommen'], dient: { atom: 0.8, gleichgewicht: 0.3, sonderverhaeltnis: -0.2 } },
     ],
     historisch: 'Das amerikanisch-britische Abkommen über gegenseitige Verteidigung wurde am 3. Juli 1958 unterzeichnet und gilt bis heute.',
   },

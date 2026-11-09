@@ -307,6 +307,24 @@ const ereignisse = [
     ],
   },
   {
+    id: 'usa_kredit_gb', titel: 'Ein Kredit für London?', nurRueckfrage: true, wiederholbar: true,
+    optionen: [
+      { text: 'London mit einem Beistandskredit helfen.', antwort: 'ja', hist: true, gunst: 0.6, dient: { buendnis_fuehren: 0.6, kosten_senken: -0.3 }, w: { kosten: -3 },
+        ergebnis: 'Washington hilft London mit einem Beistandskredit.' },
+      { text: 'Ablehnen – die Briten sollen ihren Haushalt in Ordnung bringen.', antwort: 'nein', dient: { kosten_senken: 0.7 },
+        ergebnis: 'Washington lehnt einen Kredit für London ab.' },
+    ],
+  },
+  {
+    id: 'usa_atom_gb', titel: 'Atomare Zusammenarbeit mit London?', nurRueckfrage: true, wiederholbar: true,
+    optionen: [
+      { text: 'Mit London wieder Wissen über Atomwaffen teilen.', antwort: 'ja', gunst: 0.2, dient: s => ({ buendnis_fuehren: 0.5, eindaemmung: 0.3, atomkontrolle: s.weltflags.sputnik ? 0 : -1.2 }),
+        ergebnis: 'Washington ist bereit, mit London wieder Wissen über Atomwaffen zu teilen.' },
+      { text: 'Ablehnen – das Gesetz verbietet es, und nach dem Fall Fuchs erst recht.', antwort: 'nein', hist: true, dient: { atomkontrolle: 0.6 },
+        ergebnis: 'Washington lehnt eine atomare Zusammenarbeit mit London ab.' },
+    ],
+  },
+  {
     id: 'usa_vautour', titel: 'Luftangriffe für Điện Biên Phủ?', nurRueckfrage: true, wiederholbar: true,
     optionen: [
       { text: 'Die Viet Minh vor Điện Biên Phủ aus der Luft angreifen.', antwort: 'ja', dient: { eindaemmung: 1.2, entspannung: -0.8, buendnis_fuehren: 0.4 }, w: { rueckhalt: -6, su: -6 },
