@@ -805,6 +805,7 @@ function vorhabenAnwenden(W, welt, land, id) {
     L.vorhabenZuletzt[v.id] = welt.zeit;
     titel = txt(v.titel, s);
     if (v.ergebnis) texte.push(txt(v.ergebnis, s));
+    if (v.zufall) wendeZufall(W, welt, land, v, texte);
     historisch = txt(v.historisch, s) || null;
     const aenderungen = differenz(M, vorher, s);
     L.chronik.push({ zeit: welt.zeit, id: 'vorhaben:' + v.id, titel, art: 'vorhaben', wahl: 'Regierungsvorhaben', hist: null, ergebnis: texte.join(' '), oeffentlich: false, ...(aenderungen.length ? { aenderungen } : {}) });

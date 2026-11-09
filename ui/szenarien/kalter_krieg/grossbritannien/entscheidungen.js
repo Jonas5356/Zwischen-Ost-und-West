@@ -1,9 +1,20 @@
 // Großbritannien: Entscheidungen, die die Regierung jederzeit treffen kann
 import { annaeherungen, konjunkturprogramm } from '../entscheidungen.js';
+import { aufloesen, legislaturAlter, wahlAngesetzt, premier } from './modell.js';
 
 export default [
   ...annaeherungen('grossbritannien'),
   konjunkturprogramm(),
+  {
+    id: 'aufloesung',
+    titel: 'Das Unterhaus auflösen',
+    text: 'Du bittest den Monarchen, das Unterhaus aufzulösen; gewählt wird am Ende dieses Halbjahrs. Wer gut in den Umfragen liegt, kann sich eine neue, größere Mehrheit holen – wer sich verschätzt, verliert die Regierung. Spätestens fünf Jahre nach der letzten Wahl muss ohnehin gewählt werden.',
+    moeglich: s => (wahlAngesetzt(s) ? 'Die Wahl ist schon angesetzt.' : legislaturAlter(s) < 2 ? 'Das Unterhaus ist gerade erst gewählt worden.' : true),
+    abklingzeit: 1,
+    aktion: s => aufloesen(s),
+    ergebnis: s => `${premier(s)} löst das Unterhaus auf. Gewählt wird noch in diesem Halbjahr.`,
+    historisch: [1950.1, 1951.2, 1955.1, 1959.2],
+  },
   {
     id: 'pfund_abwertung',
     titel: 'Das Pfund abwerten',

@@ -1,4 +1,5 @@
-// Regierungen Großbritanniens (vom Spiel gesteuert, ki.js) und ihre Wechsel.
+// Regierungen Großbritanniens für die vom Spiel gesteuerte Politik (ki.js). Welche Regierung
+// im Amt ist, bestimmt das Modell (regimeVon: der Premierminister).
 //
 // Ziele (b_g), auf die sich `dient` an den Optionen bezieht:
 //   empire              Empire und Commonwealth zusammenhalten
@@ -13,7 +14,7 @@
 
 const WERTE = {
   usa: 0.6, frankreich: 0.3, brd: 0.2, moskau: 0.15, empire: 0.8, pfund: 0.6, haushalt: 0.4, wachstum: 0.4,
-  inflation: -0.4, arbeitslosigkeit: -0.4, ansehen: 0.6, rueckhalt: 0.6, atom: 0.3, europa: 0.2, impuls: 0.5,
+  inflation: -0.4, arbeitslosigkeit: -0.4, ansehen: 0.6, rueckhalt: 0.6, atom: 0.3, europa: 0.2, impuls: 0.5, gewerkschaften: 0.3, zustimmung: 0.3,
 };
 const BASIS = { empire: 1.0, sonderverhaeltnis: 1.2, europa: 0.4, gleichgewicht: 0.8, atom: 0.8, pfund: 0.8, eindaemmung: 1.0, entspannung: 0.4, sozial: 0.4 };
 
@@ -124,80 +125,14 @@ export const REGIERUNGEN = {
   },
 };
 
-// ---------------------------------------------------------------- Wechsel
+// ---------------------------------------------------------------- Parteiführer
 //
-// Regulär wird nach fünf Jahren gewählt. Außerordentlich nur, wenn die Lage danach ist:
-// 1951 bei knapper Labour-Mehrheit, 1955, wenn ein neuer Premierminister sich bestätigen lässt.
+// Wer regiert, ergibt sich aus dem Modell (modell.js: Wahlen, Nachfolge in der Partei).
+// Die Führer der Opposition wechseln nach diesem Kalender, wenn nichts anderes geschieht.
 
-const LABOUR = ['attlee', 'gaitskell', 'wilson'];
-const istLabour = r => LABOUR.includes(r);
-/** Wer gerade die Konservativen führt, wenn sie an die Regierung kommen */
-const toryChef = z => (z < 1955.1 ? 'churchill' : z < 1957.1 ? 'eden' : z < 1963.2 ? 'macmillan' : 'home');
-/** Wer gerade Labour führt */
-const labourChef = z => (z < 1955.2 ? 'attlee' : z < 1963.1 ? 'gaitskell' : 'wilson');
-const tories = s => (!istLabour(s.regime) ? s.regime : toryChef(s.zeit));
-const labour = s => (istLabour(s.regime) ? s.regime : labourChef(s.zeit));
-const name = r => REGIERUNGEN[r].name;
-const merke = z => s => { s.f.letzte_wahl = z; };
-
-/** Wie die Lage der Regierungspartei hilft (−1 … 1): Umfrage um 42 % herum */
-const lage = s => Math.max(-1, Math.min(1, (s.w.zustimmung - 42) / 12));
-/** Gewicht „frei“ eines Ausgangs: Wer regiert und gut dasteht, gewinnt eher */
-const frei = (g, lab) => s => g * (1 + 0.6 * (istLabour(s.regime) === lab ? lage(s) : -lage(s)));
-
-/** Eine Unterhauswahl mit den Ausgängen „Konservative“ und „Labour“ (Gewichte historisch / frei) */
-function wahl(id, zeit, titel, wenn, { tory = [0.5, 0.5], lab = [0.5, 0.5], knapp = null } = {}) {
-  const fiktion = h => (h ? '' : ' (Fiktion)');
-  const ausgaenge = [
-    { regime: tories, hist: tory[0], frei: frei(tory[1], false), aktion: merke(zeit),
-      meldung: s => (istLabour(s.regimeVorher)
-        ? `Die Konservativen gewinnen die Unterhauswahl; ${name(s.regime)} wird Premierminister.${fiktion(tory[0])}`
-        : `Die Konservativen behalten die Mehrheit; ${name(s.regime)} bleibt Premierminister.${fiktion(tory[0])}`) },
-    { regime: labour, hist: lab[0], frei: frei(lab[1], true), aktion: merke(zeit),
-      meldung: s => (istLabour(s.regimeVorher)
-        ? `Labour behält die Mehrheit; ${name(s.regime)} bleibt Premierminister.${fiktion(lab[0])}`
-        : `Labour gewinnt die Unterhauswahl; ${name(s.regime)} wird Premierminister.${fiktion(lab[0])}`) },
-  ];
-  if (knapp) ausgaenge.push({ regime: labour, hist: knapp[0], frei: frei(knapp[1], true), aktion: s => { merke(zeit)(s); s.f.knapp = true; },
-    meldung: s => `Labour gewinnt die Unterhauswahl, aber nur mit fünf Sitzen Mehrheit. ${name(s.regime)} bleibt Premierminister.${fiktion(knapp[0])}` });
-  return { id, zeit, titel, wenn, ausgaenge };
-}
-
-export const WECHSEL = [
-  wahl('wahl1950', 1950.1, 'Unterhauswahl 1950', s => !s.f.letzte_wahl, { tory: [0, 0.4], lab: [0, 0.25], knapp: [1, 0.35] }),
-  wahl('wahl1951', 1951.2, 'Vorgezogene Unterhauswahl 1951', s => !!s.f.knapp && istLabour(s.regime), { tory: [1, 0.55], lab: [0, 0.45] }),
-  { id: 'churchill_ruecktritt', zeit: 1955.1, von: ['churchill'], titel: 'Churchills Rücktritt',
-    ausgaenge: [
-      { regime: 'eden', hist: 1, frei: 0.7, meldung: 'Winston Churchill tritt mit 80 Jahren zurück. Sein Nachfolger wird Außenminister Anthony Eden.' },
-      { regime: 'churchill', hist: 0, frei: 0.3, meldung: 'Churchill denkt nicht an den Rücktritt. (Fiktion)' },
-    ] },
-  // Ein neuer Premierminister lässt sich bestätigen – nur, wenn die letzte Wahl 1951 war
-  wahl('wahl1955e', 1955.1, 'Vorgezogene Unterhauswahl 1955', s => s.regime === 'eden' && s.f.letzte_wahl === 1951.2, { tory: [1, 0.6], lab: [0, 0.4] }),
-  // Regulär fünf Jahre nach der letzten Wahl
-  wahl('wahl1955', 1955.1, 'Unterhauswahl 1955', s => s.f.letzte_wahl === 1950.1),
-  { id: 'attlee_ruecktritt', zeit: 1955.2, von: ['attlee'], titel: 'Attlees Rücktritt',
-    ausgaenge: [{ regime: 'gaitskell', hist: 1, frei: 1, meldung: 'Clement Attlee tritt mit 72 Jahren zurück; Hugh Gaitskell übernimmt Partei und Regierung. (Fiktion)' }] },
-  wahl('wahl1956', 1956.2, 'Unterhauswahl 1956', s => s.f.letzte_wahl === 1951.2),
-  // Nach Suez: Eden geht, wenn London in Ägypten gescheitert ist
-  { id: 'eden_suez', zeit: 1957.1, von: ['eden'], titel: 'Edens Rücktritt', wenn: s => s.weltflags.suez_london === 'ja' && !!s.weltflags.suez_druck,
-    ausgaenge: [
-      { regime: 'macmillan', hist: 1, frei: 0.55, meldung: 'Gesundheitlich angeschlagen und durch Suez gedemütigt, tritt Anthony Eden zurück. Nachfolger wird Schatzkanzler Harold Macmillan.' },
-      { regime: 'butler', hist: 0, frei: 0.45, meldung: 'Nach Edens Rücktritt wählt die Fraktion nicht Macmillan, sondern R. A. Butler zum Premierminister. (Fiktion)' },
-    ] },
-  { id: 'eden_gesundheit', zeit: 1957.1, von: ['eden'], titel: 'Edens Gesundheit', wenn: s => !(s.weltflags.suez_london === 'ja' && s.weltflags.suez_druck),
-    ausgaenge: [
-      { regime: 'macmillan', hist: 1, frei: 0.4, meldung: 'Anthony Eden tritt aus gesundheitlichen Gründen zurück. Nachfolger wird Harold Macmillan.' },
-      { regime: 'eden', hist: 0, frei: 0.6, meldung: 'Eden erholt sich und bleibt im Amt. (Fiktion)' },
-    ] },
-  wahl('wahl1959', 1959.2, 'Unterhauswahl 1959', s => s.f.letzte_wahl === 1955.1, { tory: [1, 0.55], lab: [0, 0.45] }),
-  wahl('wahl1961', 1961.1, 'Unterhauswahl 1961', s => s.f.letzte_wahl === 1956.2),
-  { id: 'gaitskell_tod', zeit: 1963.1, von: ['gaitskell'], titel: 'Gaitskells Tod',
-    ausgaenge: [{ regime: 'wilson', hist: 1, frei: 1, meldung: 'Premierminister Hugh Gaitskell ist im Januar überraschend gestorben. Labour wählt Harold Wilson zum Nachfolger. (Fiktion)' }] },
-  { id: 'profumo', zeit: 1963.2, von: ['macmillan'], titel: 'Nach der Profumo-Affäre',
-    ausgaenge: [
-      { regime: 'home', hist: 1, frei: 0.5, meldung: 'Harold Macmillan tritt nach der Profumo-Affäre und einer Krankheit zurück. Nachfolger wird Außenminister Lord Home, der als Sir Alec Douglas-Home ins Unterhaus wechselt.' },
-      { regime: 'butler', hist: 0, frei: 0.5, meldung: 'Nach Macmillans Rücktritt wird R. A. Butler Premierminister. (Fiktion)' },
-    ] },
-];
-
-export { istLabour };
+export const LABOUR = ['attlee', 'gaitskell', 'wilson'];
+export const istLabour = r => LABOUR.includes(r);
+/** Wer die Konservativen führt, wenn sie in der Opposition sind */
+export const toryChef = z => (z < 1955.1 ? 'churchill' : z < 1957.1 ? 'eden' : z < 1963.2 ? 'macmillan' : 'home');
+/** Wer Labour führt, wenn Labour in der Opposition ist */
+export const labourChef = z => (z < 1955.2 ? 'attlee' : z < 1963.1 ? 'gaitskell' : 'wilson');

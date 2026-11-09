@@ -3,7 +3,7 @@
 import { REGIERUNGEN, istLabour } from './regierungen.js';
 
 /** Regierung in London (für jede Landsicht, auch die britische) */
-export const londonerRegime = s => s.welt?.laender.grossbritannien?.regime || 'attlee';
+export const londonerRegime = s => { const L = s.welt?.laender.grossbritannien; return L?.premierId || L?.regime || 'attlee'; };
 /** „Winston Churchill“ */
 export const londonerChef = s => REGIERUNGEN[londonerRegime(s)].name;
 /** „Churchill“ */
@@ -45,3 +45,7 @@ export function schatzkanzler(s) {
     default: return 'Reginald Maudling';
   }
 }
+
+/** Georg VI. bis Februar 1952, dann Elisabeth II.: „zum König“ / „zur Königin“ */
+export const zumMonarchen = s => (s.zeit < 1952.1 ? 'zum König' : 'zur Königin');
+export const monarch = s => (s.zeit < 1952.1 ? 'der König' : 'die Königin');

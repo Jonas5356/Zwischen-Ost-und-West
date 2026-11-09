@@ -45,3 +45,14 @@ test('Französische Vorlagen zeigen keine deutschen Bilder', () => {
     for (const o of Array.isArray(ev.optionen) ? ev.optionen : []) assert.ok(!DEUTSCH.includes(o.ascii), `${ev.id}: ${o.ascii}`);
   }
 });
+
+test('Britische Vorlagen zeigen weder deutsche noch französische Bilder', () => {
+  const FREMD = ['urne', 'plakat', 'presse', 'flagge', 'bundeshaus', 'mauer', 'urne_fr', 'plakat_fr', 'presse_fr', 'trikolore', 'eiffel'];
+  const M = W.laender.grossbritannien;
+  const dyn = Object.keys(M.dynamisch || {}).map(k => ({ id: 'dyn:' + k, ascii: null }));
+  for (const ev of [...M.ereignisse, ...Object.values(M.enden), ...dyn]) {
+    const a = typeof ev.ascii === 'function' ? null : ev.ascii;
+    assert.ok(!FREMD.includes(a), `${ev.id || ev.titel}: ${a}`);
+    for (const o of Array.isArray(ev.optionen) ? ev.optionen : []) assert.ok(!FREMD.includes(o.ascii), `${ev.id}: ${o.ascii}`);
+  }
+});

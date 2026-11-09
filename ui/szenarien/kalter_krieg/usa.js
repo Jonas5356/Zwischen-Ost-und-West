@@ -182,6 +182,8 @@ const ereignisse = [
   },
   {
     id: 'usa_truman_doktrin', rueckblick: true, titel: 'Griechenland und die Türkei', ab: 1947.1, bis: 1947.1, ordnung: 3,
+    // Nur wenn London sich aus Griechenland zurückzieht (grossbritannien: gb_griechenland)
+    wenn: s => s.weltflags.gb_griechenland !== 'bleiben',
     optionen: [
       { text: 'Freien Völkern beistehen, die sich gegen Unterwerfung wehren: Hilfe für Griechenland und die Türkei.', hist: true, dient: { eindaemmung: 0.7, buendnis_fuehren: 0.2 }, w: { su: -8, kosten: -4, prestige: 4 },
         ergebnis: 'Vor dem Kongress verkündet der Präsident, die Vereinigten Staaten würden „freien Völkern“ beistehen. Griechenland und die Türkei bekommen 400 Millionen Dollar.',

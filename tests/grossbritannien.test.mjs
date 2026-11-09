@@ -40,9 +40,11 @@ test('Texte über London nennen die Regierung, die wirklich regiert', () => {
       const texte = [];
       const eingriff = welt => {
         const L = welt.laender.grossbritannien;
-        if (welt.zeit >= 1951.1 && L.regime !== 'gaitskell') {
+        if (welt.zeit >= 1951.1 && L.premierId !== 'gaitskell') {
           L.regime = 'gaitskell';
           L.typ = 'skeptisch';
+          L.premierId = 'gaitskell';
+          L.partei = 'LAB';
         }
         if (welt.zeit < 1951.1) return;
         const a = E.aktuelles(W, welt);

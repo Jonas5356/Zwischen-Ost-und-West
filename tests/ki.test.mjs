@@ -54,13 +54,15 @@ test('Startregierungen, Typen und Vorab-Einschätzung', () => {
 });
 
 test('Im historischen Modus kommen die historischen Regierungen, solange die Lage ähnlich ist', () => {
-  let anders = 0;
+  let anders = 0, partien = 0;
+  const pm = {};
   for (let seed = 1; seed <= 40; seed++) {
     const { welt } = spiele(seed, 'historisch');
     if (welt.ende.id !== 'abschluss') continue; // selten: Atomkrieg nach Kuba
+    partien++;
     assert.deepEqual(welt.laender.usa.regierungen.map(r => r.regime), ['truman', 'eisenhower', 'kennedy', 'johnson']);
-    // In London: Attlee, Churchill (1951), Eden (1955), Macmillan (1957), Douglas-Home (1963)
-    assert.deepEqual(welt.laender.grossbritannien.regierungen.map(r => r.regime), ['attlee', 'churchill', 'eden', 'macmillan', 'home']);
+    // In London entscheiden Wahlen und Nachfolgekämpfe: meist Churchill (1951), Eden (1955), Macmillan (1957)
+    for (const r of new Set(welt.laender.grossbritannien.regierungen.map(r => r.regime))) pm[r] = (pm[r] || 0) + 1;
     const su = welt.laender.su.regierungen.map(r => r.regime).join(',');
     if (su === 'stalin,kollektiv,malenkow,chruschtschow') continue;
     // Berija hat nur eine Chance, wenn Moskau am 17. Juni nachgegeben hat
@@ -68,6 +70,7 @@ test('Im historischen Modus kommen die historischen Regierungen, solange die Lag
     anders++;
   }
   assert.ok(anders <= 4, `${anders} von 40 Partien mit anderer Führung in Moskau`);
+  for (const [r, anteil] of [['churchill', 0.75], ['eden', 0.7], ['macmillan', 0.6]]) assert.ok((pm[r] || 0) >= anteil * partien, `${r}: nur ${pm[r] || 0} von ${partien} Partien`);
 });
 
 test('Im freien Modus kommen auch andere Regierungen, und jede Entscheidung der gesteuerten Länder kommt vor', () => {
@@ -97,6 +100,7 @@ test('Im freien Modus kommen auch andere Regierungen, und jede Entscheidung der 
     for (const r of Object.keys(W.laender[land].regierungen)) assert.ok(regime.has(land + ':' + r), 'nie regiert: ' + land + ':' + r);
     const s = E.sicht(W, E.neueWelt(W, { spieler: ['brd'], seed: 1 }), land);
     for (const ev of W.laender[land].ereignisse) {
+      if (ev.art === 'akte') continue; // Akten bekommen nur Spieler
       // Optionen, die von der Lage abhängen (z. B. Suez mit oder ohne Druck aus Washington), in jeder Lage
       const lagen = typeof ev.optionen === 'function' && ev.lagen ? ev.lagen : [{}];
       for (const flags of lagen) for (const o of E.txt(ev.optionen, mitFlags(s, flags))) {

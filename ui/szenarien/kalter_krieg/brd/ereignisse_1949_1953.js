@@ -413,7 +413,8 @@ Die Bundesrepublik würde damit wieder kreditwürdig. Einzelne Gläubiger, vor a
     titel: 'Stalin ist tot',
     datum: 'März bis Mai 1953',
     ab: 1953.1, ordnung: 3,
-    wenn: west,
+    // Den Gipfel schlägt London vor (grossbritannien: gb_gipfel)
+    wenn: s => west(s) && s.weltflags.gb_gipfel !== 'nein',
     absender: 'Auswärtiges Amt, Länderreferat Sowjetunion',
     text: s => `Am 5. März ist Josef Stalin gestorben. In Moskau regiert eine kollektive Führung aus Malenkow, Berija und Molotow; aus dem Kreml kommen ungewohnt versöhnliche Töne.
 

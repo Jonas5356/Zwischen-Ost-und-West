@@ -313,9 +313,73 @@ const trikolore = {
      ______|______`],
 };
 
+// Britische Szenen: Big Ben, Wahlurne, Plakat, Zeitung, Union Jack
+const bigben = String.raw`
+                  /\
+                 /  \
+                |____|
+                | /\ |
+                |(  )|
+                | \/ |
+                |____|
+                |    |
+         _______|    |__________________________
+        |  ||  ||    ||  ||  ||  ||  ||  ||  || |
+        |__||__||____||__||__||__||__||__||__||_|
+ ~~~~~~~~~~~~~~~~~~~~~~~~~ Themse ~~~~~~~~~~~~~~~~~~~~~~~`;
+
+const urne_gb = String.raw`
+                   _________________
+                  |   _____________ |
+                  |  |  BALLOT     | |
+                  |  |  PAPER    X | |
+                   \_|_____________|/
+                 ____|___________|____
+                |     BALLOT BOX      |
+                |_____________________|`;
+
+const plakat_gb = String.raw`
+       ___________________________________
+      |                                   |
+      |    LIFE'S BETTER WITH THE         |
+      |    CONSERVATIVES.                 |
+      |    DON'T LET LABOUR RUIN IT!      |
+      |               (o o)               |
+      |___________________________________|
+                    ||        ||`;
+
+const presse_gb = String.raw`
+       .---------------------------------------.
+       |  THE LONDON COURIER                   |
+       |  =================================    |
+       |  MINISTER RESIGNS                     |
+       |  ---------------------                |
+       |  ~~~~~~~~~~ ~~~~~~~ ~~~~~~~~~~~~~     |
+       '---------------------------------------'`;
+
+const unionjack = {
+  ms: 320,
+  bilder: [String.raw`
+           |\  ||  /|
+           | \ || / |
+           |==++++==|
+           | / || \ |
+           |/  ||  \|
+           |
+     ______|______`, String.raw`
+           |\  ||  /|
+           | \ || / |
+           | ==++++==|
+           | / || \ |
+           |/  ||  \|
+           |
+     ______|______`],
+};
+
 export const SZENEN = {
   dschungel, eiffel, bundeshaus, note, kreml, plakat, urne, flagge, sputnik, mauer, berlin, korea, schiff,
   aufstand, presse, flut, rakete, alarm, pilz, urne_fr, plakat_fr, presse_fr, trikolore,
+  bigben, urne_gb, plakat_gb, presse_gb, unionjack,
 };
 
 /** Spielt eine Szene in einem <pre> ab. Gibt eine Funktion zum Abbrechen zurück. */

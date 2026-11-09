@@ -10,13 +10,13 @@ import { BLOECKE, STANDARD, BEZIEHUNGSREIHE } from './werte.js';
 export default {
   id: 'kalter_krieg',
   titel: 'Zwischen Ost und West',
-  beschreibung: 'Europa im Winter 1946. Der Krieg ist seit einem halben Jahr vorbei, Deutschland ist besetzt und in vier Zonen geteilt, Frankreich erschöpft, sein Empire in Aufruhr. Noch sind Washington und Moskau Verbündete – doch über Iran, Deutschland und Osteuropa zerbricht die Allianz der Sieger. Ob und wie aus den Trümmern ein westdeutscher Staat entsteht, ist offen.\n\nDu führst eine Regierung durch die Jahre des Kalten Kriegs, Halbjahr für Halbjahr – Frankreich ab 1946, die Bundesrepublik ab ihrer Gründung 1949. Die anderen Länder verfolgen ihre eigenen Ziele.',
+  beschreibung: 'Europa im Winter 1946. Der Krieg ist seit einem halben Jahr vorbei, Deutschland ist besetzt und in vier Zonen geteilt, Frankreich erschöpft, sein Empire in Aufruhr. Noch sind Washington und Moskau Verbündete – doch über Iran, Deutschland und Osteuropa zerbricht die Allianz der Sieger. Ob und wie aus den Trümmern ein westdeutscher Staat entsteht, ist offen.\n\nDu führst eine Regierung durch die Jahre des Kalten Kriegs, Halbjahr für Halbjahr – Frankreich oder Großbritannien ab 1946, die Bundesrepublik ab ihrer Gründung 1949. Die anderen Länder verfolgen ihre eigenen Ziele.',
   szene: 'bundeshaus',
   start: 1946.1,
   ende: 1964.1,
   // Reihenfolge = Reihenfolge der Entscheidungen bei gleichem Monat
   laender: { usa, su, grossbritannien, frankreich, brd },
-  spielbar: ['brd', 'frankreich'],
+  spielbar: ['brd', 'frankreich', 'grossbritannien'],
   // Wie Land A Land B sieht (0 = feindlich, 100 = engste Partnerschaft); fehlende Paare: 50
   startBeziehungen: {
     // 1946: Die Sieger sind noch Verbündete; die Werte zur Bundesrepublik gelten ab ihrer Gründung

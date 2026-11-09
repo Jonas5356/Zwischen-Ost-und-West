@@ -1,14 +1,13 @@
 // Großbritannien 1946–1964: Vorgänge der britischen Regierung.
-// Großbritannien wird vorerst vom Spiel gesteuert (ki.js); die Texte sprechen den Premierminister
-// trotzdem mit „du“ an, damit das Land später spielbar werden kann. Ergebnisse in der dritten Person.
-import { REGIERUNGEN, istLabour } from './regierungen.js';
-import { londonerAussen, londonerAussenKurz, schatzkanzler } from './hilfen.js';
+// Außen-, Empire- und Wirtschaftspolitik (die Vorgänge aus 0.8.0, als Großbritannien noch gesteuert war).
+// Die Texte sprechen den Premierminister mit „du“ an; Ergebnisse stehen in der dritten Person.
+import { londonerChef, londonerChefKurz, labourRegiert, londonerAussen, londonerAussenKurz, schatzkanzler } from './hilfen.js';
 import { praesident } from '../brd/hilfen.js';
 import { pariserChef, pariserSpitze, kanzler, bonnExistiert, bonnImWesten, brd } from '../frankreich/hilfen.js';
 
-const premier = s => REGIERUNGEN[s.regime].name;
-const premierKurz = s => REGIERUNGEN[s.regime].kurz;
-const labour = s => istLabour(s.regime);
+const premier = londonerChef;
+const premierKurz = londonerChefKurz;
+const labour = labourRegiert;
 const aussen = s => `${londonerAussen(s)}, Außenminister`;
 const fr = s => s.welt.laender.frankreich;
 /** Wie London den Fragenden sieht, in Zehnerschritten um 50 (für Antworten auf Bitten) */
@@ -386,11 +385,11 @@ In Sèvres haben französische und israelische Unterhändler einen Plan vorgeleg
         dient: { sonderverhaeltnis: 0.8, pfund: 0.8, empire: -0.3 } },
       { text: 'Weiterkämpfen, bis der Kanal genommen ist.',
         zufall: [
-          { p: 0.25, ergebnis: 'Britische und französische Truppen nehmen den ganzen Kanal. Nasser stürzt, doch das Pfund bricht ein und Washington ist auf Jahre verstimmt. (Fiktion)', w: { empire: 4, pfund: -20, usa: -15, moskau: -10, haushalt: -8 } },
-          { ergebnis: 'Das Pfund bricht zusammen, die Ölversorgung stockt; London muss den Rückzug unter noch schlimmeren Bedingungen antreten. (Fiktion)', w: { empire: -12, pfund: -25, usa: -12, ansehen: -10, rueckhalt: -15, haushalt: -8 } },
+          { p: 0.3, ergebnis: 'Britische und französische Truppen nehmen den ganzen Kanal. Nasser stürzt, doch das Pfund bricht ein und Washington ist auf Jahre verstimmt. (Fiktion)', w: { empire: 6, pfund: -15, usa: -12, moskau: -10, haushalt: -5 } },
+          { ergebnis: 'Das Pfund bricht zusammen, die Ölversorgung stockt; London muss den Rückzug unter noch schlimmeren Bedingungen antreten. (Fiktion)', w: { empire: -10, pfund: -18, usa: -10, ansehen: -8, rueckhalt: -12, haushalt: -5 } },
         ],
         aktion: (s2, a) => a.weltflag('suez_london_haelt'),
-        dient: { empire: 0.8, sonderverhaeltnis: -1.2, pfund: -0.8 } },
+        dient: { empire: 1.2, sonderverhaeltnis: -0.8, pfund: -0.4 } },
     ] : [
       { text: 'Die Kanalzone halten und Nasser zum Einlenken zwingen.', hist: false,
         ergebnis: 'Nasser muss nachgeben: Der Kanal kommt unter internationale Verwaltung. London hat gesiegt – und die arabische Welt gegen sich. (Fiktion)',
@@ -536,6 +535,7 @@ In Sèvres haben französische und israelische Unterhändler einen Plan vorgeleg
   {
     id: 'gb_profumo',
     titel: 'Die Profumo-Affäre',
+    ascii: 'presse_gb',
     datum: 'März 1963',
     ab: 1963.1, bis: 1963.1, ordnung: 3,
     wenn: s => !labour(s),
